@@ -185,6 +185,18 @@ class OfficialWeChat(object):
         return data
 
     def save_txt(self, fname, data):
+        """
+        保存数据为txt格式
+        Parameters
+        ----------
+        fname: str
+            保存为txt文件名
+        data: list
+            爬取到的数据
+        Returns
+        -------
+        None
+        """
         if ".txt" not in fname:
             raise Exception("fname must be txt", fname)
         with open(fname, "a+") as f:
@@ -193,6 +205,20 @@ class OfficialWeChat(object):
                 f.write("\n")
 
     def save_sqlite(self, dbname, tablename, data):
+        """
+        存储数据到sqlite3中
+        Parameters
+        ----------
+        dbname: str
+            数据库名(文件名)
+        tablename: str
+            数据库表名
+        data: list
+            爬取到的数据
+        Returns
+        -------
+        None
+        """
         with sqlite3.connect(dbname) as con:
             # 创建数据库
             with con as cur:
