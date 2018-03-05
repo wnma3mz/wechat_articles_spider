@@ -13,24 +13,6 @@ class OfficialWeChat(object):
     获取需要爬取的微信公众号的推文链接
     """
 
-    # def __init__(self, token, cookie):
-    #     """
-    #     初始化参数
-    #     Parameters
-    #     ----------
-    #     nickname : str or unicode
-    #         需要爬取公众号名称
-    #     token : str
-    #         登录微信公众号平台之后获取的token
-    #     cookie : str
-    #         登录微信公众号平台之后获取的cookie
-
-    #     Returns
-    #     -------
-    #     None
-    #     """
-    #     self.s = requests.session()
-
     def __init__(self, username, password):
         self.s = requests.session()
         self.headers = {
@@ -38,7 +20,7 @@ class OfficialWeChat(object):
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
         }
         self.login_official(username, password)
-        
+
     def _save_login_qrcode(self, img):
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
@@ -118,7 +100,8 @@ class OfficialWeChat(object):
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
             "Referer":
-            "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(username),
+            "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".
+            format(username),
         }
 
         data = {
