@@ -14,6 +14,18 @@ class OfficialWeChat(object):
     """
 
     def __init__(self, username, password):
+        """
+        初始化变量
+        Parameters
+        ----------
+        username: str
+            用户账号
+        password: str
+            用户密码
+        Returns
+        -------
+            None
+        """
         self.s = requests.session()
         self.headers = {
             "User-Agent":
@@ -22,6 +34,17 @@ class OfficialWeChat(object):
         self.login_official(username, password)
 
     def _save_login_qrcode(self, img):
+        """
+        存储和显示登录二维码
+        Parameters
+        ----------
+        img: str
+            获取到的二维码数据
+
+        Returns
+        -------
+            None
+        """
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
 
@@ -31,6 +54,17 @@ class OfficialWeChat(object):
         plt.show()
 
     def _save_cookie(self, username):
+        """
+        存储cookies, username用于文件命名
+        Parameters
+        ----------
+        username: str
+            用户账号
+
+        Returns
+        -------
+            None
+        """
         #实例化一个LWPcookiejar对象
         new_cookie_jar = cookielib.LWPCookieJar(username + '.txt')
 
@@ -46,6 +80,17 @@ class OfficialWeChat(object):
             ignore_expires=True)
 
     def _read_cookie(self, username):
+        """
+        读取cookies, username用于文件命名
+        Parameters
+        ----------
+        username: str
+            用户账号
+
+        Returns
+        -------
+            None
+        """
         #实例化一个LWPCookieJar对象
         load_cookiejar = cookielib.LWPCookieJar()
         #从文件中加载cookies(LWP格式)
@@ -59,12 +104,36 @@ class OfficialWeChat(object):
         self.s.cookies = requests.utils.cookiejar_from_dict(load_cookies)
 
     def _md5_passwd(self, password):
+        """
+        密码用md5加密
+        Parameters
+        ----------
+        password: str
+            未加密的密码
+
+        Returns
+        -------
+        str：
+            加密后的密码
+        """
         m5 = hashlib.md5()
         m5.update(password.encode('utf-8'))
         pwd = m5.hexdigest()
         return pwd
 
     def login_official(self, username, password):
+        """
+        登录微信公众号平台
+        Parameters
+        ----------
+        username: str
+            用户账号
+        password: str
+            用户密码
+        Returns
+        -------
+            None
+        """
         pwd = self._md5_passwd(password)
         data = {
             "username": username,
