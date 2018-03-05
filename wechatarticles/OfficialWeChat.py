@@ -2,41 +2,145 @@
 import requests
 import sqlite3
 import json
+from requests.cookies import cookielib
+import matplotlib.pyplot as plt
+from PIL import Image
+import hashlib
+
 
 class OfficialWeChat(object):
     """
     获取需要爬取的微信公众号的推文链接
     """
 
-    def __init__(self, token, cookie):
-        """
-        初始化参数
-        Parameters
-        ----------
-        nickname : str or unicode
-            需要爬取公众号名称
-        token : str
-            登录微信公众号平台之后获取的token
-        cookie : str
-            登录微信公众号平台之后获取的cookie
+    # def __init__(self, token, cookie):
+    #     """
+    #     初始化参数
+    #     Parameters
+    #     ----------
+    #     nickname : str or unicode
+    #         需要爬取公众号名称
+    #     token : str
+    #         登录微信公众号平台之后获取的token
+    #     cookie : str
+    #         登录微信公众号平台之后获取的cookie
 
-        Returns
-        -------
-        None
-        """
+    #     Returns
+    #     -------
+    #     None
+    #     """
+    #     self.s = requests.session()
+
+    def __init__(self, username, password):
         self.s = requests.session()
-        self.token = token
         self.headers = {
             "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
-            "Cookie":
-            cookie
         }
-        self.params = {
-            "token": self.token,
+        self.login_official(username, password)
+        
+    def _save_login_qrcode(self, img):
+        with open("login.png", "wb+") as fp:
+            fp.write(img.content)
+
+        img = Image.open("login.png")
+        plt.figure()
+        plt.imshow(img)
+        plt.show()
+
+    def _save_cookie(self, username):
+        #实例化一个LWPcookiejar对象
+        new_cookie_jar = cookielib.LWPCookieJar(username + '.txt')
+
+        #将转换成字典格式的RequestsCookieJar（这里我用字典推导手动转的）保存到LWPcookiejar中
+        requests.utils.cookiejar_from_dict(
+            {c.name: c.value
+             for c in self.s.cookies}, new_cookie_jar)
+
+        #保存到本地文件
+        new_cookie_jar.save(
+            'cookies/' + username + '.txt',
+            ignore_discard=True,
+            ignore_expires=True)
+
+    def _read_cookie(self, username):
+        #实例化一个LWPCookieJar对象
+        load_cookiejar = cookielib.LWPCookieJar()
+        #从文件中加载cookies(LWP格式)
+        load_cookiejar.load(
+            'cookies/' + username + '.txt',
+            ignore_discard=True,
+            ignore_expires=True)
+        #工具方法转换成字典
+        load_cookies = requests.utils.dict_from_cookiejar(load_cookiejar)
+        #工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.
+        self.s.cookies = requests.utils.cookiejar_from_dict(load_cookies)
+
+    def _md5_passwd(self, password):
+        m5 = hashlib.md5()
+        m5.update(password.encode('utf-8'))
+        pwd = m5.hexdigest()
+        return pwd
+
+    def login_official(self, username, password):
+        pwd = self._md5_passwd(password)
+        data = {
+            "username": username,
+            "userlang": "zh_CN",
+            "token": "",
+            "pwd": pwd,
+            "lang": "zh_CN",
+            "imgcode": "",
+            "f": "json",
+            "ajax": "1"
+        }
+        params = {"action": "startlogin"}
+        headers = {
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+            "Host":
+            "mp.weixin.qq.com",
+            "Origin":
+            "https://mp.weixin.qq.com",
+            "Referer":
+            "https://mp.weixin.qq.com/",
+        }
+
+        bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin"
+        res = self.s.post(
+            bizlogin_url, headers=headers, data=data, params=params)
+        img = self.s.get(
+            'https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&param=4300&rd=928'
+        )
+        self._save_login_qrcode(img)
+
+        headers = {
+            "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+            "Referer":
+            "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(username),
+        }
+
+        data = {
+            "userlang": "zh_CN",
+            "token": "",
             "lang": "zh_CN",
             "f": "json",
+            "ajax": "1",
         }
+        bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login"
+        res = self.s.post(bizlogin_url, data=data, headers=headers).json()
+        try:
+            token = res["redirect_url"].split("=")[-1]
+
+            self.params = {
+                "token": token,
+                "lang": "zh_CN",
+                "f": "json",
+            }
+        except Exception:
+            print("please try again")
+            self.login_official(username, password)
 
     def get_official_info(self, nickname, begin="0", count="5"):
         """
