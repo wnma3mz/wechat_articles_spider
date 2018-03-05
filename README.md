@@ -12,25 +12,47 @@
 
 - `requests`: 爬取内容
 
-- `matplotlib`: 用于显示二维码图片
+- `matplotlib`: 用于显示二维码图片(非必要)
 
-- `PIL`: 用于显示二维码图片
+- `PIL`: 用于显示二维码图片(非必要)
 
 
 ## API操作
+
+### 支持两种爬虫方式
+
+下面登录方式选用其一即可
+
+1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token，此种方式需要安装`matplotlib`和`PIL`
+
+2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见底部说明
 
 ```python
 # 导入模块
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
 
-# 初始化一些参数， username用户账号、password用户密码需要爬取的公众号
+"""
+初始化一些参数
+username: 用户账号
+password: 用户密码
+cookie: 登录后获取的cookie
+token: 登录后获取的token
+nickname: 需要爬取的公众号
+"""
 username = username
 password = password
+cookie = yourcookie
+token = token
 nickname = nickname
 
 # 实例化爬取对象
-test = OfficialWeChat(username, password)
+
+# 账号密码自动获取cookie和token
+test = OfficialWeChat(username=usernmae, password=password)
+# 手动输入账号密码
+test = OfficialWeChat(cookie=cookie, token=token)
+
 # 获取公众号文章总数
 articles_sum = test.totalNums(nickname)
 # 实例化爬取对象
@@ -58,7 +80,7 @@ pprint(officical_info)
 
 ## TO-DO
 
-1. 完善登录公众号平台API
+1. 支持cookie的保留
 
 2. 模拟登录微信PC端
 
