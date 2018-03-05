@@ -8,6 +8,15 @@
 
 具体可以参考: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
 
+## 第三方包
+
+- `requests`: 爬取内容
+
+- `matplotlib`: 用于显示二维码图片
+
+- `PIL`: 用于显示二维码图片
+
+
 ## API操作
 
 ```python
@@ -15,11 +24,15 @@
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
 
-# 添加cookie、token、nickname为需要爬取的公众号
-cookie = yourcookie
-token = token
+# 初始化一些参数， username用户账号、password用户密码需要爬取的公众号
+username = username
+password = password
 nickname = nickname
 
+# 实例化爬取对象
+test = OfficialWeChat(username, password)
+# 获取公众号文章总数
+articles_sum = test.totalNums(nickname)
 # 实例化爬取对象
 test = OfficialWeChat(token, cookie)
 # 获取公众号文章总数
@@ -45,7 +58,9 @@ pprint(officical_info)
 
 ## TO-DO
 
-1. 模拟登录微信PC端
+1. 完善登录公众号平台API
+
+2. 模拟登录微信PC端
 
 ## 获取微信公众号网页的cookie和token
 
