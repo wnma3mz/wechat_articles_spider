@@ -13,15 +13,22 @@ class OfficialWeChat(object):
     获取需要爬取的微信公众号的推文链接
     """
 
-    def __init__(self, username, password):
+    def __init__(self, username=None, password=None, cookie=None, token=None):
         """
-        初始化变量
+        初始化参数
         Parameters
         ----------
         username: str
             用户账号
         password: str
             用户密码
+        nickname : str or unicode
+            需要爬取公众号名称
+        token : str
+            登录微信公众号平台之后获取的token
+        cookie : str
+            登录微信公众号平台之后获取的cookie
+
         Returns
         -------
             None
@@ -29,9 +36,20 @@ class OfficialWeChat(object):
         self.s = requests.session()
         self.headers = {
             "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
         }
-        self.login_official(username, password)
+        self.params = {
+            "lang": "zh_CN",
+            "f": "json",
+        }
+        if (cookie != None) and (token != None):
+            self.headers["Cookie"] = cookie
+            self.params["token"] = token
+        elif (username != None) and (password != None):
+            self._startlogin_official(username, password)
+        else:
+            print("please check your paramse")
+            raise SystemError
 
     def _save_login_qrcode(self, img):
         """
@@ -105,7 +123,7 @@ class OfficialWeChat(object):
 
     def _md5_passwd(self, password):
         """
-        密码用md5加密
+        明文密码用md5加密
         Parameters
         ----------
         password: str
@@ -114,16 +132,16 @@ class OfficialWeChat(object):
         Returns
         -------
         str：
-            加密后的密码
+            加密后的字符串
         """
         m5 = hashlib.md5()
         m5.update(password.encode('utf-8'))
         pwd = m5.hexdigest()
         return pwd
 
-    def login_official(self, username, password):
+    def _startlogin_official(self, username, password):
         """
-        登录微信公众号平台
+        预备登录微信公众号平台获取Cookies
         Parameters
         ----------
         username: str
@@ -145,33 +163,38 @@ class OfficialWeChat(object):
             "f": "json",
             "ajax": "1"
         }
-        params = {"action": "startlogin"}
-        headers = {
-            "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
-            "Host":
-            "mp.weixin.qq.com",
-            "Origin":
-            "https://mp.weixin.qq.com",
-            "Referer":
-            "https://mp.weixin.qq.com/",
-        }
 
-        bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin"
-        res = self.s.post(
-            bizlogin_url, headers=headers, data=data, params=params)
-        img = self.s.get(
-            'https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&param=4300&rd=928'
-        )
+        self.headers["Host"] = "mp.weixin.qq.com"
+        self.headers["Origin"] = "https://mp.weixin.qq.com"
+        self.headers["Referer"] = "https://mp.weixin.qq.com/"
+
+        bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=startlogin"
+        qrcode_url = "https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&param=4300&rd=928"
+
+        self.s.post(bizlogin_url, headers=self.headers, data=data)
+        img = self.s.get(qrcode_url)
         self._save_login_qrcode(img)
 
-        headers = {
-            "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
-            "Referer":
-            "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".
-            format(username),
-        }
+        self.headers.pop("Host")
+        self.headers.pop("Origin")
+        self._login_official(username, password)
+
+    def _login_official(self, username, password):
+        """
+        正式登录微信公众号平台，获取token
+        Parameters
+        ----------
+        username: str
+            用户账号
+        password: str
+            用户密码
+        Returns
+        -------
+            None
+        """
+        referer = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(
+            username)
+        self.headers["Referer"] = referer
 
         data = {
             "userlang": "zh_CN",
@@ -181,18 +204,16 @@ class OfficialWeChat(object):
             "ajax": "1",
         }
         bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login"
-        res = self.s.post(bizlogin_url, data=data, headers=headers).json()
+        res = self.s.post(bizlogin_url, data=data, headers=self.headers).json()
         try:
+            # 截取token的字符串
             token = res["redirect_url"].split("=")[-1]
-
-            self.params = {
-                "token": token,
-                "lang": "zh_CN",
-                "f": "json",
-            }
+            self.params["token"] = token
+            self.headers.pop("Referer")
         except Exception:
+            # 获取token失败，重新登录
             print("please try again")
-            self.login_official(username, password)
+            self._startlogin_official(username, password)
 
     def get_official_info(self, nickname, begin="0", count="5"):
         """
