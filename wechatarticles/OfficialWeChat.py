@@ -41,14 +41,42 @@ class OfficialWeChat(object):
             "lang": "zh_CN",
             "f": "json",
         }
+
+        # 两种登录方式
         if (cookie != None) and (token != None):
+            self._verifi_str(cookie, "cookie")
+            self._verifi_str(token, "token")
             self.headers["Cookie"] = cookie
             self.params["token"] = token
         elif (username != None) and (password != None):
-            self._startlogin_official(username, password)
+            self._verifi_str(username, "username")
+            self._verifi_str(password, "password")
+            # 尝试用原来的cookie获取token, 如果失败就账号密码扫码登录
+            try:
+                self._read_cookie(username)
+                self._login_official(username, password)
+            except Exception:
+                print("Cooies has invalid")
+                self._startlogin_official(username, password)
         else:
             print("please check your paramse")
             raise SystemError
+
+    def _verifi_str(self, input_string, param):
+        """
+        验证输入是否为字符串
+        Parameters
+        ----------
+        input_string: str
+            输入
+        param: str
+            需要验证的参数名
+        Returns
+        ----------
+            None
+        """
+        if not isinstance(input_string, str):
+            raise TypeError("{} must be an instance of str".format(param))
 
     def _save_login_qrcode(self, img):
         """
@@ -153,6 +181,7 @@ class OfficialWeChat(object):
         -------
             None
         """
+
         pwd = self._md5_passwd(password)
         data = {
             "username": username,
@@ -210,6 +239,7 @@ class OfficialWeChat(object):
             # 截取token的字符串
             token = res["redirect_url"].split("=")[-1]
             self.params["token"] = token
+            self._save_cookie(username)
             self.headers.pop("Referer")
         except Exception:
             # 获取token失败，重新登录
@@ -238,6 +268,7 @@ class OfficialWeChat(object):
               'service_type': 1公众号性质
             }
         """
+        self._verifi_str(nickname, "nickname")
         search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
         self.params["query"] = nickname
         self.params["count"] = count
@@ -265,6 +296,7 @@ class OfficialWeChat(object):
         int
             文章总数
         """
+        self._verifi_str(nickname, "nickname")
         try:
             return self._get_articles_data(nickname, begin="0")["app_msg_cnt"]
         except Exception:
@@ -305,6 +337,7 @@ class OfficialWeChat(object):
                 'update_time': 更新文章的时间戳
               ]
         """
+        self._verifi_str(nickname, "nickname")
         try:
             return self._get_articles_data(
                 nickname, begin=str(begin), count=str(count))["app_msg_list"]
@@ -376,6 +409,8 @@ class OfficialWeChat(object):
         -------
         None
         """
+        self._verifi_str(fname, "fname")
+
         if ".txt" not in fname:
             raise Exception("fname must be txt", fname)
         with open(fname, "a+") as f:
@@ -422,6 +457,9 @@ class OfficialWeChat(object):
         -------
         None
         """
+        self._verifi_str(dbname, "dbname")
+        self._verifi_str(tablename, "tablename")
+
         if dbname not in os.listdir(os.getcwd()):
             self._create_db(dbname, tablename)
         with sqlite3.connect(dbname) as con:
@@ -436,15 +474,19 @@ class OfficialWeChat(object):
                         print("please check data")
 
     def save_mongo(self,
+                   data,
                    host=None,
                    port=None,
                    name=None,
                    password=None,
-                   dbname=None):
+                   dbname=None,
+                   collname=None):
         """
         存储数据到mongo
         Parameters
         ----------
+        data: list
+            需要插入的数据
         host: str
             主机名(默认为本机数据库)
         port: int
@@ -454,7 +496,9 @@ class OfficialWeChat(object):
         password: str
             用户密码
         dbname: str
-            远程连接数据库
+            远程连接的数据库名
+        collname: str
+            需要插入的集合名(collection)
         Returns
         -------
         None
@@ -464,19 +508,16 @@ class OfficialWeChat(object):
 
         host = HOST if host is None else host
         port = PORT if port is None else port
-        if not isinstance(host, str):
-            raise TypeError("host must be an instance of str")
+        self._verifi_str(host, "host")
         if not isinstance(port, int):
             raise TypeError("port must be an instance of int")
-        if (name is not None) and (not isinstance(name, str)):
-            raise TypeError("name_or_database must be an instance of str or a Database")
-        if (password is not None) and (not isinstance(password, str)):
-            raise TypeError("password must be an instance of str")
+        self._verifi_str(name, "name")
+        self._verifi_str(password, "password")
+        self._verifi_str(collname, "collname")
 
         from pymongo import MongoClient
         client = MongoClient(host, port)
         db_auth = client.admin
         db_auth.authenticate(name, password)
-        db_name = client[dbname]
-        print(db_name)
-        pass
+        coll = client[dbname][collname]
+        coll.insert_many(data)
