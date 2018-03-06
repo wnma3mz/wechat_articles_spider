@@ -1,6 +1,6 @@
 # 微信公众号文章爬虫
 
-步骤:
+实现思路:
 
 1. 从微信公众号平台获取微信公众所有文章的url
 
@@ -12,18 +12,13 @@
 
 - `requests`: 爬取内容
 
-- `matplotlib`: 用于显示二维码图片(非必要)
-
-- `PIL`: 用于显示二维码图片(非必要)
-
-
-## API操作
+## API实例
 
 ### 支持两种爬虫方式
 
 下面登录方式选用其一即可
 
-1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token，此种方式需要安装`matplotlib`和`PIL`
+1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
 
 2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见底部说明
 
@@ -83,6 +78,8 @@ pprint(officical_info)
 1. 支持cookie的保留
 
 2. 模拟登录微信PC端
+
+3. 支持存储数据到mongo中
 
 ## 获取微信公众号网页的cookie和token
 
