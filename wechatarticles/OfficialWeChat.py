@@ -44,13 +44,13 @@ class OfficialWeChat(object):
 
         # 两种登录方式
         if (cookie != None) and (token != None):
-            self._verifi_str(cookie, "cookie")
-            self._verifi_str(token, "token")
+            self._verify_str(cookie, "cookie")
+            self._verify_str(token, "token")
             self.headers["Cookie"] = cookie
             self.params["token"] = token
         elif (username != None) and (password != None):
-            self._verifi_str(username, "username")
-            self._verifi_str(password, "password")
+            self._verify_str(username, "username")
+            self._verify_str(password, "password")
             # 尝试用原来的cookie获取token, 如果失败就账号密码扫码登录
             try:
                 self._read_cookie(username)
@@ -62,7 +62,7 @@ class OfficialWeChat(object):
             print("please check your paramse")
             raise SystemError
 
-    def _verifi_str(self, input_string, param):
+    def _verify_str(self, input_string, param):
         """
         验证输入是否为字符串
         Parameters
@@ -268,7 +268,7 @@ class OfficialWeChat(object):
               'service_type': 1公众号性质
             }
         """
-        self._verifi_str(nickname, "nickname")
+        self._verify_str(nickname, "nickname")
         search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
         self.params["query"] = nickname
         self.params["count"] = count
@@ -296,7 +296,7 @@ class OfficialWeChat(object):
         int
             文章总数
         """
-        self._verifi_str(nickname, "nickname")
+        self._verify_str(nickname, "nickname")
         try:
             return self._get_articles_data(nickname, begin="0")["app_msg_cnt"]
         except Exception:
@@ -337,7 +337,7 @@ class OfficialWeChat(object):
                 'update_time': 更新文章的时间戳
               ]
         """
-        self._verifi_str(nickname, "nickname")
+        self._verify_str(nickname, "nickname")
         try:
             return self._get_articles_data(
                 nickname, begin=str(begin), count=str(count))["app_msg_list"]
@@ -409,7 +409,7 @@ class OfficialWeChat(object):
         -------
         None
         """
-        self._verifi_str(fname, "fname")
+        self._verify_str(fname, "fname")
 
         if ".txt" not in fname:
             raise Exception("fname must be txt", fname)
@@ -457,8 +457,8 @@ class OfficialWeChat(object):
         -------
         None
         """
-        self._verifi_str(dbname, "dbname")
-        self._verifi_str(tablename, "tablename")
+        self._verify_str(dbname, "dbname")
+        self._verify_str(tablename, "tablename")
 
         if dbname not in os.listdir(os.getcwd()):
             self._create_db(dbname, tablename)
@@ -508,12 +508,12 @@ class OfficialWeChat(object):
 
         host = HOST if host is None else host
         port = PORT if port is None else port
-        self._verifi_str(host, "host")
+        self._verify_str(host, "host")
         if not isinstance(port, int):
             raise TypeError("port must be an instance of int")
-        self._verifi_str(name, "name")
-        self._verifi_str(password, "password")
-        self._verifi_str(collname, "collname")
+        self._verify_str(name, "name")
+        self._verify_str(password, "password")
+        self._verify_str(collname, "collname")
 
         from pymongo import MongoClient
         client = MongoClient(host, port)
