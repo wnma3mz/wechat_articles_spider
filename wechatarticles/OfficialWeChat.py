@@ -434,3 +434,49 @@ class OfficialWeChat(object):
                             format(tablename), list(item.values()))
                     except Exception:
                         print("please check data")
+
+    def save_mongo(self,
+                   host=None,
+                   port=None,
+                   name=None,
+                   password=None,
+                   dbname=None):
+        """
+        存储数据到mongo
+        Parameters
+        ----------
+        host: str
+            主机名(默认为本机数据库)
+        port: int
+            mongo所在主机开放的端口，默认为27017
+        username: str
+            用户名
+        password: str
+            用户密码
+        dbname: str
+            远程连接数据库
+        Returns
+        -------
+        None
+        """
+        HOST = "localhost"
+        PORT = 27017
+
+        host = HOST if host is None else host
+        port = PORT if port is None else port
+        if not isinstance(port, str):
+            raise TypeError("host must be an instance of str")
+        if not isinstance(port, int):
+            raise TypeError("port must be an instance of int")
+        if name is not None:
+            raise TypeError("name can't be None")
+        if password is not None:
+            raise TypeError("password can't be None")
+
+        from pymongo import MongoClient
+        client = MongoClient(host, port)
+        db_auth = client.admin
+        db_auth.authenticate(name, password)
+        db_name = client[dbname]
+        print(db_name)
+        pass
