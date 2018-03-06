@@ -464,14 +464,14 @@ class OfficialWeChat(object):
 
         host = HOST if host is None else host
         port = PORT if port is None else port
-        if not isinstance(port, str):
+        if not isinstance(host, str):
             raise TypeError("host must be an instance of str")
         if not isinstance(port, int):
             raise TypeError("port must be an instance of int")
-        if name is not None:
-            raise TypeError("name can't be None")
-        if password is not None:
-            raise TypeError("password can't be None")
+        if (name is not None) and (not isinstance(name, str)):
+            raise TypeError("name_or_database must be an instance of str or a Database")
+        if (password is not None) and (not isinstance(password, str)):
+            raise TypeError("password must be an instance of str")
 
         from pymongo import MongoClient
         client = MongoClient(host, port)
