@@ -22,6 +22,14 @@
 
 2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见底部说明
 
+### 支持三种存储方式
+
+1. txt存储（不建议）
+
+2. sqlite3存储。自带模块，不需要额外安装
+
+3. mongo存储。需要安装`pymongo`。暂未完成
+
 ```python
 # 导入模块
 from wechatarticles import OfficialWeChat
