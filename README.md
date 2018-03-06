@@ -28,7 +28,7 @@
 
 2. sqlite3存储。自带模块，不需要额外安装
 
-3. mongo存储。需要安装`pymongo`。暂未完成
+3. mongo存储。需要安装`pymongo`。
 
 ```python
 # 导入模块
@@ -70,6 +70,8 @@ officical_info = test.get_official_info(nickname)
 test.save_txt("test.txt", artiacle_data)
 # 保存数据为sqlite3
 test.save_sqlite("test.db", "test", artiacle_data)
+# 保存数据到mongo中
+test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname=dbname, collname=collname)
 ```
 
 ```python
@@ -86,5 +88,3 @@ pprint(officical_info)
 1. 支持cookie的保留
 
 2. 模拟登录微信PC端
-
-3. 支持存储数据到mongo中
