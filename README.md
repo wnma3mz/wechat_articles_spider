@@ -6,7 +6,7 @@
 
 2. 登录微信PC端获取文章的阅读数、评论等信息
 
-具体可以参考: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
+具体可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
 
 ## 第三方包
 
@@ -20,7 +20,7 @@
 
 1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
 
-2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见底部说明
+2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见[说明文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/get_cookie_token.md)
 
 ### 支持三种存储方式
 
@@ -88,14 +88,3 @@ pprint(officical_info)
 2. 模拟登录微信PC端
 
 3. 支持存储数据到mongo中
-
-## 获取微信公众号网页的cookie和token
-
-1. 拥有一个微信个人订阅号，附上登陆和注册链接。[微信公众平台](https://mp.weixin.qq.com/)
-
-2. 登录公众号之后，打开浏览器的**开发者选项**(F12), 推荐Chrome或者Firefox。
-
-3. 刷新网页，在开发者工具里面，选择**Network**。如下图位置分别找到Cookie和token, 复制到代码中即可
-
-
-![description_one](https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/img/description_one.png)
