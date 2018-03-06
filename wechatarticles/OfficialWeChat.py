@@ -3,9 +3,8 @@ import requests
 import sqlite3
 import json
 from requests.cookies import cookielib
-import matplotlib.pyplot as plt
-from PIL import Image
 import hashlib
+import os
 
 
 class OfficialWeChat(object):
@@ -63,6 +62,8 @@ class OfficialWeChat(object):
         -------
             None
         """
+        import matplotlib.pyplot as plt
+        from PIL import Image
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
 
@@ -243,11 +244,12 @@ class OfficialWeChat(object):
         self.params["action"] = "search_biz"
         self.params["ajax"] = "1"
         self.params["begin"] = begin
-        public_num = self.s.get(
-            search_url, headers=self.headers,
-            params=self.params).json()["list"]
+
         try:
-            return public_num[0]
+            official = self.s.get(
+                search_url, headers=self.headers,
+                params=self.params).json()["list"]
+            return official[0]
         except Exception:
             return u"公众号名称错误，请重新输入"
 
@@ -381,17 +383,15 @@ class OfficialWeChat(object):
                 f.write(json.dumps(item))
                 f.write("\n")
 
-    def save_sqlite(self, dbname, tablename, data):
+    def _create_db(self, dbname, tablename):
         """
-        存储数据到sqlite3中
+        创建db数据库
         Parameters
         ----------
         dbname: str
             数据库名(文件名)
         tablename: str
             数据库表名
-        data: list
-            爬取到的数据
         Returns
         -------
         None
@@ -407,6 +407,24 @@ class OfficialWeChat(object):
                 """.format(tablename)
                 cur.execute(create_sql)
 
+    def save_sqlite(self, dbname, tablename, data):
+        """
+        存储数据到sqlite3中
+        Parameters
+        ----------
+        dbname: str
+            数据库名(文件名)
+        tablename: str
+            数据库表名
+        data: list
+            爬取到的数据
+        Returns
+        -------
+        None
+        """
+        if dbname not in os.listdir(os.getcwd()):
+            self._create_db(dbname, tablename)
+        with sqlite3.connect(dbname) as con:
             # 插入数据
             with con as cur:
                 for item in data:
@@ -415,5 +433,4 @@ class OfficialWeChat(object):
                             "insert into {} values (?, ?, ?, ?, ?, ?, ?, ?)".
                             format(tablename), list(item.values()))
                     except Exception:
-                        print("error")
-                        return "error"
+                        print("please check data")
