@@ -22,7 +22,7 @@
 
 1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
 
-2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见[说明文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
+2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
 
 
 **支持三种存储方式**
@@ -82,7 +82,9 @@ pprint(officical_info)
 
 ### 步骤二：登录微信PC端获取文章信息
 
-关于参数如何获取的介绍，可以参看[如何获取appmsg_token](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
+关于参数如何手动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
+
+关于参数如何自动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)
 
 
 ```python
