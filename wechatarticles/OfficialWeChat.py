@@ -51,13 +51,8 @@ class OfficialWeChat(object):
         elif (username != None) and (password != None):
             self._verify_str(username, "username")
             self._verify_str(password, "password")
-            # 尝试用原来的cookie获取token, 如果失败就账号密码扫码登录
-            try:
-                self._read_cookie(username)
-                self._login_official(username, password)
-            except Exception:
-                print("Cooies has invalid")
-                self._startlogin_official(username, password)
+            # 每次登录需要扫码，不支持cookie缓存
+            self._startlogin_official(username, password)
         else:
             print("please check your paramse")
             raise SystemError
