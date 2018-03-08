@@ -113,3 +113,4 @@ test.GetSpecInfo(article_url=article_url)
 1. 模拟登录微信PC端
 2. 解析文章详细信息的json
 3. 保存信息
+4. 完善urlAPI操作说明
