@@ -53,7 +53,7 @@ nickname = nickname
 
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
-test = OfficialWeChat(username=usernmae, password=password)
+test = OfficialWeChat(username=username, password=password)
 # 手动输入账号密码
 test = OfficialWeChat(cookie=cookie, token=token)
 
@@ -94,17 +94,13 @@ from wechatarticles import LoginWeChat
 """
 初始化一些参数。登录WeChatPC端获取下面的参数
 用户相关
-key
 appmsg_token
 cookie
-文章相关
-req_id
-pass_ticket
 """
 
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
-test = LoginWeChat(key=key, appmsg_token, cookie=cookie, req_id=req_id, pass_ticket)
+test = LoginWeChat(appmsg_token=appmsg_token, cookie=cookie)
 # 获取微信文章的详细信息（包括文章的阅读数、评论数、点赞数等）
 # 这里的articles_url是上面获取到的`articles_data`数组中每一项的"link"
 test.GetSpecInfo(article_url=article_url)
