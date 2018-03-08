@@ -44,20 +44,20 @@ class OfficialWeChat(object):
 
         # 两种登录方式
         if (cookie != None) and (token != None):
-            self._verify_str(cookie, "cookie")
-            self._verify_str(token, "token")
+            self.__verify_str(cookie, "cookie")
+            self.__verify_str(token, "token")
             self.headers["Cookie"] = cookie
             self.params["token"] = token
         elif (username != None) and (password != None):
-            self._verify_str(username, "username")
-            self._verify_str(password, "password")
+            self.__verify_str(username, "username")
+            self.__verify_str(password, "password")
             # 每次登录需要扫码，不支持cookie缓存
-            self._startlogin_official(username, password)
+            self.__startlogin_official(username, password)
         else:
             print("please check your paramse")
             raise SystemError
 
-    def _verify_str(self, input_string, param):
+    def __verify_str(self, input_string, param):
         """
         验证输入是否为字符串
         Parameters
@@ -73,7 +73,7 @@ class OfficialWeChat(object):
         if not isinstance(input_string, str):
             raise TypeError("{} must be an instance of str".format(param))
 
-    def _save_login_qrcode(self, img):
+    def __save_login_qrcode(self, img):
         """
         存储和显示登录二维码
         Parameters
@@ -95,7 +95,7 @@ class OfficialWeChat(object):
         plt.imshow(img)
         plt.show()
 
-    def _save_cookie(self, username):
+    def __save_cookie(self, username):
         """
         存储cookies, username用于文件命名
         Parameters
@@ -121,7 +121,7 @@ class OfficialWeChat(object):
             ignore_discard=True,
             ignore_expires=True)
 
-    def _read_cookie(self, username):
+    def __read_cookie(self, username):
         """
         读取cookies, username用于文件命名
         Parameters
@@ -145,7 +145,7 @@ class OfficialWeChat(object):
         #工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.
         self.s.cookies = requests.utils.cookiejar_from_dict(load_cookies)
 
-    def _md5_passwd(self, password):
+    def __md5_passwd(self, password):
         """
         明文密码用md5加密
         Parameters
@@ -163,7 +163,7 @@ class OfficialWeChat(object):
         pwd = m5.hexdigest()
         return pwd
 
-    def _startlogin_official(self, username, password):
+    def __startlogin_official(self, username, password):
         """
         预备登录微信公众号平台获取Cookies
         Parameters
@@ -177,7 +177,7 @@ class OfficialWeChat(object):
             None
         """
 
-        pwd = self._md5_passwd(password)
+        pwd = self.__md5_passwd(password)
         data = {
             "username": username,
             "userlang": "zh_CN",
@@ -198,13 +198,13 @@ class OfficialWeChat(object):
 
         self.s.post(bizlogin_url, headers=self.headers, data=data)
         img = self.s.get(qrcode_url)
-        self._save_login_qrcode(img)
+        self.__save_login_qrcode(img)
 
         self.headers.pop("Host")
         self.headers.pop("Origin")
-        self._login_official(username, password)
+        self.__login_official(username, password)
 
-    def _login_official(self, username, password):
+    def __login_official(self, username, password):
         """
         正式登录微信公众号平台，获取token
         Parameters
@@ -234,12 +234,12 @@ class OfficialWeChat(object):
             # 截取token的字符串
             token = res["redirect_url"].split("=")[-1]
             self.params["token"] = token
-            self._save_cookie(username)
+            self.__save_cookie(username)
             self.headers.pop("Referer")
         except Exception:
             # 获取token失败，重新登录
             print("please try again")
-            self._startlogin_official(username, password)
+            self.__startlogin_official(username, password)
 
     def get_official_info(self, nickname, begin="0", count="5"):
         """
@@ -263,7 +263,7 @@ class OfficialWeChat(object):
               'service_type': 1公众号性质
             }
         """
-        self._verify_str(nickname, "nickname")
+        self.__verify_str(nickname, "nickname")
         search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
         self.params["query"] = nickname
         self.params["count"] = count
@@ -291,9 +291,9 @@ class OfficialWeChat(object):
         int
             文章总数
         """
-        self._verify_str(nickname, "nickname")
+        self.__verify_str(nickname, "nickname")
         try:
-            return self._get_articles_data(nickname, begin="0")["app_msg_cnt"]
+            return self.__get_articles_data(nickname, begin="0")["app_msg_cnt"]
         except Exception:
             return u"公众号名称错误，请重新输入"
 
@@ -332,14 +332,14 @@ class OfficialWeChat(object):
                 'update_time': 更新文章的时间戳
               ]
         """
-        self._verify_str(nickname, "nickname")
+        self.__verify_str(nickname, "nickname")
         try:
-            return self._get_articles_data(
+            return self.__get_articles_data(
                 nickname, begin=str(begin), count=str(count))["app_msg_list"]
         except Exception:
             return u"公众号名称错误，请重新输入"
 
-    def _get_articles_data(self,
+    def __get_articles_data(self,
                            nickname,
                            begin,
                            count="5",
@@ -404,7 +404,7 @@ class OfficialWeChat(object):
         -------
         None
         """
-        self._verify_str(fname, "fname")
+        self.__verify_str(fname, "fname")
 
         if ".txt" not in fname:
             raise Exception("fname must be txt", fname)
@@ -413,7 +413,7 @@ class OfficialWeChat(object):
                 f.write(json.dumps(item))
                 f.write("\n")
 
-    def _create_db(self, dbname, tablename):
+    def __create_db(self, dbname, tablename):
         """
         创建db数据库
         Parameters
@@ -452,11 +452,11 @@ class OfficialWeChat(object):
         -------
         None
         """
-        self._verify_str(dbname, "dbname")
-        self._verify_str(tablename, "tablename")
+        self.__verify_str(dbname, "dbname")
+        self.__verify_str(tablename, "tablename")
 
         if dbname not in os.listdir(os.getcwd()):
-            self._create_db(dbname, tablename)
+            self.__create_db(dbname, tablename)
         with sqlite3.connect(dbname) as con:
             # 插入数据
             with con as cur:
@@ -503,12 +503,12 @@ class OfficialWeChat(object):
 
         host = HOST if host is None else host
         port = PORT if port is None else port
-        self._verify_str(host, "host")
+        self.__verify_str(host, "host")
         if not isinstance(port, int):
             raise TypeError("port must be an instance of int")
-        self._verify_str(name, "name")
-        self._verify_str(password, "password")
-        self._verify_str(collname, "collname")
+        self.__verify_str(name, "name")
+        self.__verify_str(password, "password")
+        self.__verify_str(collname, "collname")
 
         from pymongo import MongoClient
         client = MongoClient(host, port)
