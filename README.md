@@ -35,6 +35,8 @@
 
 ```python
 # 导入模块
+import sys
+sys.path.append(path + "/wechat_articles_spider")
 from wechatarticles import OfficialWeChat
 
 """
