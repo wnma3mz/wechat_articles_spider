@@ -9,46 +9,29 @@ class LoginWeChat(object):
     http://mp.weixin.qq.com/s?__biz=MjM5NDU4ODI0NQ==&mid=2650949647&idx=1&sn=854714295ceee7943fe9426ab10453bf&chksm=bd739b358a041223833057cc3816f9562999e748904f39b166ee2178ce1a565e108fe364b920#rd'
     """
 
-    def __init__(self, key, appmsg_token, cookie, req_id, pass_ticket):
+    def __init__(self, appmsg_token, cookie):
         """
         初始化参数
         Parameters
         ----------
-        key: str
-            登录WeChat之后获取的key
-        appmsg_token: str
+        appmsg_token: str, 此处最好用r转义
             登录WeChat之后获取的appmsg_token
         cookie: str
             登录WeChat之后获取的cookie
-        req_id:
-            每篇文章的req_id
-        pass_ticket:
-            每篇文章的pass_ticket
-
         Returns
         -------
         None
         """
         self.s = requests.session()
-        self.key = key
         self.appmsg_token = appmsg_token
-        self.req_id = req_id
-        self.pass_ticket = pass_ticket
         self.headers = {
             "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 7.1.1; PRO 6 Build/NMF26O; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0                   Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/043909 Mobile Safari/537.36  MicroMessenger/6.6.5.1280(0x26060532) NetType/WIFI Language",
             "Cookie":
             cookie
         }
-        self.params = {
-            "key": self.key,
-            "pass_ticket": self.pass_ticket,
-            "appmsg_token": self.appmsg_token,
-        }
         self.data = {
             "is_only_read": "1",
-            "req_id": self.req_id,
-            "pass_ticket": self.pass_ticket,
             "is_temp_url": "0",
         }
 
@@ -64,23 +47,30 @@ class LoginWeChat(object):
         -------
         json:
             文章具体信息的json
+            {
+                'advertisement_info': [],
+                'advertisement_num': 0,
+                'appmsgstat': {'is_login': True,
+                'like_num': 12,
+                'liked': False,
+                'read_num': 288,
+                'real_read_num': 0,
+                'ret': 0,
+                'show': True},
+                'base_resp': {'wxtoken': 2045685972},
+                'reward_head_imgs': []
+            }
         """
-        appmsgext_url = "http://mp.weixin.qq.com/mp/getappmsgext"
+        origin_url = "http://mp.weixin.qq.com/mp/getappmsgext?"
         # 解析文章的url,获取请求参数
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1:] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
         if sn[-3] == "#":
             sn = sn[:-3]
-        self.params["__biz"] = __biz
-        self.params["mid"] = mid
-        self.params["sn"] = sn
-        self.params["idx"] = idx
-
+        appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
+            __biz, mid, sn, idx, self.appmsg_token)
         data = requests.post(
-            appmsgext_url,
-            headers=self.headers,
-            data=self.data,
-            params=self.params).json()
+            appmsgext_url, headers=self.headers, data=self.data).json()
         #         data["appmsgstat"]
         return data
