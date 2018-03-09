@@ -69,7 +69,7 @@ class LoginWeChat(object):
             阅读数、点赞数
         """
         try:
-            appmsgstat = self.GetSpecInfo(article_url)["appmsgstat"]
+            appmsgstat = self.__get_appmsgext(article_url)["appmsgstat"]
             return appmsgstat["read_num"], appmsgstat["like_num"]
         except Exception:
             raise Exception("params is error, please check your article_url")
@@ -98,7 +98,7 @@ class LoginWeChat(object):
                         "id": 3, 
                         "is_from_friend": 0, 
                         "is_from_me": 0, 
-                        "is_top": 0, 
+                        "is_top": 0, 是否被置顶
                         "like_id": 10001, 
                         "like_num": 3, 
                         "like_status": 0, 
@@ -122,12 +122,10 @@ class LoginWeChat(object):
         """
         __biz, _, idx, _ = self.__get_params(article_url)
         url = """
-        https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100&appmsg_token={}
-        """.format(__biz, idx, self.__get_comment_id(article_url),
-                   self.appmsg_token)
+        https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100
+        """.format(__biz, idx, self.__get_comment_id(article_url))
 
         comment_json = self.s.get(url, headers=self.headers).json()
-
         return comment_json
 
     def __get_comment_id(self, article_url):
@@ -170,7 +168,7 @@ class LoginWeChat(object):
             sn = sn[:-3]
         return __biz, mid, idx, sn
 
-    def GetSpecInfo(self, article_url):
+    def __get_appmsgext(self, article_url):
         """
         获取每篇文章具体信息
         Parameters
@@ -202,8 +200,7 @@ class LoginWeChat(object):
             __biz, mid, sn, idx, self.appmsg_token)
         appmsgext_json = requests.post(
             appmsgext_url, headers=self.headers, data=self.data).json()
-        # print(res.url)
-        print(appmsgext_json)
+
         if "appmsgstat" not in appmsgext_json.keys():
             raise Exception(
                 "get info error, please check your cookie and appmsg_token")
