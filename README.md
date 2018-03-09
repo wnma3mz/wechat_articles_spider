@@ -38,7 +38,10 @@
 import sys
 sys.path.append(path + "/wechat_articles_spider")
 from wechatarticles import OfficialWeChat
+from wechatarticles import LoginWeChat
+```
 
+```python
 """
 初始化一些参数
 username: 用户账号
@@ -65,6 +68,7 @@ articles_sum = test.totalNums(nickname)
 articles_data = test.get_articles(nickname, begin="10", count="5")
 # 获取公众号的一些信息
 officical_info = test.get_official_info(nickname)
+
 # 保存数据为txt格式
 test.save_txt("test.txt", artiacle_data)
 # 保存数据为sqlite3
@@ -90,12 +94,8 @@ pprint(officical_info)
 
 
 ```python
-# 导入模块
-from wechatarticles import LoginWeChat
-
 """
 初始化一些参数。登录WeChatPC端获取下面的参数
-用户相关
 appmsg_token
 cookie
 """
@@ -106,11 +106,13 @@ test = LoginWeChat(appmsg_token=appmsg_token, cookie=cookie)
 # 获取微信文章的详细信息（包括文章的阅读数、评论数、点赞数等）
 # 这里的articles_url是上面获取到的`articles_data`数组中每一项的"link"
 test.GetSpecInfo(article_url=article_url)
+# 获取文章所有的评论信息(无需appmsg_token和cookie)
+comments = test.get_comments(link)
+# 获取文章阅读数点赞数
+read_like_num = test.get_read_like_num(link)
+# 保存操作暂时不开发
 ```
 
 ## TO-DO
 
 1. 模拟登录微信PC端
-2. 解析文章详细信息的json
-3. 保存信息
-4. 完善urlAPI操作说明
