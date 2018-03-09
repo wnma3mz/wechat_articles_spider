@@ -321,16 +321,7 @@ class OfficialWeChat(object):
                 'title': 文章标题,
                 'update_time': 更新文章的时间戳
               },
-              {
-                'aid': '2650949644_1',
-                'appmsgid': 2650949644,
-                'cover': 封面的url,
-                'digest': 文章摘要,
-                'itemidx': 1,
-                'link': 文章的url,
-                'title': 文章标题,
-                'update_time': 更新文章的时间戳
-              ]
+            ]
         """
         self.__verify_str(nickname, "nickname")
         try:
