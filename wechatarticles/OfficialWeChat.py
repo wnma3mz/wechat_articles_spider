@@ -331,11 +331,11 @@ class OfficialWeChat(object):
             return u"公众号名称错误，请重新输入"
 
     def __get_articles_data(self,
-                           nickname,
-                           begin,
-                           count="5",
-                           type_="9",
-                           action="list_ex"):
+                            nickname,
+                            begin,
+                            count="5",
+                            type_="9",
+                            action="list_ex"):
         """
         获取公众号文章的一些信息
         Parameters

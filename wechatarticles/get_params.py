@@ -4,6 +4,7 @@ from mitmproxy.exceptions import FlowReadException
 import re
 import os
 
+
 # command: python get_params outfile
 def get_params(outfile):
     with open(outfile, "rb") as logfile:
@@ -33,6 +34,7 @@ def get_params(outfile):
             print("Flow file corrupted: {}".format(e))
     return appmsg_token, cookie
 
+
 def main(fname):
     outfile = "outfile"
     os.system(
@@ -43,4 +45,3 @@ def main(fname):
     except Exception:
         pass
     return get_params(outfile)
-
