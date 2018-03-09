@@ -28,7 +28,7 @@ class LoginWeChat(object):
         self.appmsg_token = appmsg_token
         self.headers = {
             "User-Agent":
-            "Mozilla/5.0 (Linux; Android 7.1.1; PRO 6 Build/NMF26O; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0                   Chrome/57.0.2987.132 MQQBrowser/6.2 TBS/043909 Mobile Safari/537.36  MicroMessenger/6.6.5.1280(0x26060532) NetType/WIFI Language",
+            "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
             "Cookie":
             cookie
         }
@@ -70,9 +70,9 @@ class LoginWeChat(object):
         """
         try:
             appmsgstat = self.GetSpecInfo(article_url)["appmsgstat"]
+            return appmsgstat["read_num"], appmsgstat["like_num"]
         except Exception:
             raise Exception("params is error, please check your article_url")
-        return appmsgstat["read_num"], appmsgstat["like_num"]
 
     def get_comments(self, article_url):
         """
@@ -196,17 +196,15 @@ class LoginWeChat(object):
                 'reward_head_imgs': []
             }
         """
-        __biz, mid, sn, idx = self.__get_params(article_url)
-        origin_url = "http://mp.weixin.qq.com/mp/getappmsgext?"
-        # string_lst = article_url.split("?")[1].split("&")
-        # dict_value = [string[string.index("=") + 1:] for string in string_lst]
-        # __biz, mid, idx, sn, *_ = dict_value
-        # if sn[-3] == "#":
-        #     sn = sn[:-3]
+        __biz, mid, idx, sn = self.__get_params(article_url)
+        origin_url = "https://mp.weixin.qq.com/mp/getappmsgext?"
         appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
             __biz, mid, sn, idx, self.appmsg_token)
-        print(appmsgext_url)
-        res = requests.post(
-            appmsgext_url, headers=self.headers, data=self.data)
-        print(res.url)
-        return res.json()
+        appmsgext_json = requests.post(
+            appmsgext_url, headers=self.headers, data=self.data).json()
+        # print(res.url)
+        print(appmsgext_json)
+        if "appmsgstat" not in appmsgext_json.keys():
+            raise Exception(
+                "get info error, please check your cookie and appmsg_token")
+        return appmsgext_json
