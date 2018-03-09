@@ -6,15 +6,11 @@
 
 2. 登录微信PC端获取文章的阅读数、评论等信息
 
-具体可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
+完整思路可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
 
 ## 第三方包
 
 - `requests`: 爬取内容
-
-## API实例
-
-### 步骤一: 获取公众号的所有文章url
 
 **支持两种爬虫方式**
 
@@ -24,7 +20,6 @@
 
 2. cookie、token爬虫，手动复制cookie和token。具体cookie和token获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
 
-
 **支持三种存储方式**
 
 1. txt存储（不建议）
@@ -33,6 +28,10 @@
 
 3. mongo存储。需要安装`pymongo`
 
+## API实例
+
+以下具体代码见`test/`目录下的实例代码。
+
 ```python
 # 导入模块
 import sys
@@ -40,6 +39,8 @@ sys.path.append(path + "/wechat_articles_spider")
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
 ```
+
+### 步骤一: 获取公众号的所有文章url
 
 ```python
 """
@@ -77,15 +78,6 @@ test.save_sqlite("test.db", "test", artiacle_data)
 test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname=dbname, collname=collname)
 ```
 
-```python
-# 输出
-print("articles_sum:", articles_sum)
-print("artcles_data:")
-pprint(artiacle_data)
-print("officical_info:")
-pprint(officical_info)
-```
-
 ### 步骤二：登录微信PC端获取文章信息
 
 关于参数如何手动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
@@ -109,7 +101,7 @@ test.GetSpecInfo(article_url=article_url)
 # 获取文章所有的评论信息(无需appmsg_token和cookie)
 comments = test.get_comments(link)
 # 获取文章阅读数点赞数
-read_like_num = test.get_read_like_num(link)
+read_num, like_num = test.get_read_like_num(link)
 # 保存操作暂时不开发
 ```
 
