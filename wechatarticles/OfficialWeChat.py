@@ -297,7 +297,7 @@ class OfficialWeChat(object):
         except Exception:
             return u"公众号名称错误，请重新输入"
 
-    def get_articles(self, nickname, begin, count="5"):
+    def get_articles(self, nickname, begin, count=5):
         """
         获取公众号的每页的文章信息
         Parameters
@@ -322,6 +322,7 @@ class OfficialWeChat(object):
                 'update_time': 更新文章的时间戳
               },
             ]
+        如果list为空则说明没有相关文章
         """
         self.__verify_str(nickname, "nickname")
         try:
@@ -330,12 +331,68 @@ class OfficialWeChat(object):
         except Exception:
             return u"公众号名称错误，请重新输入"
 
+    def query_totalNums(self, nickname, query):
+        """
+        获取公众号指定关键词的文章的总数
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        int
+            文章总数
+        """
+        self.__verify_str(query, "query")
+        try:
+            return self.__get_articles_data(
+                nickname=nickname, begin="0", query=query)["app_msg_cnt"]
+        except Exception:
+            return u"公众号名称错误，请重新输入"
+
+    def get_query_articles(self, nickname, query, begin, count=5):
+        """
+        获取公众号指定关键词的文章
+        Parameters
+        ----------
+        begin: str or int
+            起始爬取的页数
+        count: str or int
+            每次爬取的数量，1-5
+        query: str
+            搜索关键词
+        Returns
+        -------
+        list:
+            由每个文章信息构成的数组
+            [
+              {
+                'aid': '2650949647_1',
+                'appmsgid': 2650949647,
+                'cover': 封面的url'digest': 文章摘要,
+                'itemidx': 1,
+                'link': 文章的url,
+                'title': 文章标题,
+                'update_time': 更新文章的时间戳
+              },
+            ]
+        如果list为空则说明没有相关文章
+        """
+        self.__verify_str(query, "query")
+        try:
+            return self.__get_articles_data(
+                nickname, begin=str(begin), count=str(count),
+                query=query)["app_msg_list"]
+        except Exception:
+            return u"公众号名称错误，请重新输入"
+
     def __get_articles_data(self,
                             nickname,
                             begin,
-                            count="5",
+                            count=5,
                             type_="9",
-                            action="list_ex"):
+                            action="list_ex",
+                            query=None):
         """
         获取公众号文章的一些信息
         Parameters
@@ -362,17 +419,18 @@ class OfficialWeChat(object):
             }
         """
         appmsg_url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
-        key_lst = ["query", "ajax"]
+        # key_lst = ["query", "ajax"]
 
         official_info = self.get_official_info(nickname)
         if isinstance(official_info, dict):
             self.params["fakeid"] = official_info["fakeid"]
         else:
             return u"公众号名称错误，请重新输入"
-        for key in key_lst:
-            if key in self.params.keys():
-                self.params.pop(key)
+        # for key in key_lst:
+        #     if key in self.params.keys():
+        #         self.params.pop(key)
 
+        self.params["query"] = query if query != None else ""
         self.params["begin"] = str(begin)
         self.params["count"] = str(count)
         self.params["type"] = str(type_)

@@ -53,12 +53,14 @@ password: 用户密码
 cookie: 登录后获取的cookie
 token: 登录后获取的token
 nickname: 需要爬取的公众号
+query: 筛选公众号文章的关键词
 """
 username = username
 password = password
 cookie = yourcookie
 token = token
 nickname = nickname
+query = query
 
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
@@ -66,12 +68,16 @@ test = OfficialWeChat(username=username, password=password)
 # 手动输入账号密码
 test = OfficialWeChat(cookie=cookie, token=token)
 
-# 获取公众号文章总数
+# 输入公众号名称，获取公众号文章总数
 articles_sum = test.totalNums(nickname)
-# 获取公众号部分文章信息
-articles_data = test.get_articles(nickname, begin="10", count="5")
-# 获取公众号的一些信息
+# 输入公众号名称，获取公众号部分文章信息, 每次最大返回数为5个
+articles_data = test.get_articles(nickname, begin="0", count="5")
+# 输入公众号名称，获取公众号的一些信息
 officical_info = test.get_official_info(nickname)
+# 输入公众号名称，输入关键词，获取公众号相关文章信息, 每次最大返回数为5个
+articles_data_query = test.get_articles(nickname, query=query, begin="0", count="5")
+# 输入公众号名称，输入关键词，获取公众号相关文章总数
+articles_sum_query = test.totalNums(nickname, query=query)
 
 # 保存数据为txt格式
 test.save_txt("test.txt", artiacle_data)
@@ -113,4 +119,4 @@ read_num, like_num = test.get_read_like_num(link)
 
 ## TO-DO
 
-1. 搜索任意一篇微信推文，获取相关信息
+1. 整合API, 通过搜索公众号直接获取文章阅读数等信息， 搜索公众号文章关键词直接获取文章阅读数信息
