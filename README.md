@@ -38,9 +38,12 @@ import sys
 sys.path.append(path + "/wechat_articles_spider")
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
+from wechatarticles import get_params
 ```
 
 ### 步骤一: 获取公众号的所有文章url
+
+此处有次数限制，不可一次获取太多url(获取超过30、40条貌似就会失败)。解决方案多个账号同时爬取
 
 ```python
 """
@@ -84,13 +87,16 @@ test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname
 
 关于参数如何自动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)
 
+现已支持自动获取参数(需要安装`mitmproxy`)，建议获取每天或者每半天获取一次即可。此处通过上面获取到的url即可无限爬取，没有次数限制
 
 ```python
 """
-初始化一些参数。登录WeChatPC端获取下面的参数
+初始化一些参数。登录WeChat移动端，点击任意一篇微信推文获取下面的参数
 appmsg_token
 cookie
 """
+# 支持自动获取appmsg_token和cookie
+appmsg_token, cookie = get_params.main("outfile")
 
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
@@ -107,4 +113,4 @@ read_num, like_num = test.get_read_like_num(link)
 
 ## TO-DO
 
-1. 模拟登录微信PC端
+1. 搜索任意一篇微信推文，获取相关信息
