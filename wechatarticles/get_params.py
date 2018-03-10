@@ -35,11 +35,11 @@ def get_params(outfile):
     return appmsg_token, cookie
 
 
-def main(fname):
-    outfile = "outfile"
-    os.system(
-        "mitmdump -q -s get_outfile.py -w {} mp.weixin.qq.com/mp/getappmsgext".
-        format(outfile))
+def main(outfile):
+    path = os.path.split(os.path.realpath(__file__))[0]
+    command = "mitmdump -q -s {}/get_outfile.py -w {} mp.weixin.qq.com/mp/getappmsgext".format(
+        path, outfile)
+    os.system(command)
     try:
         os.system("rm ./-q")
     except Exception:

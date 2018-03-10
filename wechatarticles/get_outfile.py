@@ -18,7 +18,6 @@ class Writer:
             exit()
 
     def done(self):
-
         self.f.close()
 
 
