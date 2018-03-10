@@ -1,6 +1,6 @@
 # coding: utf-8
 import sys
-sys.path.append("./wechat_articles_spider")
+sys.path.append(os.getcwd())
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
 from pprint import pprint
