@@ -1,8 +1,9 @@
 # coding: utf-8
+import os
+import re
+
 from mitmproxy import io
 from mitmproxy.exceptions import FlowReadException
-import re
-import os
 
 
 # 获取appmsg_token, cookie
@@ -30,8 +31,10 @@ class Reader:
 
                         # 提取appmsg_token
                         path = request["path"].decode()
-                        appmsg_token_string = re.findall("appmsg_token.+?&", path)
-                        appmsg_token = appmsg_token_string[0].split("=")[1][:-1]
+                        appmsg_token_string = re.findall(
+                            "appmsg_token.+?&", path)
+                        appmsg_token = appmsg_token_string[0].split("=")[1][:
+                                                                            -1]
                         break
                     except Exception:
                         continue
@@ -41,11 +44,7 @@ class Reader:
 
     def contral(self, outfile):
         path = os.path.split(os.path.realpath(__file__))[0]
-        command = "mitmdump -q -s {}/get_outfile.py -w {} mp.weixin.qq.com/mp/getappmsgext".format(
+        command = "mitmdump -q -s {}/tools.py -w {} mp.weixin.qq.com/mp/getappmsgext".format(
             path, outfile)
         os.system(command)
-        try:
-            os.system("rm ./-q")
-        except Exception:
-            pass
         return self.__request(outfile)

@@ -1,6 +1,7 @@
 # coding:  utf-8
-import requests
 import re
+
+import requests
 
 
 class LoginWeChat(object):
@@ -13,10 +14,10 @@ class LoginWeChat(object):
         初始化参数
         Parameters
         ----------
-        appmsg_token: str, 此处最好用r转义
-            登录WeChat之后获取的appmsg_token
         cookie: str
-            登录WeChat之后获取的cookie
+            点开微信公众号文章抓包工具获取的cookie
+        appmsg_token: str
+            点开微信公众号文章抓包工具获取的appmsg_token
 
         Returns
         -------

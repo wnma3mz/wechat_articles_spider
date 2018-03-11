@@ -1,10 +1,11 @@
 # coding:  utf-8
-import requests
-import sqlite3
-import json
-from requests.cookies import cookielib
 import hashlib
+import json
 import os
+import sqlite3
+
+import requests
+from requests.cookies import cookielib
 
 
 class OfficialWeChat(object):
