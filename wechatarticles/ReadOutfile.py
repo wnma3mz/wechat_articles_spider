@@ -8,10 +8,8 @@ import os
 # 获取appmsg_token, cookie
 # command: python get_params outfile
 class Reader:
-    def __init__(self) -> None:
+    def __init__(self):
         pass
-        # self.f = open(path, "rb")
-        # self.w = io.FlowWriter(self.f)
 
     def __request(self, outfile):
         with open(outfile, "rb") as logfile:
@@ -40,9 +38,6 @@ class Reader:
             except FlowReadException as e:
                 print("Flow file corrupted: {}".format(e))
             return appmsg_token, cookie
-
-    # def __done(self):
-    #     self.f.close()
 
     def contral(self, outfile):
         path = os.path.split(os.path.realpath(__file__))[0]
