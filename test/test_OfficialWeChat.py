@@ -1,9 +1,8 @@
 # coding: utf-8
 import sys
-sys.path.append(os.getcwd())
-from wechatarticles import OfficialWeChat
-from wechatarticles import LoginWeChat
 from pprint import pprint
+sys.path.append(os.getcwd())
+from wechatarticles import LoginWeChat, OfficialWeChat
 
 if __name__ == "__main__":
     # 模拟登录微信公众号平台，获取微信文章的url
@@ -20,7 +19,8 @@ if __name__ == "__main__":
     artiacle_data = test.get_articles(nickname, begin="0", count="5")
     officical_info = test.get_official_info(nickname)
 
-    articles_data_query = test.get_articles(nickname, query=query, begin="0", count="5")
+    articles_data_query = test.get_articles(
+        nickname, query=query, begin="0", count="5")
     articles_sum_query = test.totalNums(nickname, query=query)
 
     print("articles_sum:", end=" ")
@@ -32,4 +32,3 @@ if __name__ == "__main__":
 
     test.save_txt("test.txt", artiacle_data)
     test.save_sqlite("test.db", "test", artiacle_data)
-
