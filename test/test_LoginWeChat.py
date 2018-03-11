@@ -1,35 +1,19 @@
 # coding: utf-8
 import sys
+import os
 sys.path.append(os.getcwd())
 from wechatarticles import OfficialWeChat
 from wechatarticles import LoginWeChat
+from wechatarticles import get_params
 from pprint import pprint
 
-if __name__ == "__main__":
-    # 模拟登录微信公众号平台，获取微信文章的url
-    username = "username@qq.com"
-    password = "password"
-    cookie = "cookie"
-    token = "token"
-    nickname = "nickname"
-    query = "query"
-    #test = OfficialWeChat(username, password)
-    test = OfficialWeChat(cookie=cookie, token=token)
-
-    articles_sum = test.totalNums(nickname)
-    artiacle_data = test.get_articles(nickname, begin="0", count="5")
-    officical_info = test.get_official_info(nickname)
-
-    articles_data_query = test.get_articles(nickname, query=query, begin="0", count="5")
-    articles_sum_query = test.totalNums(nickname, query=query)
-
-    print("articles_sum:", end=" ")
-    print(articles_sum)
-    print("artcles_data:")
-    pprint(artiacle_data)
-    print("officical_info:")
-    pprint(officical_info)
-
-    test.save_txt("test.txt", artiacle_data)
-    test.save_sqlite("test.db", "test", artiacle_data)
-
+if __name__ == '__main__':
+    appmsg_token, cookie = get_params.main("outfile")
+    appmsg_token, cookie  = "appmsg_token", "cookie"
+    article_url = "http://mp.weixin.qq.com/s?__biz=MjM5NDU4ODI0NQ==&mid=2650949647&idx=1&sn=854714295ceee7943fe9426ab10453bf&chksm=bd739b358a041223833057cc3816f9562999e748904f39b166ee2178ce1a565e108fe364b920#rd'"
+    test = LoginWeChat(appmsg_token, cookie)
+    comments = test.get_comments(article_url)
+    read_num, like_num = test.get_read_like_num(article_url)
+    print("comments:")
+    pprint(comments)
+    print("read_like_num:", read_num, like_num)
