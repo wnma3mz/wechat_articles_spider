@@ -43,36 +43,37 @@ class OfficialWeChat(object):
             "f": "json",
         }
 
-        # 两种登录方式
+        # 手动输入cookie和token登录
         if (cookie != None) and (token != None):
             self.__verify_str(cookie, "cookie")
             self.__verify_str(token, "token")
             self.headers["Cookie"] = cookie
             self.params["token"] = token
+        # 扫描二维码登录
         elif (username != None) and (password != None):
             self.__verify_str(username, "username")
             self.__verify_str(password, "password")
-            # 每次登录需要扫码，不支持cookie缓存
+            # 暂不支持cookie缓存
             self.__startlogin_official(username, password)
         else:
             print("please check your paramse")
             raise SystemError
 
-    def __verify_str(self, input_string, param):
+    def __verify_str(self, input_string, param_name):
         """
         验证输入是否为字符串
         Parameters
         ----------
         input_string: str
             输入
-        param: str
+        param_name: str
             需要验证的参数名
         Returns
         ----------
             None
         """
         if not isinstance(input_string, str):
-            raise TypeError("{} must be an instance of str".format(param))
+            raise TypeError("{} must be an instance of str".format(param_name))
 
     def __save_login_qrcode(self, img):
         """
@@ -88,9 +89,10 @@ class OfficialWeChat(object):
         """
         import matplotlib.pyplot as plt
         from PIL import Image
+        # 存储二维码
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
-
+        # 显示二维码， 这里使用plt的原因是： 等待用户扫描完之后手动关闭窗口继续运行；否则会直接运行
         img = Image.open("login.png")
         plt.figure()
         plt.imshow(img)
@@ -148,11 +150,11 @@ class OfficialWeChat(object):
 
     def __md5_passwd(self, password):
         """
-        明文密码用md5加密
+        微信公众号的登录密码需要用md5方式进行加密
         Parameters
         ----------
         password: str
-            未加密的密码
+            加密前的字符串
 
         Returns
         -------
@@ -166,7 +168,7 @@ class OfficialWeChat(object):
 
     def __startlogin_official(self, username, password):
         """
-        预备登录微信公众号平台获取Cookies
+        开始登录微信公众号平台，获取Cookies
         Parameters
         ----------
         username: str
@@ -177,7 +179,7 @@ class OfficialWeChat(object):
         -------
             None
         """
-
+        # 进行md5加密，一些post的参数
         pwd = self.__md5_passwd(password)
         data = {
             "username": username,
@@ -190,19 +192,25 @@ class OfficialWeChat(object):
             "ajax": "1"
         }
 
+        # 增加headers的keys
         self.headers["Host"] = "mp.weixin.qq.com"
         self.headers["Origin"] = "https://mp.weixin.qq.com"
         self.headers["Referer"] = "https://mp.weixin.qq.com/"
 
+        # 账号密码post的url
         bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=startlogin"
+        # 获取二维码的url
         qrcode_url = "https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&param=4300&rd=928"
 
+        # 账号密码登录，获取二维码，等待用户扫描二维码，需手动关闭二维码窗口
         self.s.post(bizlogin_url, headers=self.headers, data=data)
         img = self.s.get(qrcode_url)
         self.__save_login_qrcode(img)
 
+        # 去除之后不用的headers的key
         self.headers.pop("Host")
         self.headers.pop("Origin")
+        # 获取token
         self.__login_official(username, password)
 
     def __login_official(self, username, password):
@@ -218,10 +226,12 @@ class OfficialWeChat(object):
         -------
             None
         """
+        # 设定headers的referer的请求
         referer = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(
             username)
         self.headers["Referer"] = referer
 
+        # 获取token的data
         data = {
             "userlang": "zh_CN",
             "token": "",
@@ -229,20 +239,22 @@ class OfficialWeChat(object):
             "f": "json",
             "ajax": "1",
         }
+        # 获取token的url
         bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login"
         res = self.s.post(bizlogin_url, data=data, headers=self.headers).json()
+
         try:
-            # 截取token的字符串
+            # 截取字符串中的token参数
             token = res["redirect_url"].split("=")[-1]
             self.params["token"] = token
-            self.__save_cookie(username)
+            # self.__save_cookie(username)
             self.headers.pop("Referer")
         except Exception:
-            # 获取token失败，重新登录
+            # 获取token失败，重新扫码登录
             print("please try again")
             self.__startlogin_official(username, password)
 
-    def get_official_info(self, nickname, begin="0", count="5"):
+    def get_official_info(self, nickname, begin=0, count=5):
         """
         获取公众号的一些信息
         Parameters
@@ -265,20 +277,26 @@ class OfficialWeChat(object):
             }
         """
         self.__verify_str(nickname, "nickname")
+        # 搜索公众号的url
         search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
-        self.params["query"] = nickname
-        self.params["count"] = count
-        self.params["action"] = "search_biz"
-        self.params["ajax"] = "1"
-        self.params["begin"] = begin
+
+        # 增加/更改请求参数
+        params = {
+            "query": nickname,
+            "count": str(count),
+            "action": "search_biz",
+            "ajax": "1",
+            "begin": str(begin)
+        }
+        self.params.update(params)
 
         try:
+            # 返回与输入公众号名称最接近的公众号信息
             official = self.s.get(
-                search_url, headers=self.headers,
-                params=self.params).json()["list"]
-            return official[0]
+                search_url, headers=self.headers, params=self.params)
+            return official.json()["list"][0]
         except Exception:
-            return u"公众号名称错误，请重新输入"
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
     def totalNums(self, nickname):
         """
@@ -296,9 +314,9 @@ class OfficialWeChat(object):
         try:
             return self.__get_articles_data(nickname, begin="0")["app_msg_cnt"]
         except Exception:
-            return u"公众号名称错误，请重新输入"
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def get_articles(self, nickname, begin, count=5):
+    def get_articles(self, nickname, begin=0, count=5):
         """
         获取公众号的每页的文章信息
         Parameters
@@ -330,7 +348,7 @@ class OfficialWeChat(object):
             return self.__get_articles_data(
                 nickname, begin=str(begin), count=str(count))["app_msg_list"]
         except Exception:
-            return u"公众号名称错误，请重新输入"
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
     def query_totalNums(self, nickname, query):
         """
@@ -349,7 +367,7 @@ class OfficialWeChat(object):
             return self.__get_articles_data(
                 nickname=nickname, begin="0", query=query)["app_msg_cnt"]
         except Exception:
-            return u"公众号名称错误，请重新输入"
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
     def get_query_articles(self, nickname, query, begin, count=5):
         """
@@ -385,7 +403,7 @@ class OfficialWeChat(object):
                 nickname, begin=str(begin), count=str(count),
                 query=query)["app_msg_list"]
         except Exception:
-            return u"公众号名称错误，请重新输入"
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
     def __get_articles_data(self,
                             nickname,
@@ -412,34 +430,35 @@ class OfficialWeChat(object):
             文章信息的json
             {
               'app_msg_cnt': 公众号发文章总数,
-              'app_msg_list': 　一个数组(参看GetArticles),
+              'app_msg_list': 　一个数组(参看get_articles函数),
               'base_resp': {
                 'err_msg': 'ok',
                 'ret': 0
               }
             }
         """
+        # 获取文章信息的url
         appmsg_url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
-        # key_lst = ["query", "ajax"]
 
-        official_info = self.get_official_info(nickname)
-        if isinstance(official_info, dict):
+        try:
+            # 获取公众号的fakeid
+            official_info = self.get_official_info(nickname)
             self.params["fakeid"] = official_info["fakeid"]
-        else:
-            return u"公众号名称错误，请重新输入"
-        # for key in key_lst:
-        #     if key in self.params.keys():
-        #         self.params.pop(key)
+        except Exception:
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-        self.params["query"] = query if query != None else ""
-        self.params["begin"] = str(begin)
-        self.params["count"] = str(count)
-        self.params["type"] = str(type_)
-        self.params["action"] = action
+        # 增加/更改请求参数
+        params = {
+            "query": query if query != None else "",
+            "begin": str(begin),
+            "count": str(count),
+            "type": str(type_),
+            "action": action
+        }
+        self.params.update(params)
 
-        data = self.s.get(
-            appmsg_url, headers=self.headers, params=self.params).json()
-        return data
+        data = self.s.get(appmsg_url, headers=self.headers, params=self.params)
+        return data.json()
 
     def save_txt(self, fname, data):
         """
@@ -516,7 +535,7 @@ class OfficialWeChat(object):
                             "insert into {} values (?, ?, ?, ?, ?, ?, ?, ?)".
                             format(tablename), list(item.values()))
                     except Exception:
-                        print("please check data")
+                        raise Exception("please check data")
 
     def save_mongo(self,
                    data,
@@ -551,6 +570,7 @@ class OfficialWeChat(object):
         HOST = "localhost"
         PORT = 27017
 
+        # 检查参数
         host = HOST if host is None else host
         port = PORT if port is None else port
         self.__verify_str(host, "host")
@@ -561,6 +581,7 @@ class OfficialWeChat(object):
         self.__verify_str(collname, "collname")
 
         from pymongo import MongoClient
+        # 连接数据库，一次性插入数据
         client = MongoClient(host, port)
         db_auth = client.admin
         db_auth.authenticate(name, password)
