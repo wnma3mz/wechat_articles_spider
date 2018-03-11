@@ -34,6 +34,6 @@ if __name__ == '__main__':
     test = ArticlesAPI(
         official_cookie=official_cookie, token=token, outfile="outfile")
 
-    data = test.get_data(nickname=nickname)
+    data = test.get_data(nickname=nickname, begin="0")
     print(data.__len__())
     pprint(data)
