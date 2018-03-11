@@ -141,6 +141,7 @@ class LoginWeChat(object):
             comment_id获取评论必要参数
         """
         res = self.s.post(article_url, data=self.data)
+        # 使用正则提取comment_id
         comment_id = re.findall(r'comment_id = "\d+"',
                                 res.text)[0].split(" ")[-1][1:-1]
         return comment_id
@@ -158,13 +159,13 @@ class LoginWeChat(object):
         (str, str, str, str):
             __biz, mid, idx, sn
         """
-        # 进行简单验证文章的url
+        # 简单验证文章的url是否正确
         self.__verify(article_url)
+        # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1:] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
-        if sn[-3] == "#":
-            sn = sn[:-3]
+        sn = sn[:-3] if sn[-3] == "#"　else sn
         return __biz, mid, idx, sn
 
     def __get_appmsgext(self, article_url):

@@ -126,13 +126,16 @@ class ArticlesAPI(object):
             ]
         如果list为空则说明没有相关文章
         """
+        # 获取文章数据
         artiacle_data = self.officical.get_articles(
             nickname, begin=str(begin), count=str(count))
+
+        # 提取每个文章的url，获取文章的点赞、阅读、评论信息，并加入到原来的json中
         for data in artiacle_data:
-            comments = self.wechat.get_comments(article_url=data["link"])
-            read_num, like_num = self.wechat.get_read_like_num(
-                article_url=data["link"])
+            article_url = data["link"]
+            comments = self.wechat.get_comments(article_url)
+            read_like_num = self.wechat.get_read_like_num(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"] = read_num, like_num
+            data["read_num"], data["like_num"] = read_like_num
 
         return artiacle_data
