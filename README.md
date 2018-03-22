@@ -144,4 +144,6 @@ read_num, like_num = test.get_read_like_num(link)
 
 ## TO-DO
 
-1. 完善API设计
+- [] 完善API设计
+
+- [] 增加协程`asyncio`
