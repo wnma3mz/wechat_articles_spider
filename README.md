@@ -12,6 +12,8 @@
 
 - `requests`: 爬取内容
 
+详情见`requirements.txt`
+
 **支持两种微信公众号登录方式**
 
 下面微信公众号登录方式选用其一即可
@@ -144,6 +146,6 @@ read_num, like_num = test.get_read_like_num(link)
 
 ## TO-DO
 
-- [] 完善API设计
+- [ ] 完善API设计
 
-- [] 增加协程`asyncio`
+- [ ] 增加协程`asyncio`
