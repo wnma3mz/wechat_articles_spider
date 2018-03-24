@@ -149,3 +149,7 @@ read_num, like_num = test.get_read_like_num(link)
 - [ ] 完善API设计
 
 - [ ] 增加协程`asyncio`
+
+- [ ] 发布第三方包
+
+- [ ] 直接搜索文章获取文章信息 
