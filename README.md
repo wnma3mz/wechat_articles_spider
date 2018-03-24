@@ -8,7 +8,11 @@
 
 完整思路可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
 
-## 第三方包
+## python版本
+
+- `python`: 3.6.2
+
+### 第三方包
 
 - `requests`: 爬取内容
 
@@ -26,9 +30,7 @@
 
 1. txt存储（不建议）
 
-2. sqlite3存储。自带模块，不需要额外安装
-
-3. mongo存储。需要安装`pymongo`
+2. mongo存储。需要安装`pymongo`
 
 ## API实例
 
