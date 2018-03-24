@@ -4,7 +4,7 @@ import re
 import requests
 
 
-class LoginWeChat(object):
+class ArticlesInfo(object):
     """
     登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等
     """
@@ -54,7 +54,7 @@ class LoginWeChat(object):
                 raise Exception(
                     "params is error, please check your article_url")
 
-    def get_read_like_num(self, article_url):
+    def read_like_nums(self, article_url):
         """
         获取阅读数和点赞数
         Parameters
@@ -73,7 +73,7 @@ class LoginWeChat(object):
         except Exception:
             raise Exception("params is error, please check your article_url")
 
-    def get_comments(self, article_url):
+    def comments(self, article_url):
         """
         获取文章评论
         Parameters
@@ -120,9 +120,8 @@ class LoginWeChat(object):
             }
         """
         __biz, _, idx, _ = self.__get_params(article_url)
-        url = """
-        https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100
-        """.format(__biz, idx, self.__get_comment_id(article_url))
+        getcomment_url = "https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100"
+        url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
 
         comment_json = self.s.get(url, headers=self.headers).json()
         return comment_json
@@ -161,11 +160,13 @@ class LoginWeChat(object):
         """
         # 简单验证文章的url是否正确
         self.__verify(article_url)
+        
         # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1:] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
         sn = sn[:-3] if sn[-3] == "#"　else sn
+        
         return __biz, mid, idx, sn
 
     def __get_appmsgext(self, article_url):

@@ -8,7 +8,7 @@ import requests
 from requests.cookies import cookielib
 
 
-class OfficialWeChat(object):
+class ArticlesUrls(object):
     """
     获取需要爬取的微信公众号的推文链接
     """
@@ -254,7 +254,7 @@ class OfficialWeChat(object):
             print("please try again")
             self.__startlogin_official(username, password)
 
-    def get_official_info(self, nickname, begin=0, count=5):
+    def official_info(self, nickname, begin=0, count=5):
         """
         获取公众号的一些信息
         Parameters
@@ -298,7 +298,7 @@ class OfficialWeChat(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def totalNums(self, nickname):
+    def articles_nums(self, nickname):
         """
         获取公众号的总共发布的文章数量
         Parameters
@@ -316,7 +316,7 @@ class OfficialWeChat(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def get_articles(self, nickname, begin=0, count=5):
+    def articles(self, nickname, begin=0, count=5):
         """
         获取公众号的每页的文章信息
         Parameters
@@ -350,7 +350,7 @@ class OfficialWeChat(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def query_totalNums(self, nickname, query):
+    def query_articles_nums(self, nickname, query):
         """
         获取公众号指定关键词的文章的总数
         Parameters
@@ -369,7 +369,7 @@ class OfficialWeChat(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def get_query_articles(self, nickname, query, begin, count=5):
+    def query_articles(self, nickname, query, begin, count=5):
         """
         获取公众号指定关键词的文章
         Parameters

@@ -1,13 +1,13 @@
 # coding: utf-8
 
-from .LoginWeChat import LoginWeChat
-from .OfficialWeChat import OfficialWeChat
+from .ArticlesUrls import ArticlesUrls
+from .ArticlesInfo import ArticlesInfo
 from .ReadOutfile import Reader
 
 
 class ArticlesAPI(object):
     """
-    整合OfficialWeChat和LoginWeChat, 方便调用
+    整合ArticlesInfo和ArticlesInfo, 方便调用
     """
 
     def __init__(self,
@@ -34,17 +34,16 @@ class ArticlesAPI(object):
             点开微信公众号文章抓包工具获取的cookie
         appmsg_token: str
             点开微信公众号文章抓包工具获取的appmsg_token
+
         Returns
         -------
             None
         """
         # 两种登录方式, 扫码登录和手动输入登录
         if (token != None) and (official_cookie != None):
-            self.officical = OfficialWeChat(
-                cookie=official_cookie, token=token)
+            self.officical = ArticlesUrls(cookie=official_cookie, token=token)
         elif (username != None) and (password != None):
-            self.officical = OfficialWeChat(
-                username=username, password=password)
+            self.officical = ArticlesUrls(username=username, password=password)
         else:
             print("please check your paramse")
             raise SystemError
@@ -58,7 +57,7 @@ class ArticlesAPI(object):
         else:
             print("please check your params")
             raise SystemError
-        self.wechat = LoginWeChat(self.appmsg_token, self.cookie)
+        self.wechat = ArticlesInfo(self.appmsg_token, self.cookie)
 
     def get_data(self, nickname, begin=0, count=5):
         """
@@ -127,15 +126,15 @@ class ArticlesAPI(object):
         如果list为空则说明没有相关文章
         """
         # 获取文章数据
-        artiacle_data = self.officical.get_articles(
+        artiacle_data = self.officical.articles(
             nickname, begin=str(begin), count=str(count))
 
         # 提取每个文章的url，获取文章的点赞、阅读、评论信息，并加入到原来的json中
         for data in artiacle_data:
             article_url = data["link"]
-            comments = self.wechat.get_comments(article_url)
-            read_like_num = self.wechat.get_read_like_num(article_url)
+            comments = self.wechat.comments(article_url)
+            read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"] = read_like_num
+            data["read_num"], data["like_num"] = read_like_nums
 
         return artiacle_data
