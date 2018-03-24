@@ -59,7 +59,7 @@ class ArticlesAPI(object):
             raise SystemError
         self.wechat = ArticlesInfo(self.appmsg_token, self.cookie)
 
-    def get_data(self, nickname, begin=0, count=5):
+    def complete_info(self, nickname, begin=0, count=5):
         """
         获取公众号的抓取的文章文章信息
         Parameters

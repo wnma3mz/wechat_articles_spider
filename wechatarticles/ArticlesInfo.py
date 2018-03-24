@@ -36,7 +36,7 @@ class ArticlesInfo(object):
             "is_temp_url": "0",
         }
 
-    def __verify(self, article_url):
+    def __verify_url(self, article_url):
         """
         简单验证文章url是否符合要求
         Parameters
@@ -159,7 +159,7 @@ class ArticlesInfo(object):
             __biz, mid, idx, sn
         """
         # 简单验证文章的url是否正确
-        self.__verify(article_url)
+        self.__verify_url(article_url)
         
         # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
