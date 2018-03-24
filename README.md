@@ -92,7 +92,7 @@ test = ArticlesAPI(
 test = ArticlesAPI(
     official_cookie=official_cookie, token=token, outfile=outfile)
 
-data = test.get_data(nickname=nickname, begin="0")
+data = test.complete_info(nickname=nickname, begin="0")
 ```
 
 ### 分解步骤
@@ -103,45 +103,52 @@ data = test.get_data(nickname=nickname, begin="0")
 ```python
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
-test = OfficialWeChat(username=username, password=password)
+test = ArticlesUrls(username=username, password=password)
 # 手动输入账号密码
-test = OfficialWeChat(cookie=official_cookie, token=token)
+test = ArticlesUrls(cookie=official_cookie, token=token)
 
 # 输入公众号名称，获取公众号文章总数
-articles_sum = test.totalNums(nickname)
+articles_sum = test.articles_nums(nickname)
 # 输入公众号名称，获取公众号部分文章信息, 每次最大返回数为5个
-articles_data = test.get_articles(nickname, begin="0", count="5")
+articles_data = test.articles(nickname, begin="0", count="5")
 # 输入公众号名称，获取公众号的一些信息
-officical_info = test.get_official_info(nickname)
+officical_info = test.official_info(nickname)
 # 输入公众号名称，输入关键词，获取公众号相关文章信息, 每次最大返回数为5个
-articles_data_query = test.get_articles(nickname, query=query, begin="0", count="5")
+articles_data_query = test.articles(nickname, query=query, begin="0", count="5")
 # 输入公众号名称，输入关键词，获取公众号相关文章总数
-articles_sum_query = test.totalNums(nickname, query=query)
+articles_sum_query = test.articles_nums(nickname, query=query)
 
 # 保存数据为txt格式
-test.save_txt("test.txt", artiacle_data)
+# test.save_txt("test.txt", artiacle_data)
 # 保存数据为sqlite3
-test.save_sqlite("test.db", "test", artiacle_data)
+# test.save_sqlite("test.db", "test", artiacle_data)
 # 保存数据到mongo中
-test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname=dbname, collname=collname)
+# test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname=dbname, collname=collname)
 ```
 
 #### 步骤二：登录微信PC端获取文章信息
 
 ```python
+
+    appmsg_token, cookie = Reader().contral("outfile")
+    appmsg_token, cookie = "appmsg_token", "cookie"
+    article_url = "http://mp.weixin.qq.com/s?__biz=MjM5NDU4ODI0NQ==&mid=2650949647&idx=1&sn=854714295ceee7943fe9426ab10453bf&chksm=bd739b358a041223833057cc3816f9562999e748904f39b166ee2178ce1a565e108fe364b920#rd'"
+    test = ArticlesInfo(appmsg_token, cookie)
+    comments = test.comments(article_url)
+    read_num, like_num = test.read_like_nums(article_url)
+    print("comments:")
+    pprint(comments)
+    print("read_like_num:", read_num, like_num)
 # 支持自动获取appmsg_token和cookie
 appmsg_token, cookie = Reader().contral(outfile)
 
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
-test = LoginWeChat(appmsg_token=appmsg_token, cookie=wechat_cookie)
-# 获取微信文章的详细信息（包括文章的阅读数、评论数、点赞数等）
-# 这里的articles_url是上面获取到的`articles_data`数组中每一项的"link"
-test.GetSpecInfo(article_url=article_url)
+test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
 # 获取文章所有的评论信息(无需appmsg_token和cookie)
-comments = test.get_comments(link)
+comments = test.comments(link)
 # 获取文章阅读数点赞数
-read_num, like_num = test.get_read_like_num(link)
+read_num, like_num = test.read_like_nums(link)
 ```
 
 ## TO-DO
