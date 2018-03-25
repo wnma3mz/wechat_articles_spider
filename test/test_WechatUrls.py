@@ -3,9 +3,7 @@ import sys
 import os
 from pprint import pprint
 sys.path.append(os.getcwd())
-from wechatarticles import ArticlesUrls
-from wechatarticles import tools
-
+from wechatarticles import ArticlesUrls, tools
 
 if __name__ == "__main__":
     # 模拟登录微信公众号平台，获取微信文章的url
@@ -34,7 +32,4 @@ if __name__ == "__main__":
     print("officical_info:")
     pprint(officical_info)
 
-
-    # tools.save_mongo()
-    # test.save_txt("test.txt", artiacle_data)
-    # test.save_sqlite("test.db", "test", artiacle_data)
+    tools.save_json("test.json", artiacle_data)

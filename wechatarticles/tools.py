@@ -2,6 +2,7 @@
 
 import time
 import urllib
+import json
 
 
 class tools(object):
@@ -41,28 +42,11 @@ class tools(object):
         return datetime
 
     @staticmethod
-    def verify_str(input_string, param_name):
-        """
-        验证输入是否为字符串
-        Parameters
-        ----------
-        input_string: str
-            输入
-        param_name: str
-            需要验证的参数名
-        Returns
-        ----------
-            None
-        """
-        if not isinstance(input_string, str):
-            raise TypeError("{} must be an instance of str".format(param_name))
-
-    @staticmethod
     def save_mongo(data,
                    host=None,
                    port=None,
                    name=None,
-                   password=None,
+                   password="",
                    dbname=None,
                    collname=None):
         """
@@ -93,12 +77,15 @@ class tools(object):
         # 检查参数
         host = HOST if host is None else host
         port = PORT if port is None else port
-        verify_str(host, "host")
+
+        assert isinstance(host, str)
+        assert isinstance(name, str)
+        assert isinstance(password, str)
+        assert isinstance(dbname, str)        
+        assert isinstance(collname, str)
+
         if not isinstance(port, int):
             raise TypeError("port must be an instance of int")
-        verify_str(name, "name")
-        verify_str(password, "password")
-        verify_str(collname, "collname")
 
         from pymongo import MongoClient
         # 连接数据库，一次性插入数据
@@ -109,7 +96,7 @@ class tools(object):
         coll.insert_many(data)
 
     @staticmethod
-    def save_txt(fname, data):
+    def save_json(fname, data):
         """
         保存数据为txt格式
         Parameters
@@ -122,10 +109,10 @@ class tools(object):
         -------
         None
         """
-        verify_str(fname, "fname")
+        assert isinstance(fname, str)
 
-        if ".txt" not in fname:
-            raise Exception("fname must be txt", fname)
+        if ".json" not in fname:
+            raise IOError("fname must be json", fname)
         with open(fname, "a+") as f:
             for item in data:
                 f.write(json.dumps(item))
