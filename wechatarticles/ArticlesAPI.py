@@ -2,8 +2,10 @@
 
 from .ArticlesUrls import ArticlesUrls
 from .ArticlesInfo import ArticlesInfo
-from .ReadOutfile import Reader
-
+try:
+    from .ReadOutfile import Reader
+except:
+    print("not use mitmproxy")
 
 class ArticlesAPI(object):
     """
