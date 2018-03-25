@@ -18,25 +18,35 @@
 
 详情见[requirements.txt](https://github.com/wnma3mz/wechat_articles_spider/blob/master/requirements.txt)
 
-**支持两种微信公众号登录方式**
+## 功能实现
 
-下面微信公众号登录方式选用其一即可
+- 获取某公众号信息
 
-1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
+- 获取某公众号所有文章数量
 
-2. cookie、token登录，手动复制cookie和token。
+- 获取某公众号所有文章信息（包含点赞数、阅读数、评论信息），需要手动更改循环
 
-**url支持三种存储方式**
+- 获取某公众号指定文章的信息
 
-1. txt存储（不建议）
+- 支持两种微信公众号登录方式, 下面方法选用其一即可
 
-2. mongo存储。需要安装`pymongo`
+    1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
 
-## API实例
+    2. cookie、token登录，手动复制cookie和token。
 
-以下具体代码见`test/`目录下的实例代码。
+- 支持两种获取文章阅读数和点赞数的方式，下面方式选用其一即可
 
-关于变量名的说明
+    1. 利用抓包工具手动获取
+
+    2. 安装python第三方库`mitmproxy`自动获取
+
+- 支持存储方式
+
+    1. txt存储（不建议）
+
+    2. mongo存储。需要安装`pymongo`
+
+## 变量名的说明
 
 |     变量名      |        作用        |
 | :-------------: | :----------------: |
@@ -52,8 +62,11 @@
 | begin | 从第几篇文章开始爬取 |
 | count | 每次爬取的文章数(最大为5, 但是返回结果可能会大于５) |
 
+## API实例
 
-official_cookie和token获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
+以下完整事例代码见`test/`目录下的实例代码。
+
+official_cookie和token手动获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
 
 wechat_cookie和appmsg_token手动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
 
@@ -119,13 +132,6 @@ officical_info = test.official_info(nickname)
 articles_data_query = test.articles(nickname, query=query, begin="0", count="5")
 # 输入公众号名称，输入关键词，获取公众号相关文章总数
 articles_sum_query = test.articles_nums(nickname, query=query)
-
-# 保存数据为txt格式
-# test.save_txt("test.txt", artiacle_data)
-# 保存数据为sqlite3
-# test.save_sqlite("test.db", "test", artiacle_data)
-# 保存数据到mongo中
-# test.save_mongo(data, host=host, port=27017,name=name, password=password, dbname=dbname, collname=collname)
 ```
 
 #### 步骤二：登录微信PC端获取文章信息
