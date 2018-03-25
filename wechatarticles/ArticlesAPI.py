@@ -2,10 +2,7 @@
 
 from .ArticlesUrls import ArticlesUrls
 from .ArticlesInfo import ArticlesInfo
-try:
-    from .ReadOutfile import Reader
-except:
-    print("not use mitmproxy")
+
 
 class ArticlesAPI(object):
     """
@@ -47,18 +44,18 @@ class ArticlesAPI(object):
         elif (username != None) and (password != None):
             self.officical = ArticlesUrls(username=username, password=password)
         else:
-            print("please check your paramse")
-            raise SystemError
+            raise SystemError("please check your paramse")
 
         # 支持两种方式， mitmproxy自动获取参数和手动获取参数
         if (appmsg_token == None) and (wechat_cookie == None) and (outfile !=
                                                                    None):
+            from .ReadOutfile import Reader
             self.appmsg_token, self.cookie = Reader().contral(outfile)
         elif (appmsg_token != None) and (wechat_cookie != None):
             self.appmsg_token, self.cookie = appmsg_token, wechat_cookie
         else:
-            print("please check your params")
-            raise SystemError
+            raise SystemError("please check your params")
+
         self.wechat = ArticlesInfo(self.appmsg_token, self.cookie)
 
     def complete_info(self, nickname, begin=0, count=5):
