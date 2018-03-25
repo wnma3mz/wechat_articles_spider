@@ -93,7 +93,10 @@ class ArticlesUrls(object):
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
         # 显示二维码， 这里使用plt的原因是： 等待用户扫描完之后手动关闭窗口继续运行；否则会直接运行
-        img = Image.open("login.png")
+        try:
+            img = Image.open("login.png")
+        except Exception:
+            raise TypeError(u"账号密码输入错误，请重新输入")
         plt.figure()
         plt.imshow(img)
         plt.show()
