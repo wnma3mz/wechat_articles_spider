@@ -1,9 +1,10 @@
 # coding: utf-8
 import sys
+import os
 from pprint import pprint
 sys.path.append(os.getcwd())
-from wechatarticles import ArticlesInfo, ArticlesUrls
-from tools import tools
+from wechatarticles import ArticlesUrls
+from wechatarticles import tools
 
 
 if __name__ == "__main__":
@@ -14,8 +15,9 @@ if __name__ == "__main__":
     token = "token"
     nickname = "nickname"
     query = "query"
-    #test = ArticlesUrls(username, password)
-    test = ArticlesUrls(cookie=cookie, token=token)
+
+    test = ArticlesUrls(username, password)
+    # test = ArticlesUrls(cookie=cookie, token=token)
 
     articles_sum = test.articles_nums(nickname)
     artiacle_data = test.articles(nickname, begin="0", count="5")

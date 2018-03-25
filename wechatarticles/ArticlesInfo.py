@@ -165,7 +165,7 @@ class ArticlesInfo(object):
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1:] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
-        sn = sn[:-3] if sn[-3] == "#"　else sn
+        sn = sn[:-3] if sn[-3] == "#" else sn
         
         return __biz, mid, idx, sn
 

@@ -442,7 +442,7 @@ class ArticlesUrls(object):
 
         try:
             # 获取公众号的fakeid
-            official_info = self.get_official_info(nickname)
+            official_info = self.official_info(nickname)
             self.params["fakeid"] = official_info["fakeid"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
