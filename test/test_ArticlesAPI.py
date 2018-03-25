@@ -4,7 +4,7 @@ import sys
 from pprint import pprint
 sys.path.append(os.getcwd())
 from wechatarticles.ReadOutfile import Reader
-from wechatarticles import ArticlesAPI
+from wechatarticles import ArticlesAPI, tools
 
 if __name__ == '__main__':
     username = "username"
@@ -37,3 +37,5 @@ if __name__ == '__main__':
     data = test.complete_info(nickname=nickname, begin="0")
     print(data.__len__())
     pprint(data)
+
+    tools.save_json("test.json", data)
