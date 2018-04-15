@@ -70,7 +70,8 @@ official_cookie和token手动获取方式见[这篇文档](https://github.com/wn
 
 wechat_cookie和appmsg_token手动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
 
-wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。
+wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。默认开放端口为8080。
+
 
 wechat_cookie和appmsg_token建议获取每天或者每半天获取一次即可。此处通过上面获取到的url即可无限爬取，没有次数限制
 
@@ -107,7 +108,12 @@ test = ArticlesAPI(
 test = ArticlesAPI(
     official_cookie=official_cookie, token=token, outfile=outfile)
 
+# 自定义爬取，每次爬取5篇以上
 data = test.complete_info(nickname=nickname, begin="0")
+
+# 自定义从某部分开始爬取，持续爬取，直至爬取失败为止，一次性最多爬取40篇（功能未测试，欢迎尝试）
+datas = test.continue_info(nickname=nickname, begin="0")
+
 ```
 
 ### 分解步骤
