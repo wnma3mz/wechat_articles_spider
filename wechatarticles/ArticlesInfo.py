@@ -121,8 +121,8 @@ class ArticlesInfo(object):
         """
         __biz, _, idx, _ = self.__get_params(article_url)
         getcomment_url = "https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100"
-        url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
         try:
+            url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url)
             comment_json = self.s.get(url, headers=self.headers).json()
         except Exception as e:
             comment_json = {}
