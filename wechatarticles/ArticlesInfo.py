@@ -141,7 +141,7 @@ class ArticlesInfo(object):
         str:
             comment_id获取评论必要参数
         """
-        res = self.s.get(article_url)
+        res = self.s.get(article_url, data=self.data)
         # 使用正则提取comment_id
         comment_id = re.findall(r'comment_id = "\d+"',
                                 res.text)[0].split(" ")[-1][1:-1]
