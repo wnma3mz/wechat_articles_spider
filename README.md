@@ -177,3 +177,13 @@ read_num, like_num = test.read_like_nums(link)
 - [ ] 增加协程`asyncio`
 
 - [ ] 发布第三方包
+
+## 打赏部分
+
+<figure class="third">
+    <img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/wechat.jpg">
+    <img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay.jpg">
+    <img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay_redpaper.jpg">
+</figure>
+
+
