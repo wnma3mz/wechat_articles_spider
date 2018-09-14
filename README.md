@@ -1,12 +1,19 @@
 # 微信公众号文章爬虫
 
-实现思路:
+实现思路一:
 
 1. 从微信公众号平台获取微信公众所有文章的url
-
-2. 登录微信PC端获取文章的阅读数、评论等信息
+2. 登录微信PC端或移动端获取文章的阅读数、点赞数、评论信息
 
 完整思路可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
+
+
+
+实现思路二：
+
+1. 登陆微信PC端或移动端获取公众号所有文章的url，这种获取到的url数量大于500，具体数值暂未测试
+
+2. 同上种方法，获取文章阅读数、点赞数、评论信息
 
 ## python版本
 
@@ -23,6 +30,8 @@
 - 获取某公众号信息
 
 - 获取某公众号所有文章数量
+
+- 获取某公众号文章的url信息
 
 - 获取某公众号所有文章信息（包含点赞数、阅读数、评论信息），需要手动更改循环
 
@@ -56,6 +65,8 @@
 |    token     |  个人公众号的token  |
 |    appmsg_token     |  个人微信号的appmsg_token  |
 | wechat_cookie | 个人微信号的cookie |
+| key | 个人微信号的key |
+| uin | 个人微信号的uin |
 |    nickname     |  需要获取文章的公众号名称  |
 |    query     | 筛选公众号文章的关键词  |
 | outfile | mitmproxy抓包获取请求的保存文件 |
@@ -64,7 +75,7 @@
 
 ## API实例
 
-以下完整事例代码见`test/`目录下的实例代码。
+以下完整实例代码见`test/`目录下的实例代码。
 
 official_cookie和token手动获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
 
@@ -154,6 +165,10 @@ comments = test.comments(link)
 # 获取文章阅读数点赞数
 read_num, like_num = test.read_like_nums(link)
 ```
+
+### 获取大量文章urls
+
+见`test/test_GetUrls.py`
 
 ## TO-DO
 
