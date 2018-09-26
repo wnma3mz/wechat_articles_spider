@@ -52,7 +52,7 @@ class Reader:
         提取appmsg_token
         Parameters
         ----------
-        path_str: str 
+        path_str: str
             一个由二进制编码的字符串
 
         Returns
@@ -118,7 +118,7 @@ class Reader:
             appmsg_token, cookie：需要的参数
         """
         path = os.path.split(os.path.realpath(__file__))[0]
-        command = "mitmdump -q -s {}/tools.py -w {} mp.weixin.qq.com/mp/getappmsgext".format(
-            path, outfile)
+        command = "mitmdump -q -s {} -w {} mp.weixin.qq.com/mp/getappmsgext".format(
+            os.path.join(path, "tools.py"), outfile)
         os.system(command)
         return self.__request(outfile)
