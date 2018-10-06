@@ -4,7 +4,7 @@ import sys
 from pprint import pprint
 sys.path.append(os.getcwd())
 from wechatarticles.ReadOutfile import Reader
-from wechatarticles import ArticlesAPI, tools
+from wechatarticles import ArticlesAPI
 
 if __name__ == '__main__':
     username = "username"

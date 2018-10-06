@@ -50,7 +50,9 @@ class ArticlesAPI(object):
         if (appmsg_token == None) and (wechat_cookie == None) and (outfile !=
                                                                    None):
             from .ReadOutfile import Reader
-            self.appmsg_token, self.cookie = Reader().contral(outfile)
+            reader = Reader()
+            reader.contral(outfile)
+            self.appmsg_token, self.cookie = reader.request(outfile)
         elif (appmsg_token != None) and (wechat_cookie != None):
             self.appmsg_token, self.cookie = appmsg_token, wechat_cookie
         else:

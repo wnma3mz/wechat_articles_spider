@@ -34,7 +34,9 @@ if __name__ == '__main__':
 
     # 自动获取appmsg_token, cookie
     outfile = 'outfile'
-    appmsg_token, cookie = Reader().contral(outfile)
+    reader = Reader()
+    reader.contral(outfile)
+    appmsg_token, cookie = reader.request(outfile)
     # 通过抓包工具，手动获取appmsg_token, cookie，手动输入参数
     appmsg_token = appmsg_token
     cookie = cookie

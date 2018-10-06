@@ -4,6 +4,10 @@ import re
 
 from mitmproxy import io
 from mitmproxy.exceptions import FlowReadException
+from mitmproxy import http
+import urllib
+import sys
+import typing
 
 
 class Reader:
@@ -68,7 +72,7 @@ class Reader:
         appmsg_token = appmsg_token[1][:-1]
         return appmsg_token
 
-    def __request(self, outfile):
+    def request(self, outfile):
         """
         读取文件，获取appmsg_token和cookie
         Parameters
@@ -81,6 +85,7 @@ class Reader:
         (str, str)
             appmsg_token, cookie：需要的参数
         """
+        cookie, appmsg_token = '', ''
         with open(outfile, "rb") as logfile:
             freader = io.FlowReader(logfile)
             try:
@@ -100,7 +105,7 @@ class Reader:
             except FlowReadException as e:
                 print("Flow file corrupted: {}".format(e))
         # 如果获取成功就直接返回，获取失败就需要重新抓包
-        if cookie and appmsg_token:
+        if cookie != '' and appmsg_token != '':
             return appmsg_token, cookie
         return self.contral(outfile)
 
@@ -118,7 +123,28 @@ class Reader:
             appmsg_token, cookie：需要的参数
         """
         path = os.path.split(os.path.realpath(__file__))[0]
-        command = "mitmdump -q -s {} -w {} mp.weixin.qq.com/mp/getappmsgext".format(
-            os.path.join(path, "tools.py"), outfile)
+        command = "mitmdump -qs {}/ReadOutfile.py {} mp.weixin.qq.com/mp/getappmsgext".format(path, outfile)
         os.system(command)
-        return self.__request(outfile)
+
+def response(flow):
+    """
+    mitmdumps调用的脚本函数
+    如果请求中包含需要的请求流，就在保存后终止运行
+    Parameters
+    ----------
+    flow: http.HTTPFlow
+    请求流, 通过命令调用
+        
+    Returns
+    -------
+        None
+    """
+    url = urllib.parse.unquote(flow.request.url)
+    outfile = sys.argv[3]
+    f: typing.IO[bytes] = open(outfile, 'wb')
+    w = io.FlowWriter(f)
+    if "mp.weixin.qq.com/mp/getappmsgext" in url:
+        w.add(flow)
+        f.close()
+        exit()
+
