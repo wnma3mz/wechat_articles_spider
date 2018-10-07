@@ -3,8 +3,18 @@ import os
 import sys
 from pprint import pprint
 sys.path.append(os.getcwd())
+import html
 from wechatarticles.ReadOutfile import Reader
 from wechatarticles.GetUrls import PCUrls, MobileUrls
+
+
+def flatten(x): return [y for l in x for y in flatten(
+    l)] if type(x) is list else [x]
+
+
+def transfer_url(url):
+    url = html.unescape(html.unescape(url))
+    return eval(repr(url).replace('\\', ''))
 
 
 if __name__ == '__main__':
@@ -53,7 +63,7 @@ if __name__ == '__main__':
     lst = flatten(lst)
 
     '''
-    将url转义，貌似不转义也行?
+    如果需要抓取comments，需要转义；只抓取阅读数不需要转义
     for article in lst:
         tmp_url = article['app_msg_ext_info']['content_url']
         article['app_msg_ext_info']['content_url'] = transfer_url(tmp_url)
