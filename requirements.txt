@@ -1,4 +1,4 @@
-requests==2.18.4
+requests>=2.20.0
 matplotlib==2.0.2
 Pillow==4.2.1
 pymongo==3.4.0
