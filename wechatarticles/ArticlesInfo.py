@@ -34,6 +34,7 @@ class ArticlesInfo(object):
         self.data = {
             "is_only_read": "1",
             "is_temp_url": "0",
+            "appmsg_type": "9", # 新参数，不加入无法获取like_num
         }
 
     def __verify_url(self, article_url):
@@ -86,36 +87,36 @@ class ArticlesInfo(object):
         json:
             {
                 "base_resp": {
-                    "errmsg": "ok", 
+                    "errmsg": "ok",
                     "ret": 0
-                }, 
+                },
                 "elected_comment": [
                     {
-                        "content": 用户评论文字, 
-                        "content_id": "6846263421277569047", 
-                        "create_time": 1520098511, 
-                        "id": 3, 
-                        "is_from_friend": 0, 
-                        "is_from_me": 0, 
+                        "content": 用户评论文字,
+                        "content_id": "6846263421277569047",
+                        "create_time": 1520098511,
+                        "id": 3,
+                        "is_from_friend": 0,
+                        "is_from_me": 0,
                         "is_top": 0, 是否被置顶
-                        "like_id": 10001, 
-                        "like_num": 3, 
-                        "like_status": 0, 
-                        "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132", 
-                        "my_id": 23, 
-                        "nick_name": 评论用户的名字, 
+                        "like_id": 10001,
+                        "like_num": 3,
+                        "like_status": 0,
+                        "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132",
+                        "my_id": 23,
+                        "nick_name": 评论用户的名字,
                         "reply": {
                             "reply_list": [ ]
                         }
                     }
-                ], 
+                ],
                 "elected_comment_total_cnt": 3, 评论总数
-                "enabled": 1, 
-                "friend_comment": [ ], 
-                "is_fans": 1, 
-                "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132", 
-                "my_comment": [ ], 
-                "nick_name": 当前用户名, 
+                "enabled": 1,
+                "friend_comment": [ ],
+                "is_fans": 1,
+                "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132",
+                "my_comment": [ ],
+                "nick_name": 当前用户名,
                 "only_fans_can_comment": false
             }
         """
@@ -162,13 +163,13 @@ class ArticlesInfo(object):
         """
         # 简单验证文章的url是否正确
         self.__verify_url(article_url)
-        
+
         # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1:] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
         sn = sn[:-3] if sn[-3] == "#" else sn
-        
+
         return __biz, mid, idx, sn
 
     def __get_appmsgext(self, article_url):
@@ -198,9 +199,17 @@ class ArticlesInfo(object):
             }
         """
         __biz, mid, idx, sn = self.__get_params(article_url)
+
+        # 将params参数换到data中请求。这一步貌似不换也行
         origin_url = "https://mp.weixin.qq.com/mp/getappmsgext?"
-        appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
-            __biz, mid, sn, idx, self.appmsg_token)
+        appmsgext_url = origin_url + "appmsg_token={}&x5=0".format(self.appmsg_token)
+        self.data["__biz"] = __biz
+        self.data["mid"] = mid
+        self.data["sn"] = sn
+        self.data["idx"] = idx
+
+        # appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
+        #     __biz, mid, sn, idx, self.appmsg_token)
         appmsgext_json = requests.post(
             appmsgext_url, headers=self.headers, data=self.data).json()
 
