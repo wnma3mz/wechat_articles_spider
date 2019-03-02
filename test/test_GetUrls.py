@@ -17,6 +17,43 @@ def transfer_url(url):
     return eval(repr(url).replace('\\', ''))
 
 
+def get_all_urls(urls):
+    url_lst = []
+    for item in urls:
+        url_lst.append(transfer_url(item['app_msg_ext_info']['content_url']))
+        if 'multi_app_msg_item_list' in item['app_msg_ext_info'].keys():
+            for ss in item['app_msg_ext_info']['multi_app_msg_item_list']:
+                url_lst.append(transfer_url(ss['content_url']))
+
+    return url_lst
+
+
+def method_one(biz, uin, cookie):
+
+    t = PCUrls(biz=biz, uin=uin, cookie=cookie)
+    count = 0
+    lst = []
+    while True:
+        res = t.get_urls(key, offset=count)
+        count += 10
+        lst.append(res)
+
+    return method_one
+
+
+def method_two(biz, cookie):
+
+    t = MobileUrls(biz=biz, cookie=cookie)
+    count = 0
+    lst = []
+    while True:
+        res = t.get_urls(appmsg_token, offset=count)
+        count += 10
+        lst.append(res)
+
+    return method_two
+
+
 if __name__ == '__main__':
     # 方法一：使用PCUrls。已在win10下测试
     # 需要抓取公众号的__biz参数
@@ -28,17 +65,15 @@ if __name__ == '__main__':
     # 个人微信号登陆后获取的key，隔段时间更新
     key = key
 
-    t = PCUrls(biz=biz, uin=uin, cookie=cookie)
-    count = 0
-    lst = []
-    while True:
-        res = t.get_urls(key, offset=count)
-        count += 10
-        lst.append(res)
+    lst = method_one(biz, uin, cookie)
+
     # 个人微信号登陆后获取的token
     appmsg_token = appmsg_token
 
     # 方法二：使用MobileUrls。已在Ubuntu下测试
+
+    # 自动获取参数
+    '''
     from ReadOutfile import Reader
     biz = biz
 
@@ -50,33 +85,32 @@ if __name__ == '__main__':
     # 通过抓包工具，手动获取appmsg_token, cookie，手动输入参数
     appmsg_token = appmsg_token
     cookie = cookie
+    '''
 
-    t = PCUrls(biz=biz, cookie=cookie)
-    count = 0
-    lst = []
-    while True:
-        res = t.get_urls(appmsg_token, offset=count)
-        count += 10
-        lst.append(res)
+    lst = method_two(biz, cookie)
 
     # 碾平数组
     lst = flatten(lst)
 
-    '''
-    如果需要抓取comments，需要转义；只抓取阅读数不需要转义
-    for article in lst:
-        tmp_url = article['app_msg_ext_info']['content_url']
-        article['app_msg_ext_info']['content_url'] = transfer_url(tmp_url)
-    '''
+    # 提取url
+    url_lst = get_all_urls(lst)
+
     # 获取点赞数、阅读数、评论信息
     test = ArticlesInfo(appmsg_token, cookie)
 
-    for i, item in enumerate(lst):
-        url = item['app_msg_ext_info']['content_url']
-        item['app_msg_ext_info']['comments'] = test.comments(url)
+    data_lst = []
+    for i, url in enumerate(url_lst):
+
+        item = test.comments(url)
+
+        temp_lst = [url, item]
+
         try:
-            item['app_msg_ext_info']['read_num'], item['app_msg_ext_info']['like_num'] = test.read_like_nums(
-                url)
+            read_num, like_num = test.read_like_nums(url)
+            temp_lst.append(read_num)
+            temp_lst.append(like_num)
         except:
             print("第{}个爬取失败，请更新参数".format(i + 1))
             break
+
+        data_lst.append(temp_lst)
