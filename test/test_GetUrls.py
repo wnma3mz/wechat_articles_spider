@@ -18,12 +18,42 @@ def transfer_url(url):
 
 
 def get_all_urls(urls):
+    # 获取所有的url
     url_lst = []
     for item in urls:
         url_lst.append(transfer_url(item['app_msg_ext_info']['content_url']))
         if 'multi_app_msg_item_list' in item['app_msg_ext_info'].keys():
             for ss in item['app_msg_ext_info']['multi_app_msg_item_list']:
                 url_lst.append(transfer_url(ss['content_url']))
+
+    return url_lst
+
+
+def get_all_urls_title_date(urls):
+    # 获取所有的[url, title, date]
+    import time
+    url_lst = []
+
+    for item in urls:
+        timestamp = item['comm_msg_info']['datetime']
+        time_local = time.localtime(timestamp)
+        # 转换成日期
+        time_temp = time.strftime("%Y-%m-%d", time_local)
+
+        # 文章url
+        url_temp = transfer_url(item['app_msg_ext_info']['content_url'])
+
+        # 文章标题
+        title_temp = item['app_msg_ext_info']['title']
+        url_lst.append([url_temp, title_temp, time_temp])
+
+        if 'multi_app_msg_item_list' in item['app_msg_ext_info'].keys():
+            for ss in item['app_msg_ext_info']['multi_app_msg_item_list']:
+
+                url_temp = transfer_url(ss['content_url'])
+
+                title_temp = ss['title']
+                url_lst.append([url_temp, title_temp, time_temp])
 
     return url_lst
 
