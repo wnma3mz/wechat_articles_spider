@@ -99,8 +99,6 @@ wechat_cookie和appmsg_token建议获取每天或者每半天获取一次即可�
 # 导入模块
 import sys
 sys.path.append(path + "/wechat_articles_spider")
-from wechatarticles import OfficialWeChat
-from wechatarticles import LoginWeChat
 from wechatarticles import ReadOutfile
 from wechatarticles import ArticlesAPI
 ```
