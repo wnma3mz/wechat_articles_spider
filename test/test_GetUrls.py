@@ -6,15 +6,25 @@ sys.path.append(os.getcwd())
 import html
 from wechatarticles.ReadOutfile import Reader
 from wechatarticles.GetUrls import PCUrls, MobileUrls
+import time
+import random
 
 
-def flatten(x): return [y for l in x for y in flatten(
-    l)] if type(x) is list else [x]
+def flatten(x):
+    return [y for l in x for y in flatten(l)] if type(x) is list else [x]
 
 
 def transfer_url(url):
     url = html.unescape(html.unescape(url))
     return eval(repr(url).replace('\\', ''))
+
+
+def verify_url(article_url):
+    verify_lst = ["mp.weixin.qq.com", "__biz", "mid", "sn", "idx"]
+    for string in verify_lst:
+        if string not in article_url:
+            return False
+    return True
 
 
 def get_all_urls(urls):
@@ -31,7 +41,6 @@ def get_all_urls(urls):
 
 def get_all_urls_title_date(urls):
     # 获取所有的[url, title, date]
-    import time
     url_lst = []
 
     for item in urls:
@@ -48,11 +57,11 @@ def get_all_urls_title_date(urls):
         url_lst.append([url_temp, title_temp, time_temp])
 
         if 'multi_app_msg_item_list' in item['app_msg_ext_info'].keys():
-            for ss in item['app_msg_ext_info']['multi_app_msg_item_list']:
+            for info in item['app_msg_ext_info']['multi_app_msg_item_list']:
 
-                url_temp = transfer_url(ss['content_url'])
+                url_temp = transfer_url(info['content_url'])
 
-                title_temp = ss['title']
+                title_temp = info['title']
                 url_lst.append([url_temp, title_temp, time_temp])
 
     return url_lst
@@ -82,6 +91,13 @@ def method_two(biz, cookie):
         lst.append(res)
 
     return method_two
+
+
+def save_xlsx(fj, lst):
+    df = pd.DataFrame(
+        lst,
+        columns=['url', 'title', 'date', 'read_num', 'like_num', 'comments'])
+    df.to_excel(fj + '.xlsx', encoding='utf-8')
 
 
 if __name__ == '__main__':
@@ -120,21 +136,17 @@ if __name__ == '__main__':
     lst = method_two(biz, cookie)
 
     # 碾平数组
-    lst = flatten(lst)
-
+    # lst = flatten(lst)
     # 提取url
-    url_lst = get_all_urls(lst)
+    # url_lst = get_all_urls(lst)
 
     # 获取点赞数、阅读数、评论信息
     test = ArticlesInfo(appmsg_token, cookie)
-
+    """
     data_lst = []
     for i, url in enumerate(url_lst):
-
         item = test.comments(url)
-
         temp_lst = [url, item]
-
         try:
             read_num, like_num = test.read_like_nums(url)
             temp_lst.append(read_num)
@@ -144,3 +156,40 @@ if __name__ == '__main__':
             break
 
         data_lst.append(temp_lst)
+    """
+
+    fj = '公众号名称'
+    item_lst = []
+    for i, line in enumerate(data, 0):
+        print("index:", i)
+        # item = json.loads('{' + line + '}', strict=False)
+        timestamp = item["comm_msg_info"]["datetime"]
+        ymd = time.localtime(timestamp)
+        date = '{}-{}-{}'.format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)
+
+        infos = item['app_msg_ext_info']
+        url_title_lst = [[infos['content_url'], infos['title']]]
+        if 'multi_app_msg_item_list' in infos.keys():
+            url_title_lst += [[info['content_url'], info['title']]
+                              for info in infos['multi_app_msg_item_list']]
+
+        for url, title in url_title_lst:
+            try:
+                if not verify_url(url):
+                    continue
+                read_num, like_num, comments = get_data(url)
+                print(read_num, like_num, len(comments))
+                item_lst.append(
+                    [url, title, date, read_num, like_num, comments])
+                time.sleep(random.randint(5, 10))
+            except Exception as e:
+                print(e)
+                flag = 1
+                break
+            finally:
+                save_xlsx(fj, item_lst)
+
+        if flag == 1:
+            break
+
+    save_xlsx(fj, item_lst)
