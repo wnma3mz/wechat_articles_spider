@@ -8,6 +8,8 @@ from wechatarticles.ReadOutfile import Reader
 from wechatarticles.GetUrls import PCUrls, MobileUrls
 import time
 import random
+import pandas as pd  # 如果需要保存至excel表格的话
+import re
 
 
 def flatten(x):
@@ -91,6 +93,29 @@ def method_two(biz, cookie):
         lst.append(res)
 
     return method_two
+
+
+def get_info_from_url(url):
+    html = requests.get(url).text
+    try:
+        res = re.findall(r'publish_time =.+\|\|?', html)
+        date = res[0].split('=')[1].split('||')[0].strip()
+    except:
+        date = None
+
+    try:
+        res = re.findall(r'nickname .+;?', html)
+        offical_name = res[0].split('=')[1][:-1].strip()
+    except:
+        offical_name = None
+
+    try:
+        res = re.findall(r'msg_title = .+;?', html)
+        aritlce_name = res[0].split('=')[1][:-1].strip()
+    except:
+        aritlce_name = None
+
+    return date, offical_name, aritlce_name
 
 
 def save_xlsx(fj, lst):
