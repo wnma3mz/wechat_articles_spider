@@ -1,11 +1,15 @@
-# 微信公众号文章爬虫
+# 微信公众号文章爬虫（微信文章阅读点赞的获取）
 
 实现思路一:
 
 1. 从微信公众号平台获取微信公众所有文章的url
 2. 登录微信PC端或移动端获取文章的阅读数、点赞数、评论信息
 
-完整思路可以参考我的博客: [微信公众号爬虫](http://blog.csdn.net/wnma3mz/article/details/78570580)
+完整思路可以参考我的博客: [记一次微信公众号爬虫的经历（微信文章阅读点赞的获取）](https://wnma3mz.github.io/hexo_blog/2017/11/18/记一次微信公众号爬虫的经历（微信文章阅读点赞的获取）/)
+
+批量关注微信公众的方法见：[自动批量关注微信公众号（非逆向）](https://wnma3mz.github.io/hexo_blog/2020/04/11/自动批量关注微信公众号（非逆向）/)
+
+联系方式见末尾。
 
 
 
@@ -34,7 +38,7 @@
    3. 参数是否最新
    4. 检查代码
 2. 思路一获取url时，每页间隔可以设定久一点，比如3分钟，持续时间几小时（来自网友测试）
-3. 获取文章阅读点赞时，每篇文章可以设定在5-10s左右，过期时间约为4小时；若被封，大约5-10分钟就可继续抓取。
+3. 获取文章阅读点赞时，每篇文章可以设定在5-10s左右，过期时间为4小时；若被封，大约5-10分钟就可继续抓取。
 4. 思路二获取url时，如果被封，需要24小时整之后才能重新抓取
 
 ## python版本
@@ -187,7 +191,7 @@ read_num, like_num = test.read_like_nums(link)
 ## 打赏部分
 
 <figure class="third">
-<img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/wechat.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay_redpaper.jpg" width="260">
+<img src="https://i.loli.net/2019/09/20/14QGTkfgstDxv9C.jpg"  width="50%" id="wechat_account" /><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/wechat.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay_redpaper.jpg" width="260">
 </figure>
 
 
