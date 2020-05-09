@@ -191,6 +191,7 @@ read_num, like_num = test.read_like_nums(link)
 ## 打赏部分
 
 <figure class="third">
+   微信二维码
 <img src="https://i.loli.net/2019/09/20/14QGTkfgstDxv9C.jpg"  width="50%" id="wechat_account" /><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/wechat.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay_redpaper.jpg" width="260">
 </figure>
 
