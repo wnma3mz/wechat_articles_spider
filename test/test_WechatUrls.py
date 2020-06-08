@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     articles_data_query = test.articles(
         nickname, query=query, begin="0", count="5")
-    articles_sum_query = test.articles(nickname, query=query)
+    # articles_sum_query = test.articles(nickname, query=query)
 
     print("articles_sum:", end=" ")
     print(articles_sum)
