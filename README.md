@@ -110,51 +110,15 @@ wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可
 
 wechat_cookie和appmsg_token建议获取每天或者每半天获取一次即可。此处通过上面获取到的url即可无限爬取，没有次数限制
 
-```python
-# 导入模块
-import sys
-sys.path.append(path + "/wechat_articles_spider")
-from wechatarticles import ReadOutfile
-from wechatarticles import ArticlesAPI
-```
-
-### 一次性获取文章的信息(阅读、点赞、评论信息)
-
-```python
-# 下面三种方式任选一种即可
-
-# 手动输入所有参数
-test = ArticlesAPI(
-    official_cookie=official_cookie,
-    token=token,
-    appmsg_token=appmsg_token,
-    wechat_cookie=wechat_cookie)
-
-# 输入账号密码，自动登录公众号，手动输入appmsg_token和wechat_cookie
-test = ArticlesAPI(
-    username=username,
-    password=password,
-    appmsg_token=appmsg_token,
-    wechat_cookie=wechat_cookie)
-
-# 手动输入official_cookie和token, 自动获取appmsg_token和wechat_cookie
-test = ArticlesAPI(
-    official_cookie=official_cookie, token=token, outfile=outfile)
-
-# 自定义爬取，每次爬取5篇以上
-data = test.complete_info(nickname=nickname, begin="0")
-
-# 自定义从某部分开始爬取，持续爬取，直至爬取失败为止，一次性最多爬取40篇（功能未测试，欢迎尝试）
-datas = test.continue_info(nickname=nickname, begin="0")
-
-```
-
 ### 分解步骤
 #### 步骤一: 获取公众号的所有文章url
 
 此处有次数限制，不可一次获取太多url(获取超过30、40条貌似就会失败)。解决方案多个账号同时爬取
 
 ```python
+from wechatarticles import ArticlesAPI
+from wechatarticles import ArticlesUrls
+
 # 实例化爬取对象
 # 账号密码自动获取cookie和token
 test = ArticlesUrls(username=username, password=password)
