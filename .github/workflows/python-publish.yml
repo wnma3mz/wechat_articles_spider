@@ -10,7 +10,7 @@ on:
 jobs:
   deploy:
 
-    runs-on: Operating System
+    runs-on: Windows
 
     steps:
     - uses: actions/checkout@v2
