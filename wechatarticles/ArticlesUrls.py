@@ -299,6 +299,51 @@ class ArticlesUrls(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
+            
+    def query_official_info(self, nickname, begin=0, count=5):
+        """
+        获取公众号的一些信息
+        Parameters
+        ----------
+        begin: str or int
+            起始爬取的页数
+        count: str or int
+            每次爬取的数量，1-5
+
+        Returns
+        -------
+        json:
+            公众号的一些信息
+            {
+              'alias': 公众号别名,
+              'fakeid': 公众号唯一id,
+              'nickname': 公众号名称,
+              'round_head_img': 公众号头像的url,
+              'service_type': 1公众号性质
+            }
+        """
+        self.__verify_str(nickname, "nickname")
+        # 搜索公众号的url
+        search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
+
+        # 增加/更改请求参数
+        params = {
+            "query": nickname,
+            "count": str(count),
+            "action": "search_biz",
+            "ajax": "1",
+            "begin": str(begin)
+        }
+        self.params.update(params)
+
+        try:
+            # 返回与输入公众号名称最接近的公众号信息
+            official = self.s.get(
+                search_url, headers=self.headers, params=self.params)
+            return official.json()["list"]
+        except Exception:
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
+
     def articles_nums(self, nickname):
         """
         获取公众号的总共发布的文章数量
