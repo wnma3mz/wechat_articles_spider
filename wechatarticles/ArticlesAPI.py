@@ -142,14 +142,14 @@ class ArticlesAPI(object):
 
     def __extract_info(self, articles_data):
         # 提取每个文章的url，获取文章的点赞、阅读、评论信息，并加入到原来的json中
-        for data in artiacle_data:
+        for data in articles_data:
             article_url = data["link"]
             comments = self.wechat.comments(article_url)
             read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
             data["read_num"], data["like_num"] = read_like_nums
 
-        return artiacle_data
+        return articles_data
 
     def continue_info(self, nickname, begin=0):
         """
@@ -224,6 +224,7 @@ class ArticlesAPI(object):
                     self.officical.articles(
                         nickname, begin=str(begin), count=str(count)))
             except Exception as e:
+                print(e)
                 break
             begin += count
             if begin > 40:
