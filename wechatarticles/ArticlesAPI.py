@@ -136,7 +136,7 @@ class ArticlesAPI(object):
             comments = self.wechat.comments(article_url)
             read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"] = read_like_nums
+            data["read_num"], data["like_num"], data['old_like_num'] = read_like_nums
 
         return artiacle_data
 
@@ -147,7 +147,7 @@ class ArticlesAPI(object):
             comments = self.wechat.comments(article_url)
             read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"] = read_like_nums
+            data["read_num"], data["like_num"], data['old_like_num'] = read_like_nums
 
         return articles_data
 
@@ -230,6 +230,8 @@ class ArticlesAPI(object):
             if begin > 40:
                 break
 
-        flatten = lambda x: [y for l in x for y in flatten(l)] if type(x) is list else [x]
+        def flatten(x):
+            return [y for l in x for y in flatten(l)] if type(x) is list else [x]
+        # flatten = lambda x: [y for l in x for y in flatten(l)] if type(x) is list else [x]
         print("第{}篇文章爬取失败，请过段时间再次尝试或换个帐号继续爬取".format(begin))
         return self.__extract_info(flatten(artiacle_datas))

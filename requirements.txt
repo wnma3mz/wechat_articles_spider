@@ -1,5 +1,5 @@
 requests>=2.20.0
-matplotlib==2.0.2
+matplotlib>=2.0.2
 Pillow>=6.2.0
-pymongo==3.4.0
+pymongo>=3.4.0
 mitmproxy>=4.0.4

@@ -70,7 +70,7 @@ class ArticlesInfo(object):
         """
         try:
             appmsgstat = self.__get_appmsgext(article_url)["appmsgstat"]
-            return appmsgstat["read_num"], appmsgstat["like_num"]
+            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat["like_num"]
         except Exception:
             raise Exception("params is error, please check your article_url")
 
@@ -126,6 +126,7 @@ class ArticlesInfo(object):
             url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
             comment_json = self.s.get(url, headers=self.headers).json()
         except Exception as e:
+            print(e)
             comment_json = {}
         return comment_json
 

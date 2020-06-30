@@ -34,13 +34,15 @@
 
 ## Notes
 
-更新于2020年2月
+更新于2020年7月
+
+更新微信文章阅读点赞在看
 
 1. 爬取失败的时候，可能有以下原因
-   1. 需要关注对应公众号
-   2. 运行的时候需要关闭网络代理（抓包软件），或者添加相关参数
-   3. 参数是否最新
-   4. 检查代码
+   1. 运行的时候需要关闭网络代理（抓包软件），或者添加相关参数
+   2. 参数是否最新
+   3. 检查代码
+   4. 需要关注对应公众号
 2. 思路一获取url时，每页间隔可以设定久一点，比如3分钟，持续时间几小时（来自网友测试）
 3. 获取文章阅读点赞时，每篇文章可以设定在5-10s左右，过期时间为4小时；若被封，大约5-10分钟就可继续抓取。
 4. 思路二获取url时，如果被封，需要24小时整之后才能重新抓取
@@ -148,8 +150,8 @@ appmsg_token, cookie = Reader().contral(outfile)
 test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
 # 获取文章所有的评论信息(无需appmsg_token和cookie)
 comments = test.comments(link)
-# 获取文章阅读数点赞数
-read_num, like_num = test.read_like_nums(link)
+# 获取文章阅读数在看点赞数
+read_num, like_num, old_like_num = test.read_like_nums(link)
 ```
 
 ### 获取大量文章urls
