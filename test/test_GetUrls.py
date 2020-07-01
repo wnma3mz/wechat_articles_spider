@@ -1,15 +1,16 @@
 # coding: utf-8
-import os
-import sys
-from pprint import pprint
-sys.path.append(os.getcwd())
 import html
-from wechatarticles.ReadOutfile import Reader
-from wechatarticles.GetUrls import PCUrls, MobileUrls
-import time
+import os
 import random
-import pandas as pd  # 如果需要保存至excel表格的话
 import re
+import time
+from pprint import pprint
+import json
+import pandas as pd  # 如果需要保存至excel表格的话
+import requests
+from wechatarticles import ArticlesInfo, ArticlesUrls
+from wechatarticles.GetUrls import MobileUrls, PCUrls
+from wechatarticles.ReadOutfile import Reader
 
 
 def flatten(x):
@@ -125,21 +126,25 @@ def save_xlsx(fj, lst):
     df.to_excel(fj + '.xlsx', encoding='utf-8')
 
 
+def get_data(url):
+    pass
+
+
 if __name__ == '__main__':
     # 方法一：使用PCUrls。已在win10下测试
     # 需要抓取公众号的__biz参数
-    biz = biz
+    biz = ''
     # 个人微信号登陆后获取的uin
-    uin = uin
+    uin = ''
     # 个人微信号登陆后获取的cookie
-    cookie = cookie
+    cookie = ''
     # 个人微信号登陆后获取的key，隔段时间更新
-    key = key
+    key = ''
 
     lst = method_one(biz, uin, cookie)
 
     # 个人微信号登陆后获取的token
-    appmsg_token = appmsg_token
+    appmsg_token = ''
 
     # 方法二：使用MobileUrls。已在Ubuntu下测试
 
@@ -182,12 +187,13 @@ if __name__ == '__main__':
 
         data_lst.append(temp_lst)
     """
-
+    # 存储历史文章信息的json
+    data = []
     fj = '公众号名称'
     item_lst = []
     for i, line in enumerate(data, 0):
         print("index:", i)
-        # item = json.loads('{' + line + '}', strict=False)
+        item = json.loads('{' + line + '}', strict=False)
         timestamp = item["comm_msg_info"]["datetime"]
         ymd = time.localtime(timestamp)
         date = '{}-{}-{}'.format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)

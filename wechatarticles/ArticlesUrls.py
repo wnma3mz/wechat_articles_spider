@@ -10,7 +10,6 @@ class ArticlesUrls(object):
     """
     获取需要爬取的微信公众号的推文链接
     """
-
     def __init__(self, username=None, password=None, cookie=None, token=None):
         """
         初始化参数
@@ -120,10 +119,9 @@ class ArticlesUrls(object):
              for c in self.s.cookies}, new_cookie_jar)
 
         #保存到本地文件
-        new_cookie_jar.save(
-            'cookies/' + username + '.txt',
-            ignore_discard=True,
-            ignore_expires=True)
+        new_cookie_jar.save('cookies/' + username + '.txt',
+                            ignore_discard=True,
+                            ignore_expires=True)
 
     def __read_cookie(self, username):
         """
@@ -140,10 +138,9 @@ class ArticlesUrls(object):
         #实例化一个LWPCookieJar对象
         load_cookiejar = cookielib.LWPCookieJar()
         #从文件中加载cookies(LWP格式)
-        load_cookiejar.load(
-            'cookies/' + username + '.txt',
-            ignore_discard=True,
-            ignore_expires=True)
+        load_cookiejar.load('cookies/' + username + '.txt',
+                            ignore_discard=True,
+                            ignore_expires=True)
         #工具方法转换成字典
         load_cookies = requests.utils.dict_from_cookiejar(load_cookiejar)
         #工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.
@@ -257,7 +254,7 @@ class ArticlesUrls(object):
 
     def official_info(self, nickname, begin=0, count=5):
         """
-        获取公众号的一些信息
+        根据关键词返回相关公众号的信息
         Parameters
         ----------
         begin: str or int
@@ -267,15 +264,18 @@ class ArticlesUrls(object):
 
         Returns
         -------
-        json:
-            公众号的一些信息
-            {
-              'alias': 公众号别名,
-              'fakeid': 公众号唯一id,
-              'nickname': 公众号名称,
-              'round_head_img': 公众号头像的url,
-              'service_type': 1公众号性质
-            }
+        list:
+            相关公众号的对应信息
+            [
+                {
+                'alias': 公众号别名,
+                'fakeid': 公众号唯一id,
+                'nickname': 公众号名称,
+                'round_head_img': 公众号头像的url,
+                'service_type': 1公众号性质
+                },
+            ...
+            ]
         """
         self.__verify_str(nickname, "nickname")
         # 搜索公众号的url
@@ -293,56 +293,12 @@ class ArticlesUrls(object):
 
         try:
             # 返回与输入公众号名称最接近的公众号信息
-            official = self.s.get(
-                search_url, headers=self.headers, params=self.params)
+            official = self.s.get(search_url,
+                                  headers=self.headers,
+                                  params=self.params)
             return official.json()["list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
-
-    def query_official_info(self, nickname, begin=0, count=5):
-        """
-        获取公众号的一些信息
-        Parameters
-        ----------
-        begin: str or int
-            起始爬取的页数
-        count: str or int
-            每次爬取的数量，1-5
-
-        Returns
-        -------
-        json:
-            公众号的一些信息
-            {
-              'alias': 公众号别名,
-              'fakeid': 公众号唯一id,
-              'nickname': 公众号名称,
-              'round_head_img': 公众号头像的url,
-              'service_type': 1公众号性质
-            }
-        """
-        self.__verify_str(nickname, "nickname")
-        # 搜索公众号的url
-        search_url = "https://mp.weixin.qq.com/cgi-bin/searchbiz"
-
-        # 增加/更改请求参数
-        params = {
-            "query": nickname,
-            "count": str(count),
-            "action": "search_biz",
-            "ajax": "1",
-            "begin": str(begin)
-        }
-        self.params.update(params)
-
-        try:
-            # 返回与输入公众号名称最接近的公众号信息
-            official = self.s.get(
-                search_url, headers=self.headers, params=self.params)
-            return official.json()["list"]
-        except Exception:
-            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
-
 
     def articles_nums(self, nickname):
         """
@@ -391,63 +347,9 @@ class ArticlesUrls(object):
         """
         self.__verify_str(nickname, "nickname")
         try:
-            return self.__get_articles_data(
-                nickname, begin=str(begin), count=str(count))["app_msg_list"]
-        except Exception:
-            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
-
-    def query_articles_nums(self, nickname, query):
-        """
-        获取公众号指定关键词的文章的总数
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        int
-            文章总数
-        """
-        self.__verify_str(query, "query")
-        try:
-            return self.__get_articles_data(
-                nickname=nickname, begin="0", query=query)["app_msg_cnt"]
-        except Exception:
-            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
-
-    def query_articles(self, nickname, query, begin, count=5):
-        """
-        获取公众号指定关键词的文章
-        Parameters
-        ----------
-        begin: str or int
-            起始爬取的页数
-        count: str or int
-            每次爬取的数量，1-5
-        query: str
-            搜索关键词
-        Returns
-        -------
-        list:
-            由每个文章信息构成的数组
-            [
-              {
-                'aid': '2650949647_1',
-                'appmsgid': 2650949647,
-                'cover': 封面的url'digest': 文章摘要,
-                'itemidx': 1,
-                'link': 文章的url,
-                'title': 文章标题,
-                'update_time': 更新文章的时间戳
-              },
-            ]
-        如果list为空则说明没有相关文章
-        """
-        self.__verify_str(query, "query")
-        try:
-            return self.__get_articles_data(
-                nickname, begin=str(begin), count=str(count),
-                query=query)["app_msg_list"]
+            return self.__get_articles_data(nickname,
+                                            begin=str(begin),
+                                            count=str(count))["app_msg_list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
@@ -489,7 +391,7 @@ class ArticlesUrls(object):
         try:
             # 获取公众号的fakeid
             official_info = self.official_info(nickname)
-            self.params["fakeid"] = official_info["fakeid"]
+            self.params["fakeid"] = official_info[0]["fakeid"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 

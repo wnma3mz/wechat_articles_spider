@@ -1,8 +1,6 @@
 # coding: utf-8
-import sys
 import os
 from pprint import pprint
-sys.path.append(os.getcwd())
 from wechatarticles import ArticlesUrls, tools
 
 if __name__ == "__main__":
@@ -20,10 +18,6 @@ if __name__ == "__main__":
     articles_sum = test.articles_nums(nickname)
     artiacle_data = test.articles(nickname, begin="0", count="5")
     officical_info = test.official_info(nickname)
-
-    articles_data_query = test.articles(
-        nickname, query=query, begin="0", count="5")
-    # articles_sum_query = test.articles(nickname, query=query)
 
     print("articles_sum:", end=" ")
     print(articles_sum)

@@ -1,8 +1,6 @@
 # coding: utf-8
 import os
-import sys
 from pprint import pprint
-sys.path.append(os.getcwd())
 from wechatarticles.ReadOutfile import Reader
 
 if __name__ == '__main__':
