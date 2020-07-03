@@ -70,7 +70,7 @@ class ArticlesInfo(object):
         """
         try:
             appmsgstat = self.__get_appmsgext(article_url)["appmsgstat"]
-            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat["like_num"]
+            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat["old_like_num"]
         except Exception:
             raise Exception("params is error, please check your article_url")
 
