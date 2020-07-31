@@ -54,32 +54,23 @@
 ## 功能实现
 
 - 获取某公众号信息
-
 - 获取某公众号所有文章数量
-
 - 获取某公众号文章的url信息
-
 - 获取某公众号所有文章信息（包含点赞数、阅读数、评论信息），需要手动更改循环
-
 - 获取某公众号指定文章的信息
-
-- 支持两种微信公众号登录方式, 下面方法选用其一即可
-
-    1. 账号密码爬虫，输入账号密码后，扫描二维码登录。自动获取cookie和token。此方法需要安装`matplotlib`和`PIL`用于显示二维码图片
-
-    2. cookie、token登录，手动复制cookie和token。
+- 支持微信公众号cookie、token登录，手动复制cookie和token。
 
 - 支持两种获取文章阅读数和点赞数的方式，下面方式选用其一即可
 
     1. 利用抓包工具手动获取
 
     2. 安装python第三方库`mitmproxy`自动获取
-
 - 支持存储方式
 
     1. txt存储（不建议）
     2. mongo存储。需要安装`pymongo`
 - 支持微信文章下载至本地转为md
+- 支持微信文章下载至本地转为html（图片可选是否保存
 
 ## 变量名的说明
 
@@ -122,7 +113,7 @@ from wechatarticles import ArticlesAPI
 from wechatarticles import ArticlesUrls
 
 # 实例化爬取对象
-# 账号密码自动获取cookie和token
+# 账号密码自动获取cookie和token，已失效
 test = ArticlesUrls(username=username, password=password)
 # 手动输入账号密码
 test = ArticlesUrls(cookie=official_cookie, token=token)

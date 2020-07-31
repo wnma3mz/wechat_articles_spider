@@ -19,8 +19,6 @@ class ArticlesUrls(object):
             用户账号
         password: str
             用户密码
-        nickname : str or unicode
-            需要爬取公众号名称
         token : str
             登录微信公众号平台之后获取的token
         cookie : str
@@ -257,6 +255,8 @@ class ArticlesUrls(object):
         根据关键词返回相关公众号的信息
         Parameters
         ----------
+        nickname : str
+            需要爬取公众号名称
         begin: str or int
             起始爬取的页数
         count: str or int
@@ -305,7 +305,8 @@ class ArticlesUrls(object):
         获取公众号的总共发布的文章数量
         Parameters
         ----------
-        None
+        nickname : str
+            需要爬取公众号名称
 
         Returns
         -------
@@ -323,6 +324,8 @@ class ArticlesUrls(object):
         获取公众号的每页的文章信息
         Parameters
         ----------
+        nickname : str
+            需要爬取公众号名称
         begin: str or int
             起始爬取的页数
         count: str or int
@@ -353,9 +356,41 @@ class ArticlesUrls(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
+    def lastest_articles(self, biz):
+        """
+        获取公众号的每页的文章信息
+        Parameters
+        ----------
+        biz : str
+            公众号的biz
+
+        Returns
+        -------
+        list:
+            由每个文章信息构成的数组
+            [
+              {
+                'aid': '2650949647_1',
+                'appmsgid': 2650949647,
+                'cover': 封面的url'digest': 文章摘要,
+                'itemidx': 1,
+                'link': 文章的url,
+                'title': 文章标题,
+                'update_time': 更新文章的时间戳
+              },
+            ]
+        如果list为空则说明没有相关文章
+        """
+        try:
+            return self.__get_articles_data("", begin="0",
+                                            biz=biz)["app_msg_list"]
+        except Exception:
+            raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
+
     def __get_articles_data(self,
                             nickname,
                             begin,
+                            biz=None,
                             count=5,
                             type_="9",
                             action="list_ex",
@@ -364,8 +399,12 @@ class ArticlesUrls(object):
         获取公众号文章的一些信息
         Parameters
         ----------
+        nickname : str
+            需要爬取公众号名称
         begin: str or int
             起始爬取的页数
+        biz : str
+            公众号的biz
         count: str or int
             每次爬取的数量，1-5
         type_: str or int
@@ -389,9 +428,14 @@ class ArticlesUrls(object):
         appmsg_url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
 
         try:
-            # 获取公众号的fakeid
-            official_info = self.official_info(nickname)
-            self.params["fakeid"] = official_info[0]["fakeid"]
+            if nickname != "":
+                # 获取公众号的fakeid
+                official_info = self.official_info(nickname)
+                self.params["fakeid"] = official_info[0]["fakeid"]
+            elif biz != None:
+                self.params["fakeid"] = biz
+            else:
+                raise Exception(u"请输入biz或者nickname")
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 

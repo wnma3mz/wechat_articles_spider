@@ -9,3 +9,5 @@ try:
     from .ReadOutfile import Reader
 except Exception:
     print("not use mitmproxy")
+
+__version__ = "0.4.3"
