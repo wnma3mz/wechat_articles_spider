@@ -116,15 +116,17 @@ class Url2Html(object):
             return ''
         title = self.replace_name(title)
 
-        try:
-            account_name = self.article_info(html)[0]
-        except:
-            account_name = '未分类'
+        if self.account == None:
+            try:
+                account_name = self.article_info(html)[0]
+            except:
+                account_name = '未分类'
+        else:
+            account_name = self.account
         try:
             date = self.timestamp2date(self.get_timestamp(html))
         except:
             date = ''
-
         try:
             if not os.path.isdir(account_name):
                 os.mkdir(account_name)
@@ -137,41 +139,49 @@ class Url2Html(object):
                              '[{}]-{}-{}'.format(account_name, date, title))
         return title
 
-    def run(self, url, title=None, text=False, img=True, img_path=None, source=False):
+    def run(self, url, mode, **kwargs):
         """
         启动函数
         url: 微信文章链接
-        title: 文章标题。若未提供，则根据文章源码自动查找
-        text: 只保存文章文本内容
-        img: 是否需要下载图片
-        img_path: 下载图片的路径。如果img==True, 那么img_path不能为None
-        source: 是否返回html源码,返回源码则不保存
+        mode: 运行模式
+            1: 返回html源码，不下载图片
+            2: 返回html源码，下载图片但不替换图片路径
+            3: 返回html源码，下载图片且替换图片路径
+            4: 保存html源码，下载图片且替换图片路径
+        kwargs:
+            account: 公众号名
+            title: 文章名
+            img_path: 图片下载路径
         """
-        if img:
-            if img_path != None:
-                self.img_path = img_path
-            if self.img_path == None:
-                return '{} 请输入保存图片路径!'.format(url)
         html = requests.get(url).text
-        title = self.rename_title(title, html)
-        if title == '':
-            return '{} 该文章已被删除'.format(url)
-
-        # 下载图片并替换
-        if img:
+        if mode == 1:
+            return html
+        elif mode in [2, 3, 4]:
+            if 'img_path' in kwargs.keys():
+                self.img_path = kwargs['img_path']
+            else:
+                return '{} 请输入保存图片路径!'.format(url)
             html_img, _ = self.replace_img(html)
+            if mode == 2:
+                return html
+            elif mode == 3:
+                return html_img
+            else:
+                if 'account' in kwargs.keys():
+                    self.account = kwargs['account']
+                else:
+                    self.account = None
+                if 'title' in kwargs.keys():
+                    title = kwargs['title']
+                else:
+                    title = None
+                title = self.rename_title(title, html)
+                with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
+                    f.write(html_img)
+                return '{} success!'.format(url)
         else:
-            html_img = html
-        if text:
-            html_img = html
-
-
-        if source:
-            return html_img
-        else:
-            with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
-                f.write(html_img)
-        return '{} success!'.format(url)
+            print("please input correct mode num")
+            return 'faied!'
 
 
 if __name__ == '__main__':
@@ -181,5 +191,5 @@ if __name__ == '__main__':
     ]
     uh = Url2Html()
     for url in url_lst:
-        s = uh.run(url, img_path='D:\\imgs')
+        s = uh.run(url, mode=4, img_path='D:\\imgs')
         print(s)

@@ -6,7 +6,7 @@ import time
 import requests
 from bs4 import BeautifulSoup as bs
 
-from ArticlesUrls import ArticlesUrls
+from .ArticlesUrls import ArticlesUrls
 
 
 class nickname2biz(object):
