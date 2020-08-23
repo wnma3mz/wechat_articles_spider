@@ -153,18 +153,18 @@ class Url2Html(object):
             title: 文章名
             img_path: 图片下载路径
         """
-        html = requests.get(url).text
         if mode == 1:
-            return html
+            return requests.get(url).text
         elif mode in [2, 3, 4]:
             if 'img_path' in kwargs.keys():
                 self.img_path = kwargs['img_path']
             else:
                 return '{} 请输入保存图片路径!'.format(url)
-            html_img, _ = self.replace_img(html)
             if mode == 2:
-                return html
+                return requests.get(url).text
             elif mode == 3:
+                html = requests.get(url).text
+                html_img, _ = self.replace_img(html)
                 return html_img
             else:
                 if 'account' in kwargs.keys():
@@ -176,6 +176,10 @@ class Url2Html(object):
                 else:
                     title = None
                 title = self.rename_title(title, html)
+                if os.path.isfile(title):
+                    return 0
+                html = requests.get(url).text
+                html_img, _ = self.replace_img(html)
                 with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
                     f.write(html_img)
                 return '{} success!'.format(url)
