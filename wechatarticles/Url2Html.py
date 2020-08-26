@@ -23,7 +23,7 @@ class Url2Html(object):
         title: 文章标题
         """
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |'
-        title = re.sub(rstr, "", title)
+        title = re.sub(rstr, "", title).replace('|', '')
         return title
 
     def download_img(self, url):
@@ -175,10 +175,13 @@ class Url2Html(object):
                     title = kwargs['title']
                 else:
                     title = None
-                title = self.rename_title(title, html)
-                if os.path.isfile(title):
-                    return 0
+                # if title == None or self.account == None:
                 html = requests.get(url).text
+                title = self.rename_title(title, html)
+                # if os.path.isfile(title):
+                #     return 0
+                # else:
+                # html = requests.get(url).text
                 html_img, _ = self.replace_img(html)
                 with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
                     f.write(html_img)
