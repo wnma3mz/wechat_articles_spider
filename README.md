@@ -4,6 +4,12 @@
 
 `pip install wechatarticles`
 
+展示地址：
+
+[数据展示（完整指标）](https://data.wnma3mz.cn/)
+
+[日更两次，获取公众号的最新文章链接](https://data.wnma3mz.cn/demo.html)，暂不支持实时获取阅读点赞
+
 实现思路一:
 
 1. 从微信公众号平台获取微信公众所有文章的url
@@ -13,7 +19,7 @@
 
 批量关注微信公众的方法见：[自动批量关注微信公众号（非逆向）](https://wnma3mz.github.io/hexo_blog/2020/04/11/自动批量关注微信公众号（非逆向）/)
 
-可代为获取相关数据，相关业务也可直接联系，微信二维码见末尾（微信；wnma3mz)。烦请备注Github+wechat_spider
+可代为获取相关数据，相关业务也可直接联系，微信二维码见末尾（微信；wnma3mz)。烦请备注wechat_spider
 
 
 
@@ -76,8 +82,6 @@
 
 |     变量名      |        作用        |
 | :-------------: | :----------------: |
-|    usernmae     |  个人公众号的账号  |
-|    password     |  个人公众号的密码  |
 | official_cookie | 个人公众号的cookie |
 |    token     |  个人公众号的token  |
 |    appmsg_token     |  个人微信号的appmsg_token  |
@@ -106,16 +110,14 @@ wechat_cookie和appmsg_token建议获取每天或者每半天获取一次即可�
 ### 分解步骤
 #### 步骤一: 获取公众号的所有文章url
 
-此处有次数限制，不可一次获取太多url(获取超过30、40条貌似就会失败)。解决方案多个账号同时爬取
+此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
 
 ```python
 from wechatarticles import ArticlesAPI
 from wechatarticles import ArticlesUrls
 
 # 实例化爬取对象
-# 账号密码自动获取cookie和token，已失效
-test = ArticlesUrls(username=username, password=password)
-# 手动输入账号密码
+# 手动输入cookie和token
 test = ArticlesUrls(cookie=official_cookie, token=token)
 
 # 输入公众号名称，获取公众号文章总数
@@ -133,21 +135,23 @@ articles_sum_query = test.articles_nums(nickname, query=query)
 #### 步骤二：登录微信PC端获取文章信息
 
 ```python
-# 支持自动获取appmsg_token和cookie
-appmsg_token, cookie = Reader().contral(outfile)
-
 # 实例化爬取对象
-# 账号密码自动获取cookie和token
+# 手动输入cookie和token
 test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
+# link为微信文章的永久链接
 # 获取文章所有的评论信息(无需appmsg_token和cookie)
 comments = test.comments(link)
 # 获取文章阅读数在看点赞数
 read_num, like_num, old_like_num = test.read_like_nums(link)
 ```
 
-### 获取大量文章urls
+### 快速获取大量文章urls
 
-见`test/test_GetUrls.py`
+见`test/test_GetUrls.py`中`method_one`函数，源码：`GetUrls.py`
+
+利用公众号获取链接，并获取阅读点赞：`test/test_ArticlesAPI.py`
+
+利用历史文章获取链接，并获取阅读点赞：`test/test_GetUrls.py`
 
 ## 打赏部分
 

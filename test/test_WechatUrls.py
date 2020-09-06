@@ -5,15 +5,12 @@ from wechatarticles import ArticlesUrls, tools
 
 if __name__ == "__main__":
     # 模拟登录微信公众号平台，获取微信文章的url
-    username = "username@qq.com"
-    password = "password"
     cookie = "cookie"
     token = "token"
     nickname = "nickname"
     query = "query"
 
-    test = ArticlesUrls(username, password)
-    # test = ArticlesUrls(cookie=cookie, token=token)
+    test = ArticlesUrls(cookie=cookie, token=token)
 
     articles_sum = test.articles_nums(nickname)
     artiacle_data = test.articles(nickname, begin="0", count="5")

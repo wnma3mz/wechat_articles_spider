@@ -9,8 +9,7 @@ import json
 import pandas as pd  # 如果需要保存至excel表格的话
 import requests
 from wechatarticles import ArticlesInfo, ArticlesUrls
-from wechatarticles.GetUrls import MobileUrls, PCUrls
-from wechatarticles.ReadOutfile import Reader
+from wechatarticles.GetUrls import PCUrls
 
 
 def flatten(x):
@@ -77,23 +76,12 @@ def method_one(biz, uin, cookie):
     lst = []
     while True:
         res = t.get_urls(key, offset=count)
+        if res == []:
+            break
         count += 10
         lst.append(res)
 
-    return method_one
-
-
-def method_two(biz, cookie):
-
-    t = MobileUrls(biz=biz, cookie=cookie)
-    count = 0
-    lst = []
-    while True:
-        res = t.get_urls(appmsg_token, offset=count)
-        count += 10
-        lst.append(res)
-
-    return method_two
+    return lst
 
 
 def get_info_from_url(url):
@@ -146,30 +134,6 @@ if __name__ == '__main__':
     # 个人微信号登陆后获取的token
     appmsg_token = ''
 
-    # 方法二：使用MobileUrls。已在Ubuntu下测试
-
-    # 自动获取参数
-    '''
-    from ReadOutfile import Reader
-    biz = biz
-
-    # 自动获取appmsg_token, cookie
-    outfile = 'outfile'
-    reader = Reader()
-    reader.contral(outfile)
-    appmsg_token, cookie = reader.request(outfile)
-    # 通过抓包工具，手动获取appmsg_token, cookie，手动输入参数
-    appmsg_token = appmsg_token
-    cookie = cookie
-    '''
-
-    lst = method_two(biz, cookie)
-
-    # 碾平数组
-    # lst = flatten(lst)
-    # 提取url
-    # url_lst = get_all_urls(lst)
-
     # 获取点赞数、阅读数、评论信息
     test = ArticlesInfo(appmsg_token, cookie)
     """
@@ -188,12 +152,14 @@ if __name__ == '__main__':
         data_lst.append(temp_lst)
     """
     # 存储历史文章信息的json
-    data = []
+    # data = []
+    data = lst
     fj = '公众号名称'
     item_lst = []
     for i, line in enumerate(data, 0):
         print("index:", i)
-        item = json.loads('{' + line + '}', strict=False)
+        # item = json.loads('{' + line + '}', strict=False)
+        item = line
         timestamp = item["comm_msg_info"]["datetime"]
         ymd = time.localtime(timestamp)
         date = '{}-{}-{}'.format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)
@@ -208,7 +174,9 @@ if __name__ == '__main__':
             try:
                 if not verify_url(url):
                     continue
-                read_num, like_num, comments = get_data(url)
+                comments = test.comments(url)
+                # 获取文章阅读数在看点赞数
+                read_num, like_num, old_like_num = test.read_like_nums(url)
                 print(read_num, like_num, len(comments))
                 item_lst.append(
                     [url, title, date, read_num, like_num, comments])
