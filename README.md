@@ -10,6 +10,12 @@
 
 [日更两次，获取公众号的最新文章链接](https://data.wnma3mz.cn/demo.html)，暂不支持实时获取阅读点赞
 
+可代为获取相关数据，相关业务也可直接联系，微信二维码见末尾（微信；wnma3mz)。烦请备注wechat_spider
+
+注：本项目只做交流学习使用，不能达到开箱即用的水平。使用本项目需要读文档+源码+动手实践，参考示例代码（`test`文件夹下）进行改写。
+
+更详细的吐槽见[Issue](https://github.com/wnma3mz/wechat_articles_spider/issues/25)
+
 实现思路一:
 
 1. 从微信公众号平台获取微信公众所有文章的url
@@ -18,9 +24,6 @@
 完整思路可以参考我的博客: [记一次微信公众号爬虫的经历（微信文章阅读点赞的获取）](https://wnma3mz.github.io/hexo_blog/2017/11/18/记一次微信公众号爬虫的经历（微信文章阅读点赞的获取）/)
 
 批量关注微信公众的方法见：[自动批量关注微信公众号（非逆向）](https://wnma3mz.github.io/hexo_blog/2020/04/11/自动批量关注微信公众号（非逆向）/)
-
-可代为获取相关数据，相关业务也可直接联系，微信二维码见末尾（微信；wnma3mz)。烦请备注wechat_spider
-
 
 
 实现思路二：
@@ -40,7 +43,7 @@
 
 ## Notes
 
-更新于2020年7月
+更新于2020年9月
 
 更新微信文章阅读点赞在看
 
@@ -70,13 +73,13 @@
 
     1. 利用抓包工具手动获取
 
-    2. 安装python第三方库`mitmproxy`自动获取
+    2. 安装python第三方库`mitmproxy`自动获取（已废弃，可参考源码思路）
 - 支持存储方式
 
     1. txt存储（不建议）
     2. mongo存储。需要安装`pymongo`
 - 支持微信文章下载至本地转为md
-- 支持微信文章下载至本地转为html（图片可选是否保存
+- 支持微信文章下载至本地转为html（图片可选是否保存）
 
 ## 变量名的说明
 
@@ -104,8 +107,6 @@ wechat_cookie和appmsg_token手动获取的介绍，可以参考[这篇文档](h
 
 wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。默认开放端口为8080。
 
-
-wechat_cookie和appmsg_token建议获取每天或者每半天获取一次即可。此处通过上面获取到的url即可无限爬取，没有次数限制
 
 ### 分解步骤
 #### 步骤一: 获取公众号的所有文章url
