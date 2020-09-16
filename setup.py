@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="wechatarticles",
-    version="0.4.8",
+    version="0.4.9",
     author="wnma3mz",
     author_email="wnma3mz@gmail.com",
     description="wechat articles scrapy",
@@ -15,7 +15,7 @@ setuptools.setup(
     url="https://github.com/wnma3mz/wechat_articles_spider",
     packages=setuptools.find_packages(),
     install_requires=[
-        'requests>=2.20.0'
+        'requests>=2.20.0', 'beautifulsoup4>=4.7.1'
     ],
     classifiers=(
         "Programming Language :: Python :: 3",
