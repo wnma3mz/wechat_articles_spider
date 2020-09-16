@@ -15,8 +15,7 @@ setuptools.setup(
     url="https://github.com/wnma3mz/wechat_articles_spider",
     packages=setuptools.find_packages(),
     install_requires=[
-        'requests>=2.20.0', 'matplotlib>=2.0.2', 'Pillow>=6.2.0',
-        'pymongo>=3.4.0', 'mitmproxy>=4.0.4'
+        'requests>=2.20.0'
     ],
     classifiers=(
         "Programming Language :: Python :: 3",
