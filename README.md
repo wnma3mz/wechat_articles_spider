@@ -10,11 +10,21 @@
 
 [日更两次，获取公众号的最新文章链接](https://data.wnma3mz.cn/demo.html)，暂不支持实时获取阅读点赞
 
-可代为获取相关数据，相关业务也可直接联系，微信二维码见末尾（微信；wnma3mz)。烦请备注wechat_spider
+技术交流可以直接联系，微信二维码见末尾（微信；wnma3mz)。烦请进行备注，如wechat_spider
 
-注：本项目只做交流学习使用，不能达到开箱即用的水平。使用本项目需要读文档+源码+动手实践，参考示例代码（`test`文件夹下）进行改写。
+联系前请注意：
 
-更详细的吐槽见[Issue](https://github.com/wnma3mz/wechat_articles_spider/issues/25)
+1. 不（能）做自动登录微信公众号、微信
+
+2. 不（能）做实时获取参数
+
+3. 参数过期需要手动更新
+
+4. 换一个公众号需要手动更新
+
+注：本项目仅供学习交流，严禁用于商业用途（该项目也没法直接使用），不能达到开箱即用的水平。使用本项目需要读文档+源码+动手实践，参考示例代码（`test`文件夹下）进行改写。
+
+提示：另外，已经有很多朋友（大佬）通过直接看源码，已经基于这套项目，或者重写，用于各自的需求。
 
 实现思路一:
 
@@ -31,25 +41,26 @@
 1. 登陆微信PC端或移动端获取公众号所有文章的url，这种获取到的url数量大于500，具体数值暂未测试
 2. 同上种方法，获取文章阅读数、点赞数、评论信息
 
-公开已爬取的公众号历史文章的永久链接，日期均截止commit时间。
+公开已爬取的公众号历史文章的永久链接，日期均截止commit时间，仅供测试与学习，欢迎各位关注这些优质公众号。
 
-- 科技美学
+<details>
+  <summary>公众号列表</summary>
+    <li>科技美学</li>
+    <li>共青团中央</li>
+    <li>南方周末</li>
+    <li>AppSo</li>
+</details>
 
-- 共青团中央
-
-- 南方周末
-
-- AppSo
 
 ## Notes
 
-更新于2020年9月
+更新于2020年10月
 
 更新微信文章阅读点赞在看
 
 1. 爬取失败的时候，可能有以下原因
    1. **运行的时候需要关闭网络代理（抓包软件），或者添加相关参数**
-   2. 参数是否最新
+   2. 参数是否最新，获取微信相关参数（cookie、token）时，一定要保证是**对应公众号**的任意文章
    3. 检查代码
    4. 需要关注对应公众号（Maybe）
 2. 思路一获取url时，每页间隔可以设定久一点，比如3分钟，持续时间几小时（来自网友测试）
@@ -62,24 +73,27 @@
 
 ## 功能实现
 
-- 获取某公众号信息
-- 获取某公众号所有文章数量
-- 获取某公众号文章的url信息
-- 获取某公众号所有文章信息（包含点赞数、阅读数、评论信息），需要手动更改循环
-- 获取某公众号指定文章的信息
-- 支持微信公众号cookie、token登录，手动复制cookie和token。
+<details>
+  <summary>功能</summary>
+    <li>获取某公众号信息</li>
+    <li>获取某公众号所有文章数量</li>
+    <li>获取某公众号文章的url信息</li>
+    <li>获取某公众号所有文章信息（包含点赞数、阅读数、评论信息），需要手动更改循环</li>
+    <li>获取某公众号指定文章的信息</li>
+    <li>支持微信公众号cookie、token登录，手动复制cookie和token</li>
+    <li>支持两种获取文章阅读数和点赞数的方式，下面方式选用其一即可
+        <ol>利用抓包工具手动获取</ol>
+        <ol> 安装python第三方库`mitmproxy`自动获取（已废弃，可参考源码思路）</ol>
+    </li>
+    <li>支持存储方式
+        <ol>txt存储（不建议）</ol>
+        <ol>mongo存储。需要安装`pymongo`</ol>
+    </li>
+    <li>支持微信文章下载至本地转为md</li>
+    <li>支持微信文章下载至本地转为html（图片可选是否保存）</li>
 
-- 支持两种获取文章阅读数和点赞数的方式，下面方式选用其一即可
+</details>
 
-    1. 利用抓包工具手动获取
-
-    2. 安装python第三方库`mitmproxy`自动获取（已废弃，可参考源码思路）
-- 支持存储方式
-
-    1. txt存储（不建议）
-    2. mongo存储。需要安装`pymongo`
-- 支持微信文章下载至本地转为md
-- 支持微信文章下载至本地转为html（图片可选是否保存）
 
 ## 变量名的说明
 
@@ -95,7 +109,7 @@
 |    query     | 筛选公众号文章的关键词  |
 | outfile | mitmproxy抓包获取请求的保存文件 |
 | begin | 从第几篇文章开始爬取 |
-| count | 每次爬取的文章数(最大为5, 但是返回结果可能会大于５) |
+| count | 每次爬取的文章数(最大为5, 但是返回结果可能会大于5) |
 
 ## API实例
 
@@ -110,41 +124,52 @@ wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可
 
 ### 分解步骤
 #### 步骤一: 获取公众号的所有文章url
-
 此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
 
-```python
-from wechatarticles import ArticlesAPI
-from wechatarticles import ArticlesUrls
+<details>
+  <summary>代码</summary>
+  <pre><code>
+    ```python
+    from wechatarticles import ArticlesAPI
+    from wechatarticles import ArticlesUrls
 
-# 实例化爬取对象
-# 手动输入cookie和token
-test = ArticlesUrls(cookie=official_cookie, token=token)
+    # 实例化爬取对象
+    # 手动输入cookie和token
+    test = ArticlesUrls(cookie=official_cookie, token=token)
 
-# 输入公众号名称，获取公众号文章总数
-articles_sum = test.articles_nums(nickname)
-# 输入公众号名称，获取公众号部分文章信息, 每次最大返回数为5个
-articles_data = test.articles(nickname, begin="0", count="5")
-# 输入公众号名称，获取公众号的一些信息
-officical_info = test.official_info(nickname)
-# 输入公众号名称，输入关键词，获取公众号相关文章信息, 每次最大返回数为5个
-articles_data_query = test.articles(nickname, query=query, begin="0", count="5")
-# 输入公众号名称，输入关键词，获取公众号相关文章总数
-articles_sum_query = test.articles_nums(nickname, query=query)
-```
+    # 输入公众号名称，获取公众号文章总数
+    articles_sum = test.articles_nums(nickname)
+    # 输入公众号名称，获取公众号部分文章信息, 每次最大返回数为5个
+    articles_data = test.articles(nickname, begin="0", count="5")
+    # 输入公众号名称，获取公众号的一些信息
+    officical_info = test.official_info(nickname)
+    # 输入公众号名称，输入关键词，获取公众号相关文章信息, 每次最大返回数为5个
+    articles_data_query = test.articles(nickname, query=query, begin="0", count="5")
+    # 输入公众号名称，输入关键词，获取公众号相关文章总数
+    articles_sum_query = test.articles_nums(nickname, query=query)
+    ```
+  </code></pre>
+</details>
+
+
 
 #### 步骤二：登录微信PC端获取文章信息
 
-```python
-# 实例化爬取对象
-# 手动输入cookie和token
-test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
-# link为微信文章的永久链接
-# 获取文章所有的评论信息(无需appmsg_token和cookie)
-comments = test.comments(link)
-# 获取文章阅读数在看点赞数
-read_num, like_num, old_like_num = test.read_like_nums(link)
-```
+<details>
+  <summary>代码</summary>
+    <pre><code>
+    ```python
+    # 实例化爬取对象
+    # 手动输入cookie和token
+    test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
+    # link为微信文章的永久链接
+    # 获取文章所有的评论信息(无需appmsg_token和cookie)
+    comments = test.comments(link)
+    # 获取文章阅读数在看点赞数
+    read_num, like_num, old_like_num = test.read_like_nums(link)
+    ```
+  </code></pre>
+</details>
 
 ### 快速获取大量文章urls
 
