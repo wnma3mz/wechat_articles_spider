@@ -30,7 +30,7 @@ class nickname2biz(object):
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
             "Cookie": cookie
         }
-        assert method in ['xigu', 'qingbo', 'office']
+        assert method in ['xigua', 'qingbo', 'office']
         self.method = method
         self.cookie = cookie
         self.token = token
@@ -47,7 +47,7 @@ class nickname2biz(object):
             return self.office(s, nickname_lst)
 
     def office(self, s, nickname_lst):
-        res_lst = []
+        self.res_lst = []
         for nickname in nickname_lst:
             try:
                 officical_infos = s.official_info(nickname)
@@ -55,16 +55,16 @@ class nickname2biz(object):
                     officical_info = officical_infos[0]
                     biz = officical_info['fakeid']
                     tmp = self.biz_name.format(biz, officical_info['nickname'])
-                    res_lst.append(tmp)
+                    self.res_lst.append(tmp)
                 time.sleep(self.t)
             except Exception as e:
                 print(e)
-                return res_lst
-        return res_lst
+                return self.res_lst
+        return self.res_lst
 
     def xigua(self, nickname_lst):
         url = 'https://data.xiguaji.com/Search/SearchAct/?type=1&key={}'
-        res_lst = []
+        self.res_lst = []
         for nickname in nickname_lst:
             try:
                 s = requests.get(url.format(nickname), headers=self.headers)
@@ -76,17 +76,18 @@ class nickname2biz(object):
                     try:
                         biz = info.img['src'].split('__biz=')[1].split('&')[0]
                     except Exception as e:
+                        continue
                         print(e)
-                    res_lst.append(self.biz_name.format(biz, nickname))
+                    self.res_lst.append(self.biz_name.format(biz, nickname))
                 time.sleep(self.t)
             except Exception as e:
                 print(e)
-                return res_lst
-        return res_lst
+                return self.res_lst
+        return self.res_lst
 
     def qingbo(self, nickname_lst):
         url = 'http://www.gsdata.cn/query/wx?q={}'
-        res_lst = []
+        self.res_lst = []
         for nickname in nickname_lst:
             try:
                 s = requests.get(url.format(nickname), headers=self.headers)
@@ -96,12 +97,12 @@ class nickname2biz(object):
                     nicknames_lst = re.findall(
                         r'<span class="color-pink">(.+)</span>', s.text)
                     tmp = self.biz_name.format(biz_lst[0], nicknames_lst[0])
-                    res_lst.append(tmp)
+                    self.res_lst.append(tmp)
                 time.sleep(self.t)
             except Exception as e:
                 print(e)
-                return res_lst
-        return res_lst
+                return self.res_lst
+        return self.res_lst
 
 
 if __name__ == '__main__':

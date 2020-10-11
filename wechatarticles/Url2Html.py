@@ -23,7 +23,7 @@ class Url2Html(object):
         title: 文章标题
         """
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |'
-        title = re.sub(rstr, "", title).replace('|', '')
+        title = re.sub(rstr, "", title).replace('|', '').replace('\n', '')
         return title
 
     def download_img(self, url):
