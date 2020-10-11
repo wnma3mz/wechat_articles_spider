@@ -128,13 +128,13 @@ class Url2Html(object):
             date = self.timestamp2date(self.get_timestamp(html))
         except:
             date = ''
-        try:
-            if not os.path.isdir(account_name):
-                os.mkdir(account_name)
-        except:
-            account_name = '未分类'
-            if not os.path.isdir(account_name):
-                os.mkdir(account_name)
+        # try:
+        if not os.path.isdir(account_name):
+            os.mkdir(account_name)
+        # except:
+        #     account_name = '未分类'
+        #     if not os.path.isdir(account_name):
+        #         os.mkdir(account_name)
 
         title = os.path.join(account_name,
                              '[{}]-{}-{}'.format(account_name, date, title))
@@ -152,11 +152,24 @@ class Url2Html(object):
         kwargs:
             account: 公众号名
             title: 文章名
+            date: 日期
+            proxies: 代理
             img_path: 图片下载路径
         """
         if mode == 1:
             return requests.get(url).text
         elif mode in [2, 3, 4]:
+            if 'img_path' in kwargs.keys():
+                self.img_path = kwargs['img_path']
+            else:
+                return '{} 请输入保存图片路径!'.format(url)
+            if mode == 2:
+                return requests.get(url).text
+            elif mode == 3:
+                html = requests.get(url).text
+                html_img, _ = self.replace_img(html)
+                return html_img
+            else:
             if 'img_path' in kwargs.keys():
                 self.img_path = kwargs['img_path']
             else:
@@ -176,13 +189,26 @@ class Url2Html(object):
                     title = kwargs['title']
                 else:
                     title = None
-                # if title == None or self.account == None:
-                html = requests.get(url).text
-                title = self.rename_title(title, html)
-                # if os.path.isfile(title):
-                #     return 0
-                # else:
-                # html = requests.get(url).text
+                if 'date' in kwargs.keys():
+                    date = kwargs['date']
+                else:
+                    date = None
+                if 'proxies' in kwargs.keys():
+                    proxies = kwargs['proxies']
+                else:
+                    proxies = None
+                if self.account and title and date:
+                    title = os.path.join(
+                        self.account,
+                        '[{}]-{}-{}'.format(self.account, date,
+                                            self.replace_name(title)))
+                    if os.path.isfile('{}.html'.format(title)):
+                        return 0
+                    html = requests.get(url, proxies=proxies).text
+                else:
+                    html = requests.get(url, proxies=proxies).text
+                    title = self.rename_title(title, html)
+
                 html_img, _ = self.replace_img(html)
                 with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
                     f.write(html_img)
