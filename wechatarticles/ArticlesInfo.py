@@ -8,8 +8,13 @@ class ArticlesInfo(object):
     """
     登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等
     """
-
-    def __init__(self, appmsg_token, cookie):
+    def __init__(self,
+                 appmsg_token,
+                 cookie,
+                 proxies={
+                     'http': None,
+                     'https': None
+                 }):
         """
         初始化参数
         Parameters
@@ -28,14 +33,14 @@ class ArticlesInfo(object):
         self.headers = {
             "User-Agent":
             "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
-            "Cookie":
-            cookie
+            "Cookie": cookie
         }
         self.data = {
             "is_only_read": "1",
             "is_temp_url": "0",
-            "appmsg_type": "9", # 新参数，不加入无法获取like_num
+            "appmsg_type": "9",  # 新参数，不加入无法获取like_num
         }
+        self.proxies = proxies
 
     def __verify_url(self, article_url):
         """
@@ -70,7 +75,8 @@ class ArticlesInfo(object):
         """
         try:
             appmsgstat = self.__get_appmsgext(article_url)["appmsgstat"]
-            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat["old_like_num"]
+            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat[
+                "old_like_num"]
         except Exception:
             raise Exception("params is error, please check your article_url")
 
@@ -123,8 +129,11 @@ class ArticlesInfo(object):
         __biz, _, idx, _ = self.__get_params(article_url)
         getcomment_url = "https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100"
         try:
-            url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
-            comment_json = self.s.get(url, headers=self.headers).json()
+            url = getcomment_url.format(__biz, idx,
+                                        self.__get_comment_id(article_url))
+            comment_json = self.s.get(url,
+                                      headers=self.headers,
+                                      proxies=self.proxies).json()
         except Exception as e:
             print(e)
             comment_json = {}
@@ -143,7 +152,7 @@ class ArticlesInfo(object):
         str:
             comment_id获取评论必要参数
         """
-        res = self.s.get(article_url, data=self.data)
+        res = self.s.get(article_url, data=self.data, proxies=self.proxies)
         # 使用正则提取comment_id
         comment_id = re.findall(r'comment_id = "\d+"',
                                 res.text)[0].split(" ")[-1][1:-1]
@@ -203,7 +212,8 @@ class ArticlesInfo(object):
 
         # 将params参数换到data中请求。这一步貌似不换也行
         origin_url = "https://mp.weixin.qq.com/mp/getappmsgext?"
-        appmsgext_url = origin_url + "appmsg_token={}&x5=0".format(self.appmsg_token)
+        appmsgext_url = origin_url + "appmsg_token={}&x5=0".format(
+            self.appmsg_token)
         self.data["__biz"] = __biz
         self.data["mid"] = mid
         self.data["sn"] = sn
@@ -211,8 +221,9 @@ class ArticlesInfo(object):
 
         # appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
         #     __biz, mid, sn, idx, self.appmsg_token)
-        appmsgext_json = requests.post(
-            appmsgext_url, headers=self.headers, data=self.data).json()
+        appmsgext_json = requests.post(appmsgext_url,
+                                       headers=self.headers,
+                                       data=self.data).json()
 
         if "appmsgstat" not in appmsgext_json.keys():
             raise Exception(

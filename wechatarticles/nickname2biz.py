@@ -11,7 +11,15 @@ from .ArticlesUrls import ArticlesUrls
 
 class nickname2biz(object):
     """输入公众号名称转biz"""
-    def __init__(self, cookie, token=None, method=None, t=120):
+    def __init__(self,
+                 cookie,
+                 token=None,
+                 method=None,
+                 t=120,
+                 proxies={
+                     'http': None,
+                     'https': None,
+                 }):
         """
         cookie: 平台登录的cookie
         token: 官方获取时需要token
@@ -36,6 +44,7 @@ class nickname2biz(object):
         self.token = token
         self.t = t
         self.biz_name = '{}, {}'
+        self.proxies = proxies
 
     def run(self, nickname_lst):
         if self.method == 'xigua':
@@ -43,7 +52,9 @@ class nickname2biz(object):
         elif self.method == 'qingbo':
             return self.qingbo(nickname_lst)
         else:
-            s = ArticlesUrls(cookie=self.cookie, token=self.token)
+            s = ArticlesUrls(cookie=self.cookie,
+                             token=self.token,
+                             proxies=self.proxies)
             return self.office(s, nickname_lst)
 
     def office(self, s, nickname_lst):
@@ -67,7 +78,9 @@ class nickname2biz(object):
         self.res_lst = []
         for nickname in nickname_lst:
             try:
-                s = requests.get(url.format(nickname), headers=self.headers)
+                s = requests.get(url.format(nickname),
+                                 headers=self.headers,
+                                 proxies=self.proxies)
                 soup = bs(s.text, 'lxml')
                 infos = soup.find_all(class_="number-details")
                 if infos:
@@ -90,7 +103,9 @@ class nickname2biz(object):
         self.res_lst = []
         for nickname in nickname_lst:
             try:
-                s = requests.get(url.format(nickname), headers=self.headers)
+                s = requests.get(url.format(nickname),
+                                 headers=self.headers,
+                                 proxies=self.proxies)
                 biz_lst = re.findall(
                     r'<input type="hidden" class="biz" value="(.+)">?', s.text)
                 if biz_lst != []:

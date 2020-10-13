@@ -42,7 +42,7 @@ class Url2Html(object):
                 img = f.read()
             return imgpath, img
 
-        response = requests.get(url)
+        response = requests.get(url, proxies=self.proxies)
         img = response.content
         with open(imgpath, 'wb') as f:
             f.write(img)
@@ -140,7 +140,7 @@ class Url2Html(object):
                              '[{}]-{}-{}'.format(account_name, date, title))
         return title
 
-    def run(self, url, mode, **kwargs):
+    def run(self, url, mode, proxies={'http': None, 'https': None}, **kwargs):
         """
         启动函数
         url: 微信文章链接
@@ -156,17 +156,18 @@ class Url2Html(object):
             proxies: 代理
             img_path: 图片下载路径
         """
+        proxies = self.proxies
         if mode == 1:
-            return requests.get(url).text
+            return requests.get(url, proxies=proxies).text
         elif mode in [2, 3, 4]:
             if 'img_path' in kwargs.keys():
                 self.img_path = kwargs['img_path']
             else:
                 return '{} 请输入保存图片路径!'.format(url)
             if mode == 2:
-                return requests.get(url).text
+                return requests.get(url, proxies=proxies).text
             elif mode == 3:
-                html = requests.get(url).text
+                html = requests.get(url, proxies=proxies).text
                 html_img, _ = self.replace_img(html)
                 return html_img
             else:
@@ -175,9 +176,9 @@ class Url2Html(object):
                 else:
                     return '{} 请输入保存图片路径!'.format(url)
                 if mode == 2:
-                    return requests.get(url).text
+                    return requests.get(url, proxies=proxies).text
                 elif mode == 3:
-                    html = requests.get(url).text
+                    html = requests.get(url, proxies=proxies).text
                     html_img, _ = self.replace_img(html)
                     return html_img
                 else:
@@ -210,7 +211,8 @@ class Url2Html(object):
                         title = self.rename_title(title, html)
 
                     html_img, _ = self.replace_img(html)
-                    with open('{}.html'.format(title), 'w', encoding='utf-8') as f:
+                    with open('{}.html'.format(title), 'w',
+                              encoding='utf-8') as f:
                         f.write(html_img)
                     return '{} success!'.format(url)
         else:

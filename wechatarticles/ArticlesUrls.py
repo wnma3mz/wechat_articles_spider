@@ -10,15 +10,11 @@ class ArticlesUrls(object):
     """
     获取需要爬取的微信公众号的推文链接
     """
-    def __init__(self, username=None, password=None, cookie=None, token=None):
+    def __init__(self, cookie, token, proxies={'http': None, 'https': None}):
         """
         初始化参数
         Parameters
         ----------
-        username: str
-            用户账号
-        password: str
-            用户密码
         token : str
             登录微信公众号平台之后获取的token
         cookie : str
@@ -39,20 +35,11 @@ class ArticlesUrls(object):
         }
 
         # 手动输入cookie和token登录
-        if (cookie != None) and (token != None):
-            self.__verify_str(cookie, "cookie")
-            self.__verify_str(token, "token")
-            self.headers["Cookie"] = cookie
-            self.params["token"] = token
-        # 扫描二维码登录
-        elif (username != None) and (password != None):
-            self.__verify_str(username, "username")
-            self.__verify_str(password, "password")
-            # 暂不支持cookie缓存
-            self.__startlogin_official(username, password)
-        else:
-            print("please check your paramse")
-            raise SystemError
+        self.__verify_str(cookie, "cookie")
+        self.__verify_str(token, "token")
+        self.headers["Cookie"] = cookie
+        self.params["token"] = token
+        self.proxies = proxies
 
     def __verify_str(self, input_string, param_name):
         """
@@ -237,7 +224,10 @@ class ArticlesUrls(object):
         }
         # 获取token的url
         bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login"
-        res = self.s.post(bizlogin_url, data=data, headers=self.headers).json()
+        res = self.s.post(bizlogin_url,
+                          data=data,
+                          headers=self.headers,
+                          proxies=self.proxies).json()
 
         try:
             # 截取字符串中的token参数
@@ -295,7 +285,8 @@ class ArticlesUrls(object):
             # 返回与输入公众号名称最接近的公众号信息
             official = self.s.get(search_url,
                                   headers=self.headers,
-                                  params=self.params)
+                                  params=self.params,
+                                  proxies=self.proxies)
             return official.json()["list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
@@ -449,5 +440,8 @@ class ArticlesUrls(object):
         }
         self.params.update(params)
 
-        data = self.s.get(appmsg_url, headers=self.headers, params=self.params)
+        data = self.s.get(appmsg_url,
+                          headers=self.headers,
+                          params=self.params,
+                          proxies=self.proxies)
         return data.json()
