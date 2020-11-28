@@ -223,7 +223,8 @@ class ArticlesInfo(object):
         #     __biz, mid, sn, idx, self.appmsg_token)
         appmsgext_json = requests.post(appmsgext_url,
                                        headers=self.headers,
-                                       data=self.data).json()
+                                       data=self.data,
+                                       proxies=self.proxies).json()
 
         if "appmsgstat" not in appmsgext_json.keys():
             raise Exception(

@@ -156,7 +156,7 @@ class Url2Html(object):
             proxies: 代理
             img_path: 图片下载路径
         """
-        proxies = self.proxies
+        self.proxies = proxies 
         if mode == 1:
             return requests.get(url, proxies=proxies).text
         elif mode in [2, 3, 4]:
