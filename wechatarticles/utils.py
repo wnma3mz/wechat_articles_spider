@@ -6,9 +6,12 @@ import html
 import json
 import os
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup as bs
+
+from .GetUrls import PCUrls
 
 base_columns = ['url', 'title', 'date', 'headlines', 'copyright']
 A_columns = ['read_num', 'old_like_num', 'like_num']
@@ -127,16 +130,54 @@ def copyright_num(copyright_stat):
 def copyright_num_detailed(copyright_stat):
     copyright_stat_lst = [14, 12, 201]
     if copyright_stat == 11:
-        return 1 # 标记原创
+        return 1  # 标记原创
     elif copyright_stat == 100:
-        return 0 # 荐号
+        return 0  # 荐号
     elif copyright_stat == 101:
-        return 2 # 转发
+        return 2  # 转发
     elif copyright_stat == 0:
-        return 3 # 来源非微信文章
+        return 3  # 来源非微信文章
     elif copyright_stat == 1:
-        return 4 # 形容词（xxx的公众号）
+        return 4  # 形容词（xxx的公众号）
     elif copyright_stat in copyright_stat_lst:
         return 5
     else:
         return None
+
+
+def read_nickname(fname):
+    # 读取数据
+    with open(fname, 'r', encoding='utf-8') as f:
+        haved_data = f.readlines()
+    return [line.split(', ') for line in haved_data]
+
+
+def get_history_urls(biz,
+                     uin,
+                     key,
+                     lst=[],
+                     start_timestamp=0,
+                     count=10,
+                     endcount=99999):
+    t = PCUrls(biz=biz, uin=uin, cookie='')
+    try:
+        while True:
+            res = t.get_urls(key, offset=count)
+            if res == []:
+                break
+            count += 10
+            print(count)
+            lst.append(res)
+            dt = res[-1]["comm_msg_info"]["datetime"]
+            if dt <= start_timestamp or count >= endcount:
+                break
+            time.sleep(5)
+    except KeyboardInterrupt as e:
+        print('程序手动中断')
+        return lst
+    except Exception as e:
+        print(e)
+        print("获取文章链接失败。。。退出程序")
+        assert 1 == 2
+    finally:
+        return lst
