@@ -109,11 +109,11 @@
 
 ## API实例
 
-#### 步骤一: 获取公众号的文章url
+#### 利用公众号网页版获取微信文章url
 此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
 [test_WechatUrls.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatUrls.py)
 
-#### 步骤二：登录微信PC端获取文章信息
+#### 登录微信PC端获取文章信息
 [test_WechatInfo.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatInfo.py)
 
 #### 快速获取大量文章urls（利用历史文章获取链接）

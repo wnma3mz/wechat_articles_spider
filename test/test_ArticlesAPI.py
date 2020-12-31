@@ -5,7 +5,7 @@ from wechatarticles import ArticlesAPI
 from wechatarticles import tools
 
 if __name__ == '__main__':
-
+    # 利用公众号获取链接，并获取阅读点赞
     official_cookie = "official_cookie"
     token = "token"
     appmsg_token = "appmsg_token"

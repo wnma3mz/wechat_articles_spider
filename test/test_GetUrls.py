@@ -8,7 +8,7 @@ from pprint import pprint
 import pandas as pd
 from wechatarticles import ArticlesInfo
 from wechatarticles.utils import get_history_urls
-
+# 快速获取大量文章urls（利用历史文章获取链接）
 
 def save_xlsx(fj, lst):
     df = pd.DataFrame(lst,
