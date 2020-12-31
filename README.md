@@ -85,15 +85,9 @@
     <li>支持微信公众号cookie、token登录，手动复制cookie和token</li>
     <li>支持两种获取文章阅读数和点赞数的方式，下面方式选用其一即可
         <ol>利用抓包工具手动获取</ol>
-        <ol> 安装python第三方库`mitmproxy`自动获取（已废弃，可参考源码思路）</ol>
-    </li>
-    <li>支持存储方式
-        <ol>txt存储（不建议）</ol>
-        <ol>mongo存储。需要安装`pymongo`</ol>
     </li>
     <li>支持微信文章下载至本地转为md</li>
     <li>支持微信文章下载至本地转为html（图片可选是否保存）</li>
-
 </details>
 
 
@@ -115,71 +109,33 @@
 
 ## API实例
 
-以下完整实例代码见`test/`目录下的实例代码。
+#### 步骤一: 获取公众号的文章url
+此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
+[test_WechatUrls.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatUrls.py)
+
+#### 步骤二：登录微信PC端获取文章信息
+[test_WechatInfo.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatInfo.py)
+
+#### 快速获取大量文章urls（利用历史文章获取链接）
+[test_GetUrls.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_GetUrls.py)
+
+#### 利用公众号获取链接，并获取阅读点赞
+[test_ArticlesAPI.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_ArticlesAPI.py)
+
+#### 微信文章下载为离线HTML（含图片）
+[test_Url2Html.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_Url2Html.py)
+
+
+### 相关文档
+
+见博客与下方文档
 
 official_cookie和token手动获取方式见[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_cookie_token.md)
 
 wechat_cookie和appmsg_token手动获取的介绍，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/get_appmsg_token.md)
 
-wechat_cookie和appmsg_token自动获取的介绍(需要安装`mitmproxy`)，可以参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。默认开放端口为8080。
+wechat_cookie和appmsg_token自动获取的介绍（需要安装`mitmproxy`，已放弃），仅供参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。默认开放端口为8080。
 
-
-### 分解步骤
-#### 步骤一: 获取公众号的所有文章url
-此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
-
-<details>
-  <summary>代码</summary>
-  <pre><code>
-    ```python
-    from wechatarticles import ArticlesAPI
-    from wechatarticles import ArticlesUrls
-
-    # 实例化爬取对象
-    # 手动输入cookie和token
-    test = ArticlesUrls(cookie=official_cookie, token=token)
-
-    # 输入公众号名称，获取公众号文章总数
-    articles_sum = test.articles_nums(nickname)
-    # 输入公众号名称，获取公众号部分文章信息, 每次最大返回数为5个
-    articles_data = test.articles(nickname, begin="0", count="5")
-    # 输入公众号名称，获取公众号的一些信息
-    officical_info = test.official_info(nickname)
-    # 输入公众号名称，输入关键词，获取公众号相关文章信息, 每次最大返回数为5个
-    articles_data_query = test.articles(nickname, query=query, begin="0", count="5")
-    # 输入公众号名称，输入关键词，获取公众号相关文章总数
-    articles_sum_query = test.articles_nums(nickname, query=query)
-    ```
-  </code></pre>
-</details>
-
-
-
-#### 步骤二：登录微信PC端获取文章信息
-
-<details>
-  <summary>代码</summary>
-    <pre><code>
-    ```python
-    # 实例化爬取对象
-    # 手动输入cookie和token
-    test = ArticlesInfo(appmsg_token=appmsg_token, cookie=wechat_cookie)
-    # link为微信文章的永久链接
-    # 获取文章所有的评论信息(无需appmsg_token和cookie)
-    comments = test.comments(link)
-    # 获取文章阅读数在看点赞数
-    read_num, like_num, old_like_num = test.read_like_nums(link)
-    ```
-  </code></pre>
-</details>
-
-### 快速获取大量文章urls
-
-见`test/test_GetUrls.py`中`method_one`函数，源码：`GetUrls.py`
-
-利用公众号获取链接，并获取阅读点赞：`test/test_ArticlesAPI.py`
-
-利用历史文章获取链接，并获取阅读点赞：`test/test_GetUrls.py`
 
 ## 打赏部分
 

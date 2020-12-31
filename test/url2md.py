@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 from bs4.element import NavigableString
 import re
-
+# 该文件仅作测试用，可能失效
 path = 'F:\\wechat_articles_spider\\test\\imgs\\{}'
 parse_lst = ['article', 'a']
 str_lst = ['hr', 'span', 'ul']

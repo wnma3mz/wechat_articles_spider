@@ -11,16 +11,15 @@ if __name__ == "__main__":
     query = "query"
 
     test = ArticlesUrls(cookie=cookie, token=token)
-
-    articles_sum = test.articles_nums(nickname)
+    # articles_sum = test.articles_nums(nickname)
     artiacle_data = test.articles(nickname, begin="0", count="5")
-    officical_info = test.official_info(nickname)
+    # officical_info = test.official_info(nickname)
 
-    print("articles_sum:", end=" ")
-    print(articles_sum)
+    # print("articles_sum:", end=" ")
+    # print(articles_sum)
     print("artcles_data:")
     pprint(artiacle_data)
-    print("officical_info:")
-    pprint(officical_info)
+    # print("officical_info:")
+    # pprint(officical_info)
 
     tools.save_json("test.json", artiacle_data)

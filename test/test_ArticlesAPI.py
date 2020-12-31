@@ -1,7 +1,6 @@
 # coding: utf-8
 import os
 from pprint import pprint
-from wechatarticles.ReadOutfile import Reader
 from wechatarticles import ArticlesAPI
 from wechatarticles import tools
 
