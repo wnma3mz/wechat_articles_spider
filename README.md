@@ -1,5 +1,7 @@
 # 微信公众号文章爬虫（微信文章阅读点赞的获取）
 
+![](https://img.shields.io/pypi/v/wechatarticles)
+
 安装
 
 `pip install wechatarticles`

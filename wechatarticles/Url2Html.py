@@ -76,10 +76,12 @@ class Url2Html(object):
         html: 文章源码
         """
         try:
-            title = html.split('activity-name">')[1].split('</h2')[0].strip()
+            # title = html.split('activity-name">')[1].split('</h2')[0].strip()
+            title = html.split('<h2')[1].split('</h2')[0].split('>')[1].strip()
             return title
         except Exception as e:
             print(e)
+            print(html.split('<h2')[1].split('</h2')[0])
             return ''
 
     def article_info(self, html):
@@ -140,6 +142,30 @@ class Url2Html(object):
                              '[{}]-{}-{}'.format(account_name, date, title))
         return title
 
+    def download_media(self, html, title):
+        soup = bs(html, 'lxml')
+        # mp3
+        mpvoice_item_lst = soup.find_all('mpvoice')
+        base_url = 'https://res.wx.qq.com/voice/getvoice?mediaid='
+        for i, item in enumerate(mpvoice_item_lst, 1):
+            if os.path.isfile('{}-{}.mp3'.format(title, i)):
+                continue
+            doc = requests.get(base_url + item['voice_encode_fileid'])
+            with open('{}-{}.mp3'.format(title, i), 'wb') as f:
+                f.write(doc.content)
+
+        # video
+        if os.path.isfile('{}.mp4'.format(title)):
+            return ''
+        video_url = re.findall(r'url: \'(.+)\',\n', html)
+        if video_url:
+            video_url = [url for url in video_url if 'videoplayer' not in url]
+            if video_url:
+                video_url = video_url[0].replace(r'\x26', '&')
+                doc = requests.get(video_url)
+                with open('{}.mp4'.format(title), 'wb') as f:
+                    f.write(doc.content)
+
     def run(self, url, mode, proxies={'http': None, 'https': None}, **kwargs):
         """
         启动函数
@@ -149,6 +175,7 @@ class Url2Html(object):
             2: 返回html源码，下载图片但不替换图片路径
             3: 返回html源码，下载图片且替换图片路径
             4: 保存html源码，下载图片且替换图片路径
+            5: 保存html源码，下载图片且替换图片路径，并下载视频与音频
         kwargs:
             account: 公众号名
             title: 文章名
@@ -156,7 +183,7 @@ class Url2Html(object):
             proxies: 代理
             img_path: 图片下载路径
         """
-        self.proxies = proxies 
+        self.proxies = proxies
         if mode == 1:
             return requests.get(url, proxies=proxies).text
         elif mode in [2, 3, 4]:
@@ -210,6 +237,11 @@ class Url2Html(object):
                         html = requests.get(url, proxies=proxies).text
                         title = self.rename_title(title, html)
 
+                    try:
+                        if mode == 5:
+                            self.download_media(html, title)
+                    except Exception as e:
+                        print(fj, title)
                     html_img, _ = self.replace_img(html)
                     with open('{}.html'.format(title), 'w',
                               encoding='utf-8') as f:

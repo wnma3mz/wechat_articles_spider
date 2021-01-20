@@ -29,6 +29,7 @@ class ArticlesInfo(object):
         None
         """
         self.s = requests.session()
+        self.s.trust_env = False
         self.appmsg_token = appmsg_token
         self.headers = {
             "User-Agent":
