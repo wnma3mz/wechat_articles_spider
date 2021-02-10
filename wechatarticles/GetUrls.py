@@ -6,14 +6,8 @@ class PCUrls(object):
     """
     通过PC端的wechat，获取需要爬取的微信公众号的推文链接
     """
-    def __init__(self,
-                 biz,
-                 uin,
-                 cookie,
-                 proxies={
-                     'http': None,
-                     'https': None
-                 }):
+
+    def __init__(self, biz, uin, cookie, proxies={"http": None, "https": None}):
         """
         初始化参数
         Parameters
@@ -31,10 +25,10 @@ class PCUrls(object):
         self.s = requests.session()
         self.__biz = biz
         self.uin = uin
-        self.headers = {'Cookies': cookie}
+        self.headers = {"Cookies": cookie}
         self.proxies = proxies
 
-    def get_urls(self, key, offset='0'):
+    def get_urls(self, key, offset="0"):
         """
         获取urls
         Parameters
@@ -84,29 +78,29 @@ class PCUrls(object):
         ]
         """
         self.params = {
-            'action': 'getmsg',
-            '__biz': self.__biz,
-            'f': 'json',
-            'offset': str(offset),
-            'count': '10',
-            'uin': self.uin,
-            'key': key,
+            "action": "getmsg",
+            "__biz": self.__biz,
+            "f": "json",
+            "offset": str(offset),
+            "count": "10",
+            "uin": self.uin,
+            "key": key,
         }
-        origin_url = 'https://mp.weixin.qq.com/mp/profile_ext'
+        origin_url = "https://mp.weixin.qq.com/mp/profile_ext"
 
-        msg_json = self.s.get(origin_url,
-                              params=self.params,
-                              headers=self.headers,
-                              proxies=self.proxies).json()
-        if 'general_msg_list' in msg_json.keys():
+        msg_json = self.s.get(
+            origin_url, params=self.params, headers=self.headers, proxies=self.proxies
+        ).json()
+        if "general_msg_list" in msg_json.keys():
             lst = [
-                item for item in eval(msg_json['general_msg_list'])['list']
-                if 'app_msg_ext_info' in item.keys()
+                item
+                for item in eval(msg_json["general_msg_list"])["list"]
+                if "app_msg_ext_info" in item.keys()
             ]
             return lst
 
         raise Exception(
-            'Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key'
+            "Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key"
         )
 
 
@@ -114,6 +108,7 @@ class MobileUrls(object):
     """
     通过移动端的wechat，获取需要爬取的微信公众号的推文链接
     """
+
     def __init__(self, biz, cookie):
         """
         初始化参数
@@ -130,12 +125,11 @@ class MobileUrls(object):
         self.s = requests.session()
         self.__biz = biz
         self.headers = {
-            'User-Agent':
-            'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile',
-            'Cookie': cookie
+            "User-Agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
+            "Cookie": cookie,
         }
 
-    def get_urls(self, appmsg_token, offset='0'):
+    def get_urls(self, appmsg_token, offset="0"):
         """
         获取urls
         Parameters
@@ -185,26 +179,26 @@ class MobileUrls(object):
         ]
         """
         self.params = {
-            'action': 'getmsg',
-            '__biz': self.__biz,
-            'f': 'json',
-            'offset': str(offset),
-            'count': '10',
-            'appmsg_token': appmsg_token,
+            "action": "getmsg",
+            "__biz": self.__biz,
+            "f": "json",
+            "offset": str(offset),
+            "count": "10",
+            "appmsg_token": appmsg_token,
         }
-        origin_url = 'https://mp.weixin.qq.com/mp/profile_ext'
+        origin_url = "https://mp.weixin.qq.com/mp/profile_ext"
 
-        msg_json = self.s.get(origin_url,
-                              params=self.params,
-                              headers=self.headers,
-                              proxies=self.proxies).json()
-        if 'general_msg_list' in msg_json.keys():
+        msg_json = self.s.get(
+            origin_url, params=self.params, headers=self.headers, proxies=self.proxies
+        ).json()
+        if "general_msg_list" in msg_json.keys():
             lst = [
-                item for item in eval(msg_json['general_msg_list'])['list']
-                if 'app_msg_ext_info' in item.keys()
+                item
+                for item in eval(msg_json["general_msg_list"])["list"]
+                if "app_msg_ext_info" in item.keys()
             ]
             return lst
 
         raise Exception(
-            'Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key'
+            "Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key"
         )

@@ -2,6 +2,7 @@
 """
 辅助脚本函数
 """
+import base64
 import html
 import json
 import os
@@ -13,10 +14,10 @@ from bs4 import BeautifulSoup as bs
 
 from .GetUrls import PCUrls
 
-base_columns = ['url', 'title', 'date', 'headlines', 'copyright']
-A_columns = ['read_num', 'old_like_num', 'like_num']
-B_columns = ['comments_num', 'comments_content', 'comments_like_num']
-C_columns = ['content', 'content_num', 'pic_num']
+base_columns = ["url", "title", "date", "headlines", "copyright"]
+A_columns = ["read_num", "old_like_num", "like_num"]
+B_columns = ["comments_num", "comments_content", "comments_like_num"]
+C_columns = ["content", "content_num", "pic_num"]
 mode_columns = {
     1: A_columns,
     2: B_columns,
@@ -24,10 +25,10 @@ mode_columns = {
     4: A_columns + B_columns,
     5: A_columns + C_columns,
     6: B_columns + C_columns,
-    7: A_columns + B_columns + C_columns
+    7: A_columns + B_columns + C_columns,
 }
 
-ctext = '你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面'
+ctext = "你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面"
 
 
 # url, readnum likenum
@@ -38,7 +39,7 @@ def flatten(x):
 def remove_duplicate_json(fname):
     # 删除json中重复的数据
     # fname: xxx.json
-    with open(fname, 'r', encoding='utf-8') as f:
+    with open(fname, "r", encoding="utf-8") as f:
         data = f.readlines()
 
     id_re = re.compile(r'datetime": (.+), "fakeid"')
@@ -51,7 +52,7 @@ def remove_duplicate_json(fname):
     #                    key=lambda line: re.findall(
     #                        r'datetime": (.+), "fakeid"', line)[0])[::-1]
 
-    with open(fname, 'w', encoding='utf-8') as f:
+    with open(fname, "w", encoding="utf-8") as f:
         f.writelines(sort_data)
 
 
@@ -64,15 +65,15 @@ def end_func(timestamp, end_timestamp):
 
 def transfer_url(url):
     url = html.unescape(html.unescape(url))
-    return eval(repr(url).replace('\\', ''))
+    return eval(repr(url).replace("\\", ""))
 
 
 def save_f(fname):
     i = 1
     while True:
-        if os.path.isfile('{}.json'.format(fname)):
+        if os.path.isfile("{}.json".format(fname)):
             i += 1
-            fname += '-' + str(i)
+            fname += "-" + str(i)
         else:
             break
 
@@ -92,13 +93,12 @@ def verify_url(article_url):
 
 def get_content(url, cookie):
     headers = {
-        'user-agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36',
-        'cookie': cookie
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
+        "cookie": cookie,
     }
     html_text = requests.get(url.strip(), headers=headers).text
 
-    soup = bs(html_text, 'lxml')
+    soup = bs(html_text, "lxml")
     if ctext in html_text:
         assert 1 == 2
     # js加载
@@ -108,16 +108,15 @@ def get_content(url, cookie):
         body = soup.find(class_="rich_media_area_primary_inner")
         content_p = body.find(class_="rich_media_content")
         if content_p:
-            imgs = body.find_all('img')
-            return content_p.text.strip(), len(
-                content_p.text.strip()), len(imgs)
+            imgs = body.find_all("img")
+            return content_p.text.strip(), len(content_p.text.strip()), len(imgs)
         else:
             content_p = soup.find(id="js_panel_like_title").text.strip()
             return content_p, len(content_p), 0
         # with open(txt_name, 'w', encoding='utf-8') as f:
         # f.write(content_p.text)
     except:
-        return '', 0, 0
+        return "", 0, 0
 
 
 def copyright_num(copyright_stat):
@@ -147,19 +146,15 @@ def copyright_num_detailed(copyright_stat):
 
 def read_nickname(fname):
     # 读取数据
-    with open(fname, 'r', encoding='utf-8') as f:
+    with open(fname, "r", encoding="utf-8") as f:
         haved_data = f.readlines()
-    return [line.split(', ') for line in haved_data]
+    return [line.split(", ") for line in haved_data]
 
 
-def get_history_urls(biz,
-                     uin,
-                     key,
-                     lst=[],
-                     start_timestamp=0,
-                     count=10,
-                     endcount=99999):
-    t = PCUrls(biz=biz, uin=uin, cookie='')
+def get_history_urls(
+    biz, uin, key, lst=[], start_timestamp=0, count=10, endcount=99999
+):
+    t = PCUrls(biz=biz, uin=uin, cookie="")
     try:
         while True:
             res = t.get_urls(key, offset=count)
@@ -173,7 +168,7 @@ def get_history_urls(biz,
                 break
             time.sleep(5)
     except KeyboardInterrupt as e:
-        print('程序手动中断')
+        print("程序手动中断")
         return lst
     except Exception as e:
         print(e)
@@ -181,3 +176,11 @@ def get_history_urls(biz,
         assert 1 == 2
     finally:
         return lst
+
+
+def swap_biz_id(biz=None, fakeid=None):
+    if biz == None:
+        return str(base64.b64encode(fakeid.encode()), encoding="utf-8")
+    if fakeid == None:
+        return str(base64.b64decode(biz.encode()), encoding="utf-8")
+    return None

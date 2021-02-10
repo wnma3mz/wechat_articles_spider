@@ -8,6 +8,7 @@ import requests
 
 class Url2Html(object):
     """根据微信文章链接下载为本地HTML文件"""
+
     def __init__(self, img_path=None):
         """
         img_path: 本地存储图片的路径，采用绝对路径的方式引用图片。可不下载图片
@@ -23,7 +24,7 @@ class Url2Html(object):
         title: 文章标题
         """
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |'
-        title = re.sub(rstr, "", title).replace('|', '').replace('\n', '')
+        title = re.sub(rstr, "", title).replace("|", "").replace("\n", "")
         return title
 
     def download_img(self, url):
@@ -32,19 +33,17 @@ class Url2Html(object):
         url: 图片链接
         """
         # 根据链接提取图片名
-        name = '{}.{}'.format(
-            url.split('/')[-2],
-            url.split('/')[3].split('_')[-1])
+        name = "{}.{}".format(url.split("/")[-2], url.split("/")[3].split("_")[-1])
         imgpath = os.path.join(self.img_path, name)
         # 如果该图片已被下载，可以无需再下载，直接返回路径即可
         if os.path.isfile(imgpath):
-            with open(imgpath, 'rb') as f:
+            with open(imgpath, "rb") as f:
                 img = f.read()
             return imgpath, img
 
         response = requests.get(url, proxies=self.proxies)
         img = response.content
-        with open(imgpath, 'wb') as f:
+        with open(imgpath, "wb") as f:
             f.write(img)
         imgpath = os.path.basename(self.img_path)
         return os.path.join(imgpath, name), img
@@ -61,13 +60,12 @@ class Url2Html(object):
         img_url_lst = data_croporisrc_lst + data_src_lst + src_lst
         img_lst = []
         for img_url in img_url_lst:
-            if 'mmbiz.qpic.cn' in img_url:
+            if "mmbiz.qpic.cn" in img_url:
                 # print(img_url)
                 data_src, img = self.download_img(img_url)
                 img_lst.append([data_src, img])
                 # 以绝对路径的方式替换图片
-                html = html.replace(img_url,
-                                    data_src).replace('data-src=', 'src=')
+                html = html.replace(img_url, data_src).replace("data-src=", "src=")
         return html, img_lst
 
     def get_title(self, html):
@@ -77,21 +75,24 @@ class Url2Html(object):
         """
         try:
             # title = html.split('activity-name">')[1].split('</h2')[0].strip()
-            title = html.split('<h2')[1].split('</h2')[0].split('>')[1].strip()
+            title = html.split("<h2")[1].split("</h2")[0].split(">")[1].strip()
             return title
         except Exception as e:
             print(e)
-            print(html.split('<h2')[1].split('</h2')[0])
-            return ''
+            print(html.split("<h2")[1].split("</h2")[0])
+            return ""
 
     def article_info(self, html):
         """
         根据提供的html源码提取文章中的公众号和作者
         html: 文章源码
         """
-        account = html.split('rich_media_meta rich_media_meta_text">'
-                             )[1].split('</span')[0].strip()
-        author = html.split('id="js_name">')[1].split('</a')[0].strip()
+        account = (
+            html.split('rich_media_meta rich_media_meta_text">')[1]
+            .split("</span")[0]
+            .strip()
+        )
+        author = html.split('id="js_name">')[1].split("</a")[0].strip()
         return account, author
 
     def get_timestamp(self, html):
@@ -108,28 +109,28 @@ class Url2Html(object):
         timestamp: 时间戳
         """
         ymd = time.localtime(timestamp)
-        date = '{}-{}-{}'.format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)
+        date = "{}-{}-{}".format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)
         return date
 
     def rename_title(self, title, html):
         # 自动获取文章标题
         if title == None:
             title = self.get_title(html)
-        if title == '':
-            return ''
+        if title == "":
+            return ""
         title = self.replace_name(title)
 
         if self.account == None:
             try:
                 account_name = self.article_info(html)[0]
             except:
-                account_name = '未分类'
+                account_name = "未分类"
         else:
             account_name = self.account
         try:
             date = self.timestamp2date(self.get_timestamp(html))
         except:
-            date = ''
+            date = ""
         # try:
         if not os.path.isdir(account_name):
             os.mkdir(account_name)
@@ -138,35 +139,36 @@ class Url2Html(object):
         #     if not os.path.isdir(account_name):
         #         os.mkdir(account_name)
 
-        title = os.path.join(account_name,
-                             '[{}]-{}-{}'.format(account_name, date, title))
+        title = os.path.join(
+            account_name, "[{}]-{}-{}".format(account_name, date, title)
+        )
         return title
 
     def download_media(self, html, title):
-        soup = bs(html, 'lxml')
+        soup = bs(html, "lxml")
         # mp3
-        mpvoice_item_lst = soup.find_all('mpvoice')
-        base_url = 'https://res.wx.qq.com/voice/getvoice?mediaid='
+        mpvoice_item_lst = soup.find_all("mpvoice")
+        base_url = "https://res.wx.qq.com/voice/getvoice?mediaid="
         for i, item in enumerate(mpvoice_item_lst, 1):
-            if os.path.isfile('{}-{}.mp3'.format(title, i)):
+            if os.path.isfile("{}-{}.mp3".format(title, i)):
                 continue
-            doc = requests.get(base_url + item['voice_encode_fileid'])
-            with open('{}-{}.mp3'.format(title, i), 'wb') as f:
+            doc = requests.get(base_url + item["voice_encode_fileid"])
+            with open("{}-{}.mp3".format(title, i), "wb") as f:
                 f.write(doc.content)
 
         # video
-        if os.path.isfile('{}.mp4'.format(title)):
-            return ''
-        video_url = re.findall(r'url: \'(.+)\',\n', html)
+        if os.path.isfile("{}.mp4".format(title)):
+            return ""
+        video_url = re.findall(r"url: \'(.+)\',\n", html)
         if video_url:
-            video_url = [url for url in video_url if 'videoplayer' not in url]
+            video_url = [url for url in video_url if "videoplayer" not in url]
             if video_url:
-                video_url = video_url[0].replace(r'\x26', '&')
+                video_url = video_url[0].replace(r"\x26", "&")
                 doc = requests.get(video_url)
-                with open('{}.mp4'.format(title), 'wb') as f:
+                with open("{}.mp4".format(title), "wb") as f:
                     f.write(doc.content)
 
-    def run(self, url, mode, proxies={'http': None, 'https': None}, **kwargs):
+    def run(self, url, mode, proxies={"http": None, "https": None}, **kwargs):
         """
         启动函数
         url: 微信文章链接
@@ -187,10 +189,10 @@ class Url2Html(object):
         if mode == 1:
             return requests.get(url, proxies=proxies).text
         elif mode in [2, 3, 4]:
-            if 'img_path' in kwargs.keys():
-                self.img_path = kwargs['img_path']
+            if "img_path" in kwargs.keys():
+                self.img_path = kwargs["img_path"]
             else:
-                return '{} 请输入保存图片路径!'.format(url)
+                return "{} 请输入保存图片路径!".format(url)
             if mode == 2:
                 return requests.get(url, proxies=proxies).text
             elif mode == 3:
@@ -198,10 +200,10 @@ class Url2Html(object):
                 html_img, _ = self.replace_img(html)
                 return html_img
             else:
-                if 'img_path' in kwargs.keys():
-                    self.img_path = kwargs['img_path']
+                if "img_path" in kwargs.keys():
+                    self.img_path = kwargs["img_path"]
                 else:
-                    return '{} 请输入保存图片路径!'.format(url)
+                    return "{} 请输入保存图片路径!".format(url)
                 if mode == 2:
                     return requests.get(url, proxies=proxies).text
                 elif mode == 3:
@@ -209,28 +211,30 @@ class Url2Html(object):
                     html_img, _ = self.replace_img(html)
                     return html_img
                 else:
-                    if 'account' in kwargs.keys():
-                        self.account = kwargs['account']
+                    if "account" in kwargs.keys():
+                        self.account = kwargs["account"]
                     else:
                         self.account = None
-                    if 'title' in kwargs.keys():
-                        title = kwargs['title']
+                    if "title" in kwargs.keys():
+                        title = kwargs["title"]
                     else:
                         title = None
-                    if 'date' in kwargs.keys():
-                        date = kwargs['date']
+                    if "date" in kwargs.keys():
+                        date = kwargs["date"]
                     else:
                         date = None
-                    if 'proxies' in kwargs.keys():
-                        proxies = kwargs['proxies']
+                    if "proxies" in kwargs.keys():
+                        proxies = kwargs["proxies"]
                     else:
                         proxies = None
                     if self.account and title and date:
                         title = os.path.join(
                             self.account,
-                            '[{}]-{}-{}'.format(self.account, date,
-                                                self.replace_name(title)))
-                        if os.path.isfile('{}.html'.format(title)):
+                            "[{}]-{}-{}".format(
+                                self.account, date, self.replace_name(title)
+                            ),
+                        )
+                        if os.path.isfile("{}.html".format(title)):
                             return 0
                         html = requests.get(url, proxies=proxies).text
                     else:
@@ -243,21 +247,20 @@ class Url2Html(object):
                     except Exception as e:
                         print(fj, title)
                     html_img, _ = self.replace_img(html)
-                    with open('{}.html'.format(title), 'w',
-                              encoding='utf-8') as f:
+                    with open("{}.html".format(title), "w", encoding="utf-8") as f:
                         f.write(html_img)
-                    return '{} success!'.format(url)
+                    return "{} success!".format(url)
         else:
             print("please input correct mode num")
-            return 'faied!'
+            return "faied!"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     url_lst = [
-        'http://mp.weixin.qq.com/s?__biz=MTc5MTU3NTYyMQ==&mid=2650742058&idx=2&sn=1da6e9ddd1a0281e8c548fb30f8387f0&chksm=5afd0c006d8a851648e91e8cdaebfc2ab61d2518cbba369749b0a29cccb4781c622f966e6b04#rd'
+        "http://mp.weixin.qq.com/s?__biz=MTc5MTU3NTYyMQ==&mid=2650742058&idx=2&sn=1da6e9ddd1a0281e8c548fb30f8387f0&chksm=5afd0c006d8a851648e91e8cdaebfc2ab61d2518cbba369749b0a29cccb4781c622f966e6b04#rd"
     ]
     uh = Url2Html()
     for url in url_lst:
-        s = uh.run(url, mode=4, img_path='D:\\imgs')
+        s = uh.run(url, mode=4, img_path="D:\\imgs")
         print(s)

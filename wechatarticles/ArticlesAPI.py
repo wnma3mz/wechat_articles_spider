@@ -9,14 +9,16 @@ class ArticlesAPI(object):
     整合ArticlesInfo和ArticlesInfo, 方便调用
     """
 
-    def __init__(self,
-                 username=None,
-                 password=None,
-                 official_cookie=None,
-                 token=None,
-                 appmsg_token=None,
-                 wechat_cookie=None,
-                 outfile=None):
+    def __init__(
+        self,
+        username=None,
+        password=None,
+        official_cookie=None,
+        token=None,
+        appmsg_token=None,
+        wechat_cookie=None,
+        outfile=None,
+    ):
         """
         初始化参数
         Parameters
@@ -47,9 +49,9 @@ class ArticlesAPI(object):
             raise SystemError("please check your paramse")
 
         # 支持两种方式， mitmproxy自动获取参数和手动获取参数
-        if (appmsg_token == None) and (wechat_cookie == None) and (outfile !=
-                                                                   None):
+        if (appmsg_token == None) and (wechat_cookie == None) and (outfile != None):
             from .ReadOutfile import Reader
+
             reader = Reader()
             reader.contral(outfile)
             self.appmsg_token, self.cookie = reader.request(outfile)
@@ -83,38 +85,38 @@ class ArticlesAPI(object):
                 'comments': 文章评论信息
                     {
                         "base_resp": {
-                            "errmsg": "ok", 
+                            "errmsg": "ok",
                             "ret": 0
-                        }, 
+                        },
                         "elected_comment": [
                             {
-                                "content": 用户评论文字, 
-                                "content_id": "6846263421277569047", 
-                                "create_time": 1520098511, 
-                                "id": 3, 
-                                "is_from_friend": 0, 
-                                "is_from_me": 0, 
+                                "content": 用户评论文字,
+                                "content_id": "6846263421277569047",
+                                "create_time": 1520098511,
+                                "id": 3,
+                                "is_from_friend": 0,
+                                "is_from_me": 0,
                                 "is_top": 0, 是否被置顶
-                                "like_id": 10001, 
-                                "like_num": 3, 
-                                "like_status": 0, 
-                                "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132", 
-                                "my_id": 23, 
-                                "nick_name": 评论用户的名字, 
+                                "like_id": 10001,
+                                "like_num": 3,
+                                "like_status": 0,
+                                "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132",
+                                "my_id": 23,
+                                "nick_name": 评论用户的名字,
                                 "reply": {
                                     "reply_list": [ ]
                                 }
                             }
-                        ], 
+                        ],
                         "elected_comment_total_cnt": 3, 评论总数
-                        "enabled": 1, 
-                        "friend_comment": [ ], 
-                        "is_fans": 1, 
-                        "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132", 
-                        "my_comment": [ ], 
-                        "nick_name": 当前用户名, 
+                        "enabled": 1,
+                        "friend_comment": [ ],
+                        "is_fans": 1,
+                        "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132",
+                        "my_comment": [ ],
+                        "nick_name": 当前用户名,
                         "only_fans_can_comment": false
-                    }, 
+                    },
                 'cover': 封面的url'digest': 文章摘要,
                 'itemidx': 1,
                 'like_num': 18, 文章点赞数
@@ -128,7 +130,8 @@ class ArticlesAPI(object):
         """
         # 获取文章数据
         artiacle_data = self.officical.articles(
-            nickname, begin=str(begin), count=str(count))
+            nickname, begin=str(begin), count=str(count)
+        )
 
         # 提取每个文章的url，获取文章的点赞、阅读、评论信息，并加入到原来的json中
         for data in artiacle_data:
@@ -136,7 +139,7 @@ class ArticlesAPI(object):
             comments = self.wechat.comments(article_url)
             read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"], data['old_like_num'] = read_like_nums
+            data["read_num"], data["like_num"], data["old_like_num"] = read_like_nums
 
         return artiacle_data
 
@@ -147,7 +150,7 @@ class ArticlesAPI(object):
             comments = self.wechat.comments(article_url)
             read_like_nums = self.wechat.read_like_nums(article_url)
             data["comments"] = comments
-            data["read_num"], data["like_num"], data['old_like_num'] = read_like_nums
+            data["read_num"], data["like_num"], data["old_like_num"] = read_like_nums
 
         return articles_data
 
@@ -172,38 +175,38 @@ class ArticlesAPI(object):
                 'comments': 文章评论信息
                     {
                         "base_resp": {
-                            "errmsg": "ok", 
+                            "errmsg": "ok",
                             "ret": 0
-                        }, 
+                        },
                         "elected_comment": [
                             {
-                                "content": 用户评论文字, 
-                                "content_id": "6846263421277569047", 
-                                "create_time": 1520098511, 
-                                "id": 3, 
-                                "is_from_friend": 0, 
-                                "is_from_me": 0, 
+                                "content": 用户评论文字,
+                                "content_id": "6846263421277569047",
+                                "create_time": 1520098511,
+                                "id": 3,
+                                "is_from_friend": 0,
+                                "is_from_me": 0,
                                 "is_top": 0, 是否被置顶
-                                "like_id": 10001, 
-                                "like_num": 3, 
-                                "like_status": 0, 
-                                "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132", 
-                                "my_id": 23, 
-                                "nick_name": 评论用户的名字, 
+                                "like_id": 10001,
+                                "like_num": 3,
+                                "like_status": 0,
+                                "logo_url": "http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132",
+                                "my_id": 23,
+                                "nick_name": 评论用户的名字,
                                 "reply": {
                                     "reply_list": [ ]
                                 }
                             }
-                        ], 
+                        ],
                         "elected_comment_total_cnt": 3, 评论总数
-                        "enabled": 1, 
-                        "friend_comment": [ ], 
-                        "is_fans": 1, 
-                        "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132", 
-                        "my_comment": [ ], 
-                        "nick_name": 当前用户名, 
+                        "enabled": 1,
+                        "friend_comment": [ ],
+                        "is_fans": 1,
+                        "logo_url": "http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132",
+                        "my_comment": [ ],
+                        "nick_name": 当前用户名,
                         "only_fans_can_comment": false
-                    }, 
+                    },
                 'cover': 封面的url'digest': 文章摘要,
                 'itemidx': 1,
                 'like_num': 18, 文章点赞数
@@ -222,7 +225,9 @@ class ArticlesAPI(object):
                 # 获取文章数据
                 artiacle_datas.append(
                     self.officical.articles(
-                        nickname, begin=str(begin), count=str(count)))
+                        nickname, begin=str(begin), count=str(count)
+                    )
+                )
             except Exception as e:
                 print(e)
                 break
@@ -232,6 +237,7 @@ class ArticlesAPI(object):
 
         def flatten(x):
             return [y for l in x for y in flatten(l)] if type(x) is list else [x]
+
         # flatten = lambda x: [y for l in x for y in flatten(l)] if type(x) is list else [x]
         print("第{}篇文章爬取失败，请过段时间再次尝试或换个帐号继续爬取".format(begin))
         return self.__extract_info(flatten(artiacle_datas))

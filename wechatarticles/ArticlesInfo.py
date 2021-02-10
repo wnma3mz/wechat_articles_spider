@@ -8,13 +8,8 @@ class ArticlesInfo(object):
     """
     登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等
     """
-    def __init__(self,
-                 appmsg_token,
-                 cookie,
-                 proxies={
-                     'http': None,
-                     'https': None
-                 }):
+
+    def __init__(self, appmsg_token, cookie, proxies={"http": None, "https": None}):
         """
         初始化参数
         Parameters
@@ -32,9 +27,8 @@ class ArticlesInfo(object):
         self.s.trust_env = False
         self.appmsg_token = appmsg_token
         self.headers = {
-            "User-Agent":
-            "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
-            "Cookie": cookie
+            "User-Agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
+            "Cookie": cookie,
         }
         self.data = {
             "is_only_read": "1",
@@ -58,8 +52,7 @@ class ArticlesInfo(object):
         verify_lst = ["mp.weixin.qq.com", "__biz", "mid", "sn", "idx"]
         for string in verify_lst:
             if string not in article_url:
-                raise Exception(
-                    "params is error, please check your article_url")
+                raise Exception("params is error, please check your article_url")
 
     def read_like_nums(self, article_url):
         """
@@ -76,8 +69,11 @@ class ArticlesInfo(object):
         """
         try:
             appmsgstat = self.__get_appmsgext(article_url)["appmsgstat"]
-            return appmsgstat["read_num"], appmsgstat["like_num"], appmsgstat[
-                "old_like_num"]
+            return (
+                appmsgstat["read_num"],
+                appmsgstat["like_num"],
+                appmsgstat["old_like_num"],
+            )
         except Exception:
             raise Exception("params is error, please check your article_url")
 
@@ -130,11 +126,10 @@ class ArticlesInfo(object):
         __biz, _, idx, _ = self.__get_params(article_url)
         getcomment_url = "https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100"
         try:
-            url = getcomment_url.format(__biz, idx,
-                                        self.__get_comment_id(article_url))
-            comment_json = self.s.get(url,
-                                      headers=self.headers,
-                                      proxies=self.proxies).json()
+            url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
+            comment_json = self.s.get(
+                url, headers=self.headers, proxies=self.proxies
+            ).json()
         except Exception as e:
             print(e)
             comment_json = {}
@@ -155,8 +150,7 @@ class ArticlesInfo(object):
         """
         res = self.s.get(article_url, data=self.data, proxies=self.proxies)
         # 使用正则提取comment_id
-        comment_id = re.findall(r'comment_id = "\d+"',
-                                res.text)[0].split(" ")[-1][1:-1]
+        comment_id = re.findall(r'comment_id = "\d+"', res.text)[0].split(" ")[-1][1:-1]
         return comment_id
 
     def __get_params(self, article_url):
@@ -177,7 +171,7 @@ class ArticlesInfo(object):
 
         # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
-        dict_value = [string[string.index("=") + 1:] for string in string_lst]
+        dict_value = [string[string.index("=") + 1 :] for string in string_lst]
         __biz, mid, idx, sn, *_ = dict_value
         sn = sn[:-3] if sn[-3] == "#" else sn
 
@@ -213,8 +207,7 @@ class ArticlesInfo(object):
 
         # 将params参数换到data中请求。这一步貌似不换也行
         origin_url = "https://mp.weixin.qq.com/mp/getappmsgext?"
-        appmsgext_url = origin_url + "appmsg_token={}&x5=0".format(
-            self.appmsg_token)
+        appmsgext_url = origin_url + "appmsg_token={}&x5=0".format(self.appmsg_token)
         self.data["__biz"] = __biz
         self.data["mid"] = mid
         self.data["sn"] = sn
@@ -222,12 +215,10 @@ class ArticlesInfo(object):
 
         # appmsgext_url = origin_url + "__biz={}&mid={}&sn={}&idx={}&appmsg_token={}&x5=1".format(
         #     __biz, mid, sn, idx, self.appmsg_token)
-        appmsgext_json = requests.post(appmsgext_url,
-                                       headers=self.headers,
-                                       data=self.data,
-                                       proxies=self.proxies).json()
+        appmsgext_json = requests.post(
+            appmsgext_url, headers=self.headers, data=self.data, proxies=self.proxies
+        ).json()
 
         if "appmsgstat" not in appmsgext_json.keys():
-            raise Exception(
-                "get info error, please check your cookie and appmsg_token")
+            raise Exception("get info error, please check your cookie and appmsg_token")
         return appmsgext_json

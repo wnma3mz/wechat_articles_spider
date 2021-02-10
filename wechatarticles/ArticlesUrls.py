@@ -10,7 +10,8 @@ class ArticlesUrls(object):
     """
     获取需要爬取的微信公众号的推文链接
     """
-    def __init__(self, cookie, token, proxies={'http': None, 'https': None}):
+
+    def __init__(self, cookie, token, proxies={"http": None, "https": None}):
         """
         初始化参数
         Parameters
@@ -26,8 +27,7 @@ class ArticlesUrls(object):
         """
         self.s = requests.session()
         self.headers = {
-            "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36"
         }
         self.params = {
             "lang": "zh_CN",
@@ -71,6 +71,7 @@ class ArticlesUrls(object):
         """
         import matplotlib.pyplot as plt
         from PIL import Image
+
         # 存储二维码
         with open("login.png", "wb+") as fp:
             fp.write(img.content)
@@ -95,18 +96,18 @@ class ArticlesUrls(object):
         -------
             None
         """
-        #实例化一个LWPcookiejar对象
-        new_cookie_jar = cookielib.LWPCookieJar(username + '.txt')
+        # 实例化一个LWPcookiejar对象
+        new_cookie_jar = cookielib.LWPCookieJar(username + ".txt")
 
-        #将转换成字典格式的RequestsCookieJar（这里我用字典推导手动转的）保存到LWPcookiejar中
+        # 将转换成字典格式的RequestsCookieJar（这里我用字典推导手动转的）保存到LWPcookiejar中
         requests.utils.cookiejar_from_dict(
-            {c.name: c.value
-             for c in self.s.cookies}, new_cookie_jar)
+            {c.name: c.value for c in self.s.cookies}, new_cookie_jar
+        )
 
-        #保存到本地文件
-        new_cookie_jar.save('cookies/' + username + '.txt',
-                            ignore_discard=True,
-                            ignore_expires=True)
+        # 保存到本地文件
+        new_cookie_jar.save(
+            "cookies/" + username + ".txt", ignore_discard=True, ignore_expires=True
+        )
 
     def __read_cookie(self, username):
         """
@@ -120,15 +121,15 @@ class ArticlesUrls(object):
         -------
             None
         """
-        #实例化一个LWPCookieJar对象
+        # 实例化一个LWPCookieJar对象
         load_cookiejar = cookielib.LWPCookieJar()
-        #从文件中加载cookies(LWP格式)
-        load_cookiejar.load('cookies/' + username + '.txt',
-                            ignore_discard=True,
-                            ignore_expires=True)
-        #工具方法转换成字典
+        # 从文件中加载cookies(LWP格式)
+        load_cookiejar.load(
+            "cookies/" + username + ".txt", ignore_discard=True, ignore_expires=True
+        )
+        # 工具方法转换成字典
         load_cookies = requests.utils.dict_from_cookiejar(load_cookiejar)
-        #工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.
+        # 工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.
         self.s.cookies = requests.utils.cookiejar_from_dict(load_cookies)
 
     def __md5_passwd(self, password):
@@ -145,7 +146,7 @@ class ArticlesUrls(object):
             加密后的字符串
         """
         m5 = hashlib.md5()
-        m5.update(password.encode('utf-8'))
+        m5.update(password.encode("utf-8"))
         pwd = m5.hexdigest()
         return pwd
 
@@ -172,7 +173,7 @@ class ArticlesUrls(object):
             "lang": "zh_CN",
             "imgcode": "",
             "f": "json",
-            "ajax": "1"
+            "ajax": "1",
         }
 
         # 增加headers的keys
@@ -211,7 +212,8 @@ class ArticlesUrls(object):
         """
         # 设定headers的referer的请求
         referer = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(
-            username)
+            username
+        )
         self.headers["Referer"] = referer
 
         # 获取token的data
@@ -224,10 +226,9 @@ class ArticlesUrls(object):
         }
         # 获取token的url
         bizlogin_url = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login"
-        res = self.s.post(bizlogin_url,
-                          data=data,
-                          headers=self.headers,
-                          proxies=self.proxies).json()
+        res = self.s.post(
+            bizlogin_url, data=data, headers=self.headers, proxies=self.proxies
+        ).json()
 
         try:
             # 截取字符串中的token参数
@@ -277,16 +278,18 @@ class ArticlesUrls(object):
             "count": str(count),
             "action": "search_biz",
             "ajax": "1",
-            "begin": str(begin)
+            "begin": str(begin),
         }
         self.params.update(params)
 
         try:
             # 返回与输入公众号名称最接近的公众号信息
-            official = self.s.get(search_url,
-                                  headers=self.headers,
-                                  params=self.params,
-                                  proxies=self.proxies)
+            official = self.s.get(
+                search_url,
+                headers=self.headers,
+                params=self.params,
+                proxies=self.proxies,
+            )
             return official.json()["list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
@@ -341,9 +344,9 @@ class ArticlesUrls(object):
         """
         self.__verify_str(nickname, "nickname")
         try:
-            return self.__get_articles_data(nickname,
-                                            begin=str(begin),
-                                            count=str(count))["app_msg_list"]
+            return self.__get_articles_data(
+                nickname, begin=str(begin), count=str(count)
+            )["app_msg_list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
@@ -373,19 +376,20 @@ class ArticlesUrls(object):
         如果list为空则说明没有相关文章
         """
         try:
-            return self.__get_articles_data("", begin="0",
-                                            biz=biz)["app_msg_list"]
+            return self.__get_articles_data("", begin="0", biz=biz)["app_msg_list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def __get_articles_data(self,
-                            nickname,
-                            begin,
-                            biz=None,
-                            count=5,
-                            type_="9",
-                            action="list_ex",
-                            query=None):
+    def __get_articles_data(
+        self,
+        nickname,
+        begin,
+        biz=None,
+        count=5,
+        type_="9",
+        action="list_ex",
+        query=None,
+    ):
         """
         获取公众号文章的一些信息
         Parameters
@@ -436,12 +440,11 @@ class ArticlesUrls(object):
             "begin": str(begin),
             "count": str(count),
             "type": str(type_),
-            "action": action
+            "action": action,
         }
         self.params.update(params)
 
-        data = self.s.get(appmsg_url,
-                          headers=self.headers,
-                          params=self.params,
-                          proxies=self.proxies)
+        data = self.s.get(
+            appmsg_url, headers=self.headers, params=self.params, proxies=self.proxies
+        )
         return data.json()
