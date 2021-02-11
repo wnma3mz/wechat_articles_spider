@@ -1,7 +1,6 @@
 # 微信公众号文章爬虫（微信文章阅读点赞的获取）
 
-![](https://img.shields.io/pypi/v/wechatarticles)
-
+![](https://img.shields.io/pypi/v/wechatarticles)![](https://img.shields.io/pypi/l/wechatarticles)[![](https://img.shields.io/badge/docs-building-blue)](https://wnma3mz.github.io/wechat_articles_spider/build/html/index.html)
 安装
 
 `pip install wechatarticles`
@@ -65,6 +64,8 @@
 2. 思路一获取url时，每页间隔可以设定久一点，比如3分钟，持续时间几小时（来自网友测试）
 3. 获取文章阅读点赞时，每篇文章可以设定在5-10s左右，过期时间为4小时；若被封，大约5-10分钟就可继续抓取。
 4. 思路二获取url时，如果被封，需要24小时整之后才能重新抓取
+
+参数文件说明见[README](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs)
 
 ## python版本
 

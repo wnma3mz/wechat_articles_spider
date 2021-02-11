@@ -10,7 +10,6 @@ import re
 import time
 
 import requests
-from bs4 import BeautifulSoup as bs
 
 from .ArticlesUrls import PC
 
@@ -27,8 +26,6 @@ mode_columns = {
     6: B_columns + C_columns,
     7: A_columns + B_columns + C_columns,
 }
-
-ctext = "你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面"
 
 
 # url, readnum likenum
@@ -89,34 +86,6 @@ def verify_url(article_url):
         if string not in article_url:
             return False
     return True
-
-
-def get_content(url, cookie):
-    headers = {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36",
-        "cookie": cookie,
-    }
-    html_text = requests.get(url.strip(), headers=headers).text
-
-    soup = bs(html_text, "lxml")
-    if ctext in html_text:
-        assert 1 == 2
-    # js加载
-    # html.text.split('var content = ')[1].split('var')[0].strip()
-    # soup.find(id="js_panel_like_title").text
-    try:
-        body = soup.find(class_="rich_media_area_primary_inner")
-        content_p = body.find(class_="rich_media_content")
-        if content_p:
-            imgs = body.find_all("img")
-            return content_p.text.strip(), len(content_p.text.strip()), len(imgs)
-        else:
-            content_p = soup.find(id="js_panel_like_title").text.strip()
-            return content_p, len(content_p), 0
-        # with open(txt_name, 'w', encoding='utf-8') as f:
-        # f.write(content_p.text)
-    except:
-        return "", 0, 0
 
 
 def copyright_num(copyright_stat):

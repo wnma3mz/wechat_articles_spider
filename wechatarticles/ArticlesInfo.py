@@ -2,6 +2,7 @@
 import re
 
 import requests
+from bs4 import BeautifulSoup as bs
 
 
 class ArticlesInfo(object):
@@ -221,3 +222,27 @@ class ArticlesInfo(object):
         if "appmsgstat" not in appmsgext_json.keys():
             raise Exception("get info error, please check your cookie and appmsg_token")
         return appmsgext_json
+
+    def content(self, url):
+        html_text = self.s.get(
+            url.strip(), headers=self.headers, proxies=self.proxies
+        ).text
+
+        soup = bs(html_text, "lxml")
+        ctext = "你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面"
+        if ctext in html_text:
+            raise SystemError("访问频繁！")
+        # js加载
+        # html.text.split('var content = ')[1].split('var')[0].strip()
+        # soup.find(id="js_panel_like_title").text
+        try:
+            body = soup.find(class_="rich_media_area_primary_inner")
+            content_p = body.find(class_="rich_media_content")
+            if content_p:
+                imgs = body.find_all("img")
+                return content_p.text.strip(), len(content_p.text.strip()), len(imgs)
+            else:
+                content_p = soup.find(id="js_panel_like_title").text.strip()
+                return content_p, len(content_p), 0
+        except:
+            return "", 0, 0
