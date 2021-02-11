@@ -1,29 +1,25 @@
 # coding:  utf-8
 import hashlib
 import os
+import time
 
 import requests
 from requests.cookies import cookielib
 
+# TODO: 抽象一个基类
 
-class ArticlesUrls(object):
-    """
-    获取需要爬取的微信公众号的推文链接
-    """
+
+class PublicAccountsWeb(object):
+    """通过微信公众号网页版抓取链接，或者公众号信息"""
 
     def __init__(self, cookie, token, proxies={"http": None, "https": None}):
         """
-        初始化参数
         Parameters
         ----------
         token : str
             登录微信公众号平台之后获取的token
         cookie : str
             登录微信公众号平台之后获取的cookie
-
-        Returns
-        -------
-            None
         """
         self.s = requests.session()
         self.headers = {
@@ -44,15 +40,13 @@ class ArticlesUrls(object):
     def __verify_str(self, input_string, param_name):
         """
         验证输入是否为字符串
+
         Parameters
         ----------
         input_string: str
             输入
         param_name: str
             需要验证的参数名
-        Returns
-        ----------
-            None
         """
         if not isinstance(input_string, str):
             raise TypeError("{} must be an instance of str".format(param_name))
@@ -60,14 +54,11 @@ class ArticlesUrls(object):
     def __save_login_qrcode(self, img):
         """
         存储和显示登录二维码
+
         Parameters
         ----------
         img: str
             获取到的二维码数据
-
-        Returns
-        -------
-            None
         """
         import matplotlib.pyplot as plt
         from PIL import Image
@@ -87,14 +78,11 @@ class ArticlesUrls(object):
     def __save_cookie(self, username):
         """
         存储cookies, username用于文件命名
+
         Parameters
         ----------
         username: str
             用户账号
-
-        Returns
-        -------
-            None
         """
         # 实例化一个LWPcookiejar对象
         new_cookie_jar = cookielib.LWPCookieJar(username + ".txt")
@@ -112,14 +100,11 @@ class ArticlesUrls(object):
     def __read_cookie(self, username):
         """
         读取cookies, username用于文件命名
+
         Parameters
         ----------
         username: str
             用户账号
-
-        Returns
-        -------
-            None
         """
         # 实例化一个LWPCookieJar对象
         load_cookiejar = cookielib.LWPCookieJar()
@@ -135,6 +120,7 @@ class ArticlesUrls(object):
     def __md5_passwd(self, password):
         """
         微信公众号的登录密码需要用md5方式进行加密
+
         Parameters
         ----------
         password: str
@@ -152,13 +138,15 @@ class ArticlesUrls(object):
 
     def __startlogin_official(self, username, password):
         """
-        开始登录微信公众号平台，获取Cookies
+        获取登录二维码，进而获取Cookies
+
         Parameters
         ----------
         username: str
             用户账号
         password: str
             用户密码
+
         Returns
         -------
             None
@@ -199,16 +187,14 @@ class ArticlesUrls(object):
 
     def __login_official(self, username, password):
         """
-        正式登录微信公众号平台，获取token
+        登录微信公众号平台，获取token
+
         Parameters
         ----------
         username: str
             用户账号
         password: str
             用户密码
-        Returns
-        -------
-            None
         """
         # 设定headers的referer的请求
         referer = "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&lang=zh_CN&account={}".format(
@@ -244,6 +230,7 @@ class ArticlesUrls(object):
     def official_info(self, nickname, begin=0, count=5):
         """
         根据关键词返回相关公众号的信息
+
         Parameters
         ----------
         nickname : str
@@ -256,17 +243,18 @@ class ArticlesUrls(object):
         Returns
         -------
         list:
-            相关公众号的对应信息
-            [
-                {
-                'alias': 公众号别名,
-                'fakeid': 公众号唯一id,
-                'nickname': 公众号名称,
-                'round_head_img': 公众号头像的url,
-                'service_type': 1公众号性质
-                },
-            ...
-            ]
+            相关公众号的对应信息::
+
+                [
+                    {
+                    'alias': 公众号别名,
+                    'fakeid': 公众号唯一id,
+                    'nickname': 公众号名称,
+                    'round_head_img': 公众号头像的url,
+                    'service_type': 1公众号性质
+                    },
+                ...
+                ]
         """
         self.__verify_str(nickname, "nickname")
         # 搜索公众号的url
@@ -297,6 +285,7 @@ class ArticlesUrls(object):
     def articles_nums(self, nickname):
         """
         获取公众号的总共发布的文章数量
+
         Parameters
         ----------
         nickname : str
@@ -313,9 +302,10 @@ class ArticlesUrls(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def articles(self, nickname, begin=0, count=5):
+    def get_urls(self, nickname, begin=0, count=5):
         """
         获取公众号的每页的文章信息
+
         Parameters
         ----------
         nickname : str
@@ -328,19 +318,20 @@ class ArticlesUrls(object):
         Returns
         -------
         list:
-            由每个文章信息构成的数组
-            [
-              {
-                'aid': '2650949647_1',
-                'appmsgid': 2650949647,
-                'cover': 封面的url'digest': 文章摘要,
-                'itemidx': 1,
-                'link': 文章的url,
-                'title': 文章标题,
-                'update_time': 更新文章的时间戳
-              },
-            ]
-        如果list为空则说明没有相关文章
+            由每个文章信息构成的数组::
+
+                [
+                {
+                    'aid': '2650949647_1',
+                    'appmsgid': 2650949647,
+                    'cover': 封面的url'digest': 文章摘要,
+                    'itemidx': 1,
+                    'link': 文章的url,
+                    'title': 文章标题,
+                    'update_time': 更新文章的时间戳
+                },
+                ]
+            如果list为空则说明没有相关文章
         """
         self.__verify_str(nickname, "nickname")
         try:
@@ -350,9 +341,10 @@ class ArticlesUrls(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def lastest_articles(self, biz):
+    def latest_articles(self, biz):
         """
-        获取公众号的每页的文章信息
+        获取公众号的最新页的文章信息
+
         Parameters
         ----------
         biz : str
@@ -361,19 +353,20 @@ class ArticlesUrls(object):
         Returns
         -------
         list:
-            由每个文章信息构成的数组
-            [
-              {
-                'aid': '2650949647_1',
-                'appmsgid': 2650949647,
-                'cover': 封面的url'digest': 文章摘要,
-                'itemidx': 1,
-                'link': 文章的url,
-                'title': 文章标题,
-                'update_time': 更新文章的时间戳
-              },
-            ]
-        如果list为空则说明没有相关文章
+            由每个文章信息构成的数组::
+
+                [
+                {
+                    'aid': '2650949647_1',
+                    'appmsgid': 2650949647,
+                    'cover': 封面的url'digest': 文章摘要,
+                    'itemidx': 1,
+                    'link': 文章的url,
+                    'title': 文章标题,
+                    'update_time': 更新文章的时间戳
+                },
+                ]
+            如果list为空则说明没有相关文章
         """
         try:
             return self.__get_articles_data("", begin="0", biz=biz)["app_msg_list"]
@@ -391,7 +384,6 @@ class ArticlesUrls(object):
         query=None,
     ):
         """
-        获取公众号文章的一些信息
         Parameters
         ----------
         nickname : str
@@ -409,15 +401,16 @@ class ArticlesUrls(object):
         Returns
         -------
         json:
-            文章信息的json
-            {
-              'app_msg_cnt': 公众号发文章总数,
-              'app_msg_list': 　一个数组(参看get_articles函数),
-              'base_resp': {
-                'err_msg': 'ok',
-                'ret': 0
-              }
-            }
+            文章信息的json::
+
+                {
+                'app_msg_cnt': 公众号发文章总数,
+                'app_msg_list': 　一个数组(参看get_articles函数),
+                'base_resp': {
+                    'err_msg': 'ok',
+                    'ret': 0
+                }
+                }
         """
         # 获取文章信息的url
         appmsg_url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
@@ -448,3 +441,231 @@ class ArticlesUrls(object):
             appmsg_url, headers=self.headers, params=self.params, proxies=self.proxies
         )
         return data.json()
+
+
+class PC(object):
+    """通过PC端的微信，获取需要爬取的微信公众号的推文链接"""
+
+    def __init__(self, biz, uin, cookie, proxies={"http": None, "https": None}):
+        """
+        Parameters
+        ----------
+        __biz: str
+            需要爬取公众号的id
+        uin: str
+            用户id
+        cookies : str
+            登录微信后获取的cookie
+
+        """
+        self.s = requests.session()
+        self.__biz = biz
+        self.uin = uin
+        self.headers = {"Cookies": cookie}
+        self.proxies = proxies
+
+    def get_urls(self, key, offset="0"):
+        """
+        Parameters
+        ----------
+        key: str
+            个人微信号登陆后获取的key
+        offset: str or int
+            获取起始的页数，从0开始，每次递增10（可以大于10，但是不好确认参数，所以递增10，之后再去重）
+        Returns
+        ----------
+        list:
+        由每个文章信息构成的数组，主要获取的参数`item['app_msg_ext_info']['content_url']`, `item['app_msg_ext_info']['title']`, `item['comm_msg_info']['datetime']`::
+
+            import html
+            消除转义 html.unescape(html.unescape(url)); eval(repr(url).replace('\\', ''))
+            [
+                {
+                    'app_msg_ext_info': {
+                        'audio_fileid': 0,
+                        'author': '',
+                        'content': '',
+                        'content_url': 文章url，存在转义符'/'需要去除,
+                        'copyright_stat': 100,
+                        'cover': 文章封面url，存在转义符'/'需要去除,
+                        'del_flag': 1,
+                        'digest': '',
+                        'duration': 0,
+                        'fileid': 0,
+                        'is_multi': 0,
+                        'item_show_type': 8,
+                        'malicious_content_type': 0,
+                        'malicious_title_reason_id': 0,
+                        'multi_app_msg_item_list': [],
+                        'play_url': '',
+                        'source_url': '',
+                        'subtype': 9,
+                        'title': 文章标题
+                    },
+                    'comm_msg_info': {
+                        'content': '',
+                        'datetime': 1536930840,
+                        'fakeid': '2394588245',
+                        'id': 1000000262,
+                        'status': 2,
+                        'type': 49
+                    }
+                }
+            ]
+        """
+        self.params = {
+            "action": "getmsg",
+            "__biz": self.__biz,
+            "f": "json",
+            "offset": str(offset),
+            "count": "10",
+            "uin": self.uin,
+            "key": key,
+        }
+        origin_url = "https://mp.weixin.qq.com/mp/profile_ext"
+
+        msg_json = self.s.get(
+            origin_url, params=self.params, headers=self.headers, proxies=self.proxies
+        ).json()
+        if "general_msg_list" in msg_json.keys():
+            lst = [
+                item
+                for item in eval(msg_json["general_msg_list"])["list"]
+                if "app_msg_ext_info" in item.keys()
+            ]
+            return lst
+
+        raise Exception(
+            "Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key"
+        )
+
+
+class Mobile(object):
+    """通过移动端的wechat，获取需要爬取的微信公众号的推文链接"""
+
+    def __init__(self, biz, cookie):
+        """
+        Parameters
+        ----------
+        __biz: str
+            需要爬取公众号的id
+        cookie : str
+            登录微信后获取的cookie
+        """
+        self.s = requests.session()
+        self.__biz = biz
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
+            "Cookie": cookie,
+        }
+
+    def get_urls(self, appmsg_token, offset="0"):
+        """
+        Parameters
+        ----------
+        appmsg_token: str
+            个人微信号登陆后获取的token
+        offset: str or int
+            获取起始的页数，从0开始，每次递增10（可以大于10，但是不好确认参数，所以递增10，之后再去重）
+        
+        Returns
+        ----------
+        list:
+        由每个文章信息构成的数组::
+
+            [
+                {
+                    'app_msg_ext_info': {
+                        'audio_fileid': 0,
+                        'author': '',
+                        'content': '',
+                        'content_url': 文章url，存在转义符'/'需要去除,
+                        'copyright_stat': 100,
+                        'cover': 文章封面url，存在转义符'/'需要去除,
+                        'del_flag': 1,
+                        'digest': '',
+                        'duration': 0,
+                        'fileid': 0,
+                        'is_multi': 0,
+                        'item_show_type': 8,
+                        'malicious_content_type': 0,
+                        'malicious_title_reason_id': 0,
+                        'multi_app_msg_item_list': [],
+                        'play_url': '',
+                        'source_url': '',
+                        'subtype': 9,
+                        'title': 文章标题
+                    },
+                    'comm_msg_info': {
+                        'content': '',
+                        'datetime': 1536930840,
+                        'fakeid': '2394588245',
+                        'id': 1000000262,
+                        'status': 2,
+                        'type': 49
+                    }
+                }
+            ]
+        """
+        self.params = {
+            "action": "getmsg",
+            "__biz": self.__biz,
+            "f": "json",
+            "offset": str(offset),
+            "count": "10",
+            "appmsg_token": appmsg_token,
+        }
+        origin_url = "https://mp.weixin.qq.com/mp/profile_ext"
+
+        msg_json = self.s.get(
+            origin_url, params=self.params, headers=self.headers, proxies=self.proxies
+        ).json()
+        if "general_msg_list" in msg_json.keys():
+            lst = [
+                item
+                for item in eval(msg_json["general_msg_list"])["list"]
+                if "app_msg_ext_info" in item.keys()
+            ]
+            return lst
+
+        raise Exception(
+            "Failure:\n1.params is error, please check your params\n2.key is lose efficacy, please update your key"
+        )
+
+
+class WeBook(object):
+    """
+    通过微信读书，获取需要爬取的微信公众号的推文链接
+    vid是固定的微信账号
+    skey是变动的
+    需要注意抓取时间，如每次抓取暂停50s，则可以抓取51次左右。
+    该接口也不会封禁（暂时来看），如果被判定频繁，只需要在移动端进行滑动验证码，则可以继续抓取
+    """
+
+    def __init__(
+        self, skey, vid, user_agent=None, proxies={"http": None, "https": None}
+    ):
+        self.s = requests.session()
+        self.base_url = "https://i.weread.qq.com/book/articles?bookId=MP_WXS_{}&count=20&offset={}&synckey={}"
+        user_agent = (
+            "WeRead/5.3.4 (iPhone; iOS 14.1; Scale/2.00)"
+            if user_agent == None
+            else user_agent
+        )
+        self.headers = {
+            "User-Agent": user_agent,
+            "Cookies": "wr_logined=1",
+            "skey": skey,
+            "vid": vid,
+        }
+        self.proxies = proxies
+
+    def get_urls(self, bookid, offset="0"):
+        url = self.base_url.format(bookid, offset, str(time.time()).split(".")[0])
+        res = self.s.get(url, headers=self.headers, proxies=self.proxies)
+        if "reviews" in res.json():
+            item_lst = res.json()["reviews"]
+            return [item["review"] for item in item_lst]
+        else:
+            print(res.json())
+            return []

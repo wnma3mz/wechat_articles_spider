@@ -1,0 +1,773 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>wechatarticles.ArticlesUrls &#8212; wechatarticles  文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>wechatarticles.ArticlesUrls 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding:  utf-8</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.cookies</span> <span class="kn">import</span> <span class="n">cookielib</span>
+
+<span class="c1"># TODO: 抽象一个基类</span>
+
+
+<div class="viewcode-block" id="PublicAccountsWeb"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PublicAccountsWeb">[文档]</a><span class="k">class</span> <span class="nc">PublicAccountsWeb</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;通过微信公众号网页版抓取链接，或者公众号信息&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cookie</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        token : str</span>
+<span class="sd">            登录微信公众号平台之后获取的token</span>
+<span class="sd">        cookie : str</span>
+<span class="sd">            登录微信公众号平台之后获取的cookie</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.62 Safari/537.36&quot;</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># 手动输入cookie和token登录</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_str</span><span class="p">(</span><span class="n">cookie</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_str</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="s2">&quot;token&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Cookie&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cookie</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+
+    <span class="k">def</span> <span class="nf">__verify_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_string</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        验证输入是否为字符串</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_string: str</span>
+<span class="sd">            输入</span>
+<span class="sd">        param_name: str</span>
+<span class="sd">            需要验证的参数名</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> must be an instance of str&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param_name</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__save_login_qrcode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        存储和显示登录二维码</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        img: str</span>
+<span class="sd">            获取到的二维码数据</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+
+        <span class="c1"># 存储二维码</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;login.png&quot;</span><span class="p">,</span> <span class="s2">&quot;wb+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="c1"># 显示二维码， 这里使用plt的原因是： 等待用户扫描完之后手动关闭窗口继续运行；否则会直接运行</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;login.png&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;账号密码输入错误，请重新输入&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__save_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        存储cookies, username用于文件命名</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        username: str</span>
+<span class="sd">            用户账号</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 实例化一个LWPcookiejar对象</span>
+        <span class="n">new_cookie_jar</span> <span class="o">=</span> <span class="n">cookielib</span><span class="o">.</span><span class="n">LWPCookieJar</span><span class="p">(</span><span class="n">username</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 将转换成字典格式的RequestsCookieJar（这里我用字典推导手动转的）保存到LWPcookiejar中</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">cookiejar_from_dict</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">cookies</span><span class="p">},</span> <span class="n">new_cookie_jar</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 保存到本地文件</span>
+        <span class="n">new_cookie_jar</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+            <span class="s2">&quot;cookies/&quot;</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="n">ignore_discard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignore_expires</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__read_cookie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        读取cookies, username用于文件命名</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        username: str</span>
+<span class="sd">            用户账号</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 实例化一个LWPCookieJar对象</span>
+        <span class="n">load_cookiejar</span> <span class="o">=</span> <span class="n">cookielib</span><span class="o">.</span><span class="n">LWPCookieJar</span><span class="p">()</span>
+        <span class="c1"># 从文件中加载cookies(LWP格式)</span>
+        <span class="n">load_cookiejar</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+            <span class="s2">&quot;cookies/&quot;</span> <span class="o">+</span> <span class="n">username</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="n">ignore_discard</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignore_expires</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="c1"># 工具方法转换成字典</span>
+        <span class="n">load_cookies</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">dict_from_cookiejar</span><span class="p">(</span><span class="n">load_cookiejar</span><span class="p">)</span>
+        <span class="c1"># 工具方法将字典转换成RequestsCookieJar，赋值给session的cookies.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">cookiejar_from_dict</span><span class="p">(</span><span class="n">load_cookies</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__md5_passwd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        微信公众号的登录密码需要用md5方式进行加密</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        password: str</span>
+<span class="sd">            加密前的字符串</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str：</span>
+<span class="sd">            加密后的字符串</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m5</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="n">m5</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="n">pwd</span> <span class="o">=</span> <span class="n">m5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pwd</span>
+
+    <span class="k">def</span> <span class="nf">__startlogin_official</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取登录二维码，进而获取Cookies</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        username: str</span>
+<span class="sd">            用户账号</span>
+<span class="sd">        password: str</span>
+<span class="sd">            用户密码</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 进行md5加密，一些post的参数</span>
+        <span class="n">pwd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__md5_passwd</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s2">&quot;userlang&quot;</span><span class="p">:</span> <span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pwd&quot;</span><span class="p">:</span> <span class="n">pwd</span><span class="p">,</span>
+            <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;imgcode&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ajax&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># 增加headers的keys</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Host&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mp.weixin.qq.com&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Origin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Referer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/&quot;</span>
+
+        <span class="c1"># 账号密码post的url</span>
+        <span class="n">bizlogin_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/bizlogin?action=startlogin&quot;</span>
+        <span class="c1"># 获取二维码的url</span>
+        <span class="n">qrcode_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&amp;param=4300&amp;rd=928&quot;</span>
+
+        <span class="c1"># 账号密码登录，获取二维码，等待用户扫描二维码，需手动关闭二维码窗口</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">bizlogin_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qrcode_url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__save_login_qrcode</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="c1"># 去除之后不用的headers的key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;Host&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;Origin&quot;</span><span class="p">)</span>
+        <span class="c1"># 获取token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__login_official</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__login_official</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        登录微信公众号平台，获取token</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        username: str</span>
+<span class="sd">            用户账号</span>
+<span class="sd">        password: str</span>
+<span class="sd">            用户密码</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 设定headers的referer的请求</span>
+        <span class="n">referer</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/bizlogin?action=validate&amp;lang=zh_CN&amp;account=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">username</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Referer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">referer</span>
+
+        <span class="c1"># 获取token的data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;userlang&quot;</span><span class="p">:</span> <span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lang&quot;</span><span class="p">:</span> <span class="s2">&quot;zh_CN&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ajax&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># 获取token的url</span>
+        <span class="n">bizlogin_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="n">bizlogin_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 截取字符串中的token参数</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">&quot;redirect_url&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+            <span class="c1"># self.__save_cookie(username)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;Referer&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># 获取token失败，重新扫码登录</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;please try again&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__startlogin_official</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PublicAccountsWeb.official_info"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PublicAccountsWeb.official_info">[文档]</a>    <span class="k">def</span> <span class="nf">official_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        根据关键词返回相关公众号的信息</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nickname : str</span>
+<span class="sd">            需要爬取公众号名称</span>
+<span class="sd">        begin: str or int</span>
+<span class="sd">            起始爬取的页数</span>
+<span class="sd">        count: str or int</span>
+<span class="sd">            每次爬取的数量，1-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list:</span>
+<span class="sd">            相关公众号的对应信息::</span>
+
+<span class="sd">                [</span>
+<span class="sd">                    {</span>
+<span class="sd">                    &#39;alias&#39;: 公众号别名,</span>
+<span class="sd">                    &#39;fakeid&#39;: 公众号唯一id,</span>
+<span class="sd">                    &#39;nickname&#39;: 公众号名称,</span>
+<span class="sd">                    &#39;round_head_img&#39;: 公众号头像的url,</span>
+<span class="sd">                    &#39;service_type&#39;: 1公众号性质</span>
+<span class="sd">                    },</span>
+<span class="sd">                ...</span>
+<span class="sd">                ]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_str</span><span class="p">(</span><span class="n">nickname</span><span class="p">,</span> <span class="s2">&quot;nickname&quot;</span><span class="p">)</span>
+        <span class="c1"># 搜索公众号的url</span>
+        <span class="n">search_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/searchbiz&quot;</span>
+
+        <span class="c1"># 增加/更改请求参数</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">nickname</span><span class="p">,</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">),</span>
+            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;search_biz&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ajax&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;begin&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">begin</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 返回与输入公众号名称最接近的公众号信息</span>
+            <span class="n">official</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">search_url</span><span class="p">,</span>
+                <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+                <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+                <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">official</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;公众号名称错误或cookie、token错误，请重新输入&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PublicAccountsWeb.articles_nums"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PublicAccountsWeb.articles_nums">[文档]</a>    <span class="k">def</span> <span class="nf">articles_nums</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取公众号的总共发布的文章数量</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nickname : str</span>
+<span class="sd">            需要爬取公众号名称</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            文章总数</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_str</span><span class="p">(</span><span class="n">nickname</span><span class="p">,</span> <span class="s2">&quot;nickname&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_articles_data</span><span class="p">(</span><span class="n">nickname</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">)[</span><span class="s2">&quot;app_msg_cnt&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;公众号名称错误或cookie、token错误，请重新输入&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PublicAccountsWeb.get_urls"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PublicAccountsWeb.get_urls">[文档]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取公众号的每页的文章信息</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nickname : str</span>
+<span class="sd">            需要爬取公众号名称</span>
+<span class="sd">        begin: str or int</span>
+<span class="sd">            起始爬取的页数</span>
+<span class="sd">        count: str or int</span>
+<span class="sd">            每次爬取的数量，1-5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list:</span>
+<span class="sd">            由每个文章信息构成的数组::</span>
+
+<span class="sd">                [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;aid&#39;: &#39;2650949647_1&#39;,</span>
+<span class="sd">                    &#39;appmsgid&#39;: 2650949647,</span>
+<span class="sd">                    &#39;cover&#39;: 封面的url&#39;digest&#39;: 文章摘要,</span>
+<span class="sd">                    &#39;itemidx&#39;: 1,</span>
+<span class="sd">                    &#39;link&#39;: 文章的url,</span>
+<span class="sd">                    &#39;title&#39;: 文章标题,</span>
+<span class="sd">                    &#39;update_time&#39;: 更新文章的时间戳</span>
+<span class="sd">                },</span>
+<span class="sd">                ]</span>
+<span class="sd">            如果list为空则说明没有相关文章</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_str</span><span class="p">(</span><span class="n">nickname</span><span class="p">,</span> <span class="s2">&quot;nickname&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_articles_data</span><span class="p">(</span>
+                <span class="n">nickname</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">begin</span><span class="p">),</span> <span class="n">count</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="p">)[</span><span class="s2">&quot;app_msg_list&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;公众号名称错误或cookie、token错误，请重新输入&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PublicAccountsWeb.latest_articles"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PublicAccountsWeb.latest_articles">[文档]</a>    <span class="k">def</span> <span class="nf">latest_articles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">biz</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取公众号的最新页的文章信息</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        biz : str</span>
+<span class="sd">            公众号的biz</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list:</span>
+<span class="sd">            由每个文章信息构成的数组::</span>
+
+<span class="sd">                [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;aid&#39;: &#39;2650949647_1&#39;,</span>
+<span class="sd">                    &#39;appmsgid&#39;: 2650949647,</span>
+<span class="sd">                    &#39;cover&#39;: 封面的url&#39;digest&#39;: 文章摘要,</span>
+<span class="sd">                    &#39;itemidx&#39;: 1,</span>
+<span class="sd">                    &#39;link&#39;: 文章的url,</span>
+<span class="sd">                    &#39;title&#39;: 文章标题,</span>
+<span class="sd">                    &#39;update_time&#39;: 更新文章的时间戳</span>
+<span class="sd">                },</span>
+<span class="sd">                ]</span>
+<span class="sd">            如果list为空则说明没有相关文章</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_articles_data</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">begin</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">biz</span><span class="o">=</span><span class="n">biz</span><span class="p">)[</span><span class="s2">&quot;app_msg_list&quot;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;公众号名称错误或cookie、token错误，请重新输入&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__get_articles_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">nickname</span><span class="p">,</span>
+        <span class="n">begin</span><span class="p">,</span>
+        <span class="n">biz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">type_</span><span class="o">=</span><span class="s2">&quot;9&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;list_ex&quot;</span><span class="p">,</span>
+        <span class="n">query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        nickname : str</span>
+<span class="sd">            需要爬取公众号名称</span>
+<span class="sd">        begin: str or int</span>
+<span class="sd">            起始爬取的页数</span>
+<span class="sd">        biz : str</span>
+<span class="sd">            公众号的biz</span>
+<span class="sd">        count: str or int</span>
+<span class="sd">            每次爬取的数量，1-5</span>
+<span class="sd">        type_: str or int</span>
+<span class="sd">            获取数据的方式，暂不知道具体用途</span>
+<span class="sd">        action: str</span>
+<span class="sd">            请求之后的行为动作，&quot;list_ex&quot;获取文章信息的json</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json:</span>
+<span class="sd">            文章信息的json::</span>
+
+<span class="sd">                {</span>
+<span class="sd">                &#39;app_msg_cnt&#39;: 公众号发文章总数,</span>
+<span class="sd">                &#39;app_msg_list&#39;: 　一个数组(参看get_articles函数),</span>
+<span class="sd">                &#39;base_resp&#39;: {</span>
+<span class="sd">                    &#39;err_msg&#39;: &#39;ok&#39;,</span>
+<span class="sd">                    &#39;ret&#39;: 0</span>
+<span class="sd">                }</span>
+<span class="sd">                }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 获取文章信息的url</span>
+        <span class="n">appmsg_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/cgi-bin/appmsg&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nickname</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="c1"># 获取公众号的fakeid</span>
+                <span class="n">official_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">official_info</span><span class="p">(</span><span class="n">nickname</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;fakeid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">official_info</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;fakeid&quot;</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">biz</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;fakeid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">biz</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;请输入biz或者nickname&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">u</span><span class="s2">&quot;公众号名称错误或cookie、token错误，请重新输入&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 增加/更改请求参数</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span> <span class="k">if</span> <span class="n">query</span> <span class="o">!=</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;begin&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">begin</span><span class="p">),</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">),</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_</span><span class="p">),</span>
+            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">appmsg_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PC"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PC">[文档]</a><span class="k">class</span> <span class="nc">PC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;通过PC端的微信，获取需要爬取的微信公众号的推文链接&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">biz</span><span class="p">,</span> <span class="n">uin</span><span class="p">,</span> <span class="n">cookie</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        __biz: str</span>
+<span class="sd">            需要爬取公众号的id</span>
+<span class="sd">        uin: str</span>
+<span class="sd">            用户id</span>
+<span class="sd">        cookies : str</span>
+<span class="sd">            登录微信后获取的cookie</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__biz</span> <span class="o">=</span> <span class="n">biz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uin</span> <span class="o">=</span> <span class="n">uin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Cookies&quot;</span><span class="p">:</span> <span class="n">cookie</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+
+<div class="viewcode-block" id="PC.get_urls"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.PC.get_urls">[文档]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key: str</span>
+<span class="sd">            个人微信号登陆后获取的key</span>
+<span class="sd">        offset: str or int</span>
+<span class="sd">            获取起始的页数，从0开始，每次递增10（可以大于10，但是不好确认参数，所以递增10，之后再去重）</span>
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list:</span>
+<span class="sd">        由每个文章信息构成的数组，主要获取的参数`item[&#39;app_msg_ext_info&#39;][&#39;content_url&#39;]`, `item[&#39;app_msg_ext_info&#39;][&#39;title&#39;]`, `item[&#39;comm_msg_info&#39;][&#39;datetime&#39;]`::</span>
+
+<span class="sd">            import html</span>
+<span class="sd">            消除转义 html.unescape(html.unescape(url)); eval(repr(url).replace(&#39;\\&#39;, &#39;&#39;))</span>
+<span class="sd">            [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;app_msg_ext_info&#39;: {</span>
+<span class="sd">                        &#39;audio_fileid&#39;: 0,</span>
+<span class="sd">                        &#39;author&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;content&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;content_url&#39;: 文章url，存在转义符&#39;/&#39;需要去除,</span>
+<span class="sd">                        &#39;copyright_stat&#39;: 100,</span>
+<span class="sd">                        &#39;cover&#39;: 文章封面url，存在转义符&#39;/&#39;需要去除,</span>
+<span class="sd">                        &#39;del_flag&#39;: 1,</span>
+<span class="sd">                        &#39;digest&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;duration&#39;: 0,</span>
+<span class="sd">                        &#39;fileid&#39;: 0,</span>
+<span class="sd">                        &#39;is_multi&#39;: 0,</span>
+<span class="sd">                        &#39;item_show_type&#39;: 8,</span>
+<span class="sd">                        &#39;malicious_content_type&#39;: 0,</span>
+<span class="sd">                        &#39;malicious_title_reason_id&#39;: 0,</span>
+<span class="sd">                        &#39;multi_app_msg_item_list&#39;: [],</span>
+<span class="sd">                        &#39;play_url&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;source_url&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;subtype&#39;: 9,</span>
+<span class="sd">                        &#39;title&#39;: 文章标题</span>
+<span class="sd">                    },</span>
+<span class="sd">                    &#39;comm_msg_info&#39;: {</span>
+<span class="sd">                        &#39;content&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;datetime&#39;: 1536930840,</span>
+<span class="sd">                        &#39;fakeid&#39;: &#39;2394588245&#39;,</span>
+<span class="sd">                        &#39;id&#39;: 1000000262,</span>
+<span class="sd">                        &#39;status&#39;: 2,</span>
+<span class="sd">                        &#39;type&#39;: 49</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">            ]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;getmsg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__biz&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__biz</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uin&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uin</span><span class="p">,</span>
+            <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">origin_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/mp/profile_ext&quot;</span>
+
+        <span class="n">msg_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">origin_url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;general_msg_list&quot;</span> <span class="ow">in</span> <span class="n">msg_json</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">item</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">eval</span><span class="p">(</span><span class="n">msg_json</span><span class="p">[</span><span class="s2">&quot;general_msg_list&quot;</span><span class="p">])[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;app_msg_ext_info&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="n">lst</span>
+
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;Failure:</span><span class="se">\n</span><span class="s2">1.params is error, please check your params</span><span class="se">\n</span><span class="s2">2.key is lose efficacy, please update your key&quot;</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Mobile"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.Mobile">[文档]</a><span class="k">class</span> <span class="nc">Mobile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;通过移动端的wechat，获取需要爬取的微信公众号的推文链接&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">biz</span><span class="p">,</span> <span class="n">cookie</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        __biz: str</span>
+<span class="sd">            需要爬取公众号的id</span>
+<span class="sd">        cookie : str</span>
+<span class="sd">            登录微信后获取的cookie</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__biz</span> <span class="o">=</span> <span class="n">biz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Cookie&quot;</span><span class="p">:</span> <span class="n">cookie</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="Mobile.get_urls"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.Mobile.get_urls">[文档]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appmsg_token</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        appmsg_token: str</span>
+<span class="sd">            个人微信号登陆后获取的token</span>
+<span class="sd">        offset: str or int</span>
+<span class="sd">            获取起始的页数，从0开始，每次递增10（可以大于10，但是不好确认参数，所以递增10，之后再去重）</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        list:</span>
+<span class="sd">        由每个文章信息构成的数组::</span>
+
+<span class="sd">            [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &#39;app_msg_ext_info&#39;: {</span>
+<span class="sd">                        &#39;audio_fileid&#39;: 0,</span>
+<span class="sd">                        &#39;author&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;content&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;content_url&#39;: 文章url，存在转义符&#39;/&#39;需要去除,</span>
+<span class="sd">                        &#39;copyright_stat&#39;: 100,</span>
+<span class="sd">                        &#39;cover&#39;: 文章封面url，存在转义符&#39;/&#39;需要去除,</span>
+<span class="sd">                        &#39;del_flag&#39;: 1,</span>
+<span class="sd">                        &#39;digest&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;duration&#39;: 0,</span>
+<span class="sd">                        &#39;fileid&#39;: 0,</span>
+<span class="sd">                        &#39;is_multi&#39;: 0,</span>
+<span class="sd">                        &#39;item_show_type&#39;: 8,</span>
+<span class="sd">                        &#39;malicious_content_type&#39;: 0,</span>
+<span class="sd">                        &#39;malicious_title_reason_id&#39;: 0,</span>
+<span class="sd">                        &#39;multi_app_msg_item_list&#39;: [],</span>
+<span class="sd">                        &#39;play_url&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;source_url&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;subtype&#39;: 9,</span>
+<span class="sd">                        &#39;title&#39;: 文章标题</span>
+<span class="sd">                    },</span>
+<span class="sd">                    &#39;comm_msg_info&#39;: {</span>
+<span class="sd">                        &#39;content&#39;: &#39;&#39;,</span>
+<span class="sd">                        &#39;datetime&#39;: 1536930840,</span>
+<span class="sd">                        &#39;fakeid&#39;: &#39;2394588245&#39;,</span>
+<span class="sd">                        &#39;id&#39;: 1000000262,</span>
+<span class="sd">                        &#39;status&#39;: 2,</span>
+<span class="sd">                        &#39;type&#39;: 49</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">            ]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;getmsg&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__biz&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__biz</span><span class="p">,</span>
+            <span class="s2">&quot;f&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;offset&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;appmsg_token&quot;</span><span class="p">:</span> <span class="n">appmsg_token</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">origin_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/mp/profile_ext&quot;</span>
+
+        <span class="n">msg_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">origin_url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;general_msg_list&quot;</span> <span class="ow">in</span> <span class="n">msg_json</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">item</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">eval</span><span class="p">(</span><span class="n">msg_json</span><span class="p">[</span><span class="s2">&quot;general_msg_list&quot;</span><span class="p">])[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;app_msg_ext_info&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="n">lst</span>
+
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;Failure:</span><span class="se">\n</span><span class="s2">1.params is error, please check your params</span><span class="se">\n</span><span class="s2">2.key is lose efficacy, please update your key&quot;</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="WeBook"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.WeBook">[文档]</a><span class="k">class</span> <span class="nc">WeBook</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    通过微信读书，获取需要爬取的微信公众号的推文链接</span>
+<span class="sd">    vid是固定的微信账号</span>
+<span class="sd">    skey是变动的</span>
+<span class="sd">    需要注意抓取时间，如每次抓取暂停50s，则可以抓取51次左右。</span>
+<span class="sd">    该接口也不会封禁（暂时来看），如果被判定频繁，只需要在移动端进行滑动验证码，则可以继续抓取</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">skey</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">user_agent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s2">&quot;https://i.weread.qq.com/book/articles?bookId=MP_WXS_</span><span class="si">{}</span><span class="s2">&amp;count=20&amp;offset=</span><span class="si">{}</span><span class="s2">&amp;synckey=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="n">user_agent</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;WeRead/5.3.4 (iPhone; iOS 14.1; Scale/2.00)&quot;</span>
+            <span class="k">if</span> <span class="n">user_agent</span> <span class="o">==</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">user_agent</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="n">user_agent</span><span class="p">,</span>
+            <span class="s2">&quot;Cookies&quot;</span><span class="p">:</span> <span class="s2">&quot;wr_logined=1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;skey&quot;</span><span class="p">:</span> <span class="n">skey</span><span class="p">,</span>
+            <span class="s2">&quot;vid&quot;</span><span class="p">:</span> <span class="n">vid</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+
+<div class="viewcode-block" id="WeBook.get_urls"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesUrls.WeBook.get_urls">[文档]</a>    <span class="k">def</span> <span class="nf">get_urls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bookid</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bookid</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;reviews&quot;</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">():</span>
+            <span class="n">item_lst</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;reviews&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;review&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_lst</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+            <span class="k">return</span> <span class="p">[]</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">wechatarticles</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, wnma3mz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

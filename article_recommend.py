@@ -9,26 +9,22 @@ from collections import Counter
 
 import requests
 
-parser = argparse.ArgumentParser(
-    description='wechat article recommend analysis')
-parser.add_argument('--url', type=str, help='wechat article url')
-parser.add_argument('--nickname', type=str, help='wechat officename')
-parser.add_argument('--max_recursive',
-                    type=int,
-                    default=10,
-                    help='recommend url recursive depth')
-parser.add_argument('--high_frequency_value',
-                    type=int,
-                    default=20,
-                    help='max officename frequency')
+parser = argparse.ArgumentParser(description="wechat article recommend analysis")
+parser.add_argument("--url", type=str, help="wechat article url")
+parser.add_argument("--nickname", type=str, help="wechat officename")
+parser.add_argument(
+    "--max_recursive", type=int, default=10, help="recommend url recursive depth"
+)
+parser.add_argument(
+    "--high_frequency_value", type=int, default=20, help="max officename frequency"
+)
 headers = {
-    'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36'
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
 }
-relatedarticle_url = 'https://mp.weixin.qq.com/mp/relatedarticle'
+relatedarticle_url = "https://mp.weixin.qq.com/mp/relatedarticle"
 
 
-def write_data(res_lst, output_fname='graph.html'):
+def write_data(res_lst, output_fname="graph.html"):
     # 绘制graph.html
     head = """
     <!DOCTYPE html>
@@ -254,13 +250,19 @@ def write_data(res_lst, output_fname='graph.html'):
 
     </script>
     """
-    with open(output_fname, 'w', encoding='utf-8') as f:
+    with open(output_fname, "w", encoding="utf-8") as f:
         f.write(head)
         for item in res_lst:
-            if len(item['target']) < 20:
-                for target in item['target']:
-                    f.write('{ source: "' + item['source'] + '", target: "' +
-                            target + '" },' + '\n')
+            if len(item["target"]) < 20:
+                for target in item["target"]:
+                    f.write(
+                        '{ source: "'
+                        + item["source"]
+                        + '", target: "'
+                        + target
+                        + '" },'
+                        + "\n"
+                    )
         f.write(tail)
 
 
@@ -269,26 +271,26 @@ def merge_dict(source_set, lst):
     res_lst = []
     for source in source_set:
 
-        tmp = list(filter(lambda i: i['source'] == source, lst))
+        tmp = list(filter(lambda i: i["source"] == source, lst))
         tmp_set = set()
         for line in tmp:
-            tmp_set = tmp_set | line['target']
-        res_lst.append({'source': source, 'target': tmp_set})
+            tmp_set = tmp_set | line["target"]
+        res_lst.append({"source": source, "target": tmp_set})
     return res_lst
 
 
 def get_recommend_article(article_url):
     params = {
-        'action': 'getlist',
-        'count': 3,  # 可修改
-        'begin': 0,
-        'article_url': article_url
+        "action": "getlist",
+        "count": 3,  # 可修改
+        "begin": 0,
+        "article_url": article_url,
     }
     res = requests.get(relatedarticle_url, headers=headers, params=params)
-    return res.json()['list']
+    return res.json()["list"]
 
 
-def run(start_article_url, max_recursive=10, fname='d.pkl'):
+def run(start_article_url, max_recursive=10, fname="d.pkl"):
     article_url_lst = [start_article_url]
     traverse_url_set = set()
     data_lst = []
@@ -299,12 +301,11 @@ def run(start_article_url, max_recursive=10, fname='d.pkl'):
             # 遍历爬取的文章
             for article_url in article_url_lst:
                 recommend_article_lst = get_recommend_article(article_url)
-                data_lst.append({article_url:
-                                 recommend_article_lst})  # 存储已经爬取的文章
+                data_lst.append({article_url: recommend_article_lst})  # 存储已经爬取的文章
                 traverse_url_set.add(article_url)  # 已经爬取过
                 # 获取新的推荐文章，避免重复用set
                 for item in recommend_article_lst:
-                    tmp_url_set.add(item['url'])
+                    tmp_url_set.add(item["url"])
             # 如果已经爬取过，则跳过
             article_url_lst = []
             for article_url in tmp_url_set:
@@ -315,15 +316,15 @@ def run(start_article_url, max_recursive=10, fname='d.pkl'):
     except Exception as e:
         print(e)
     finally:
-        with open(fname, 'wb') as f:
+        with open(fname, "wb") as f:
             pickle.dump(data_lst, f)
 
 
-def analysis(url_nickname_dict, fname='d.pkl', high_frequency_value=20):
+def analysis(url_nickname_dict, fname="d.pkl", high_frequency_value=20):
     """
     url_nickname_dict: 链接与公众号名字的k与v
     """
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         data_lst = pickle.load(f)
 
     # 筛选出出现次数最多的公众号
@@ -334,7 +335,7 @@ def analysis(url_nickname_dict, fname='d.pkl', high_frequency_value=20):
         for recommend_item in recommend_item_lst:
             # if recommend_item['url'] not in traverse_url_set:
             #     traverse_url_set.add(recommend_item['url'])
-            nickname_lst.append(recommend_item['nickname'])
+            nickname_lst.append(recommend_item["nickname"])
 
     nc = Counter(nickname_lst)
     print(nc.most_common()[:high_frequency_value])
@@ -347,8 +348,7 @@ def analysis(url_nickname_dict, fname='d.pkl', high_frequency_value=20):
     for recommend_d in data_lst:
         recommend_item_lst = list(recommend_d.values())[0]
         for recommend_item in recommend_item_lst:
-            url_nickname_dict[
-                recommend_item['url']] = recommend_item['nickname']
+            url_nickname_dict[recommend_item["url"]] = recommend_item["nickname"]
 
     res_lst = []
     for recommend_d in data_lst:
@@ -358,18 +358,21 @@ def analysis(url_nickname_dict, fname='d.pkl', high_frequency_value=20):
         # if source_nickname not in high_frequency_nickname_lst:
         #     continue
 
-        res_lst.append({
-            'source': source_nickname,
-            'target': {
-                recomment_item['nickname']
-                for recomment_item in recomment_lst
-                if recomment_item['nickname'] in high_frequency_nickname_lst
+        res_lst.append(
+            {
+                "source": source_nickname,
+                "target": {
+                    recomment_item["nickname"]
+                    for recomment_item in recomment_lst
+                    if recomment_item["nickname"] in high_frequency_nickname_lst
+                },
             }
-        })
+        )
 
-    source_set = set(map(lambda item: item['source'], res_lst))
+    source_set = set(map(lambda item: item["source"], res_lst))
     res_lst = merge_dict(source_set, res_lst)
-    write_data(res_lst, fname.split('.pkl')[0] + '_graph.html')
+    write_data(res_lst, fname.split(".pkl")[0] + "_graph.html")
+
 
 def main():
     args = parser.parse_args()
@@ -378,11 +381,11 @@ def main():
 
     max_recursive = args.max_recursive
     high_frequency_value = args.high_frequency_value
-    fname = '{}_{}.pkl'.format(nickname, max_recursive)
+    fname = "{}_{}.pkl".format(nickname, max_recursive)
     run(article_url, max_recursive=max_recursive, fname=fname)
-    analysis({article_url: nickname},
-             fname=fname,
-             high_frequency_value=high_frequency_value)
+    analysis(
+        {article_url: nickname}, fname=fname, high_frequency_value=high_frequency_value
+    )
 
 
 if __name__ == "__main__":

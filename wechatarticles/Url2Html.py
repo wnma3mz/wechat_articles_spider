@@ -11,7 +11,10 @@ class Url2Html(object):
 
     def __init__(self, img_path=None):
         """
-        img_path: 本地存储图片的路径，采用绝对路径的方式引用图片。可不下载图片
+        Parameters
+        ----------
+        img_path: str
+            本地存储图片的路径，采用绝对路径的方式引用图片。可不下载图片
         """
         self.data_src_re = re.compile(r'data-src="(.*?)"')
         self.data_croporisrc_re = re.compile(r'data-croporisrc="(.*?)"')
@@ -21,7 +24,15 @@ class Url2Html(object):
     def replace_name(self, title):
         """
         对进行标题替换，确保标题符合windows的命名规则
-        title: 文章标题
+
+        Parameters
+        ----------
+        title: str
+            文章标题
+
+        Returns
+        ----------
+        str: 替换后的文章标题
         """
         rstr = r"[\/\\\:\*\?\"\<\>\|]"  # '/ \ : * ? " < > |'
         title = re.sub(rstr, "", title).replace("|", "").replace("\n", "")
@@ -29,8 +40,14 @@ class Url2Html(object):
 
     def download_img(self, url):
         """
-        下载图片
-        url: 图片链接
+        Parameters
+        ----------
+        url: str
+            图片链接
+
+        Returns
+        ----------
+        str: 下载图片的本地路径
         """
         # 根据链接提取图片名
         name = "{}.{}".format(url.split("/")[-2], url.split("/")[3].split("_")[-1])
@@ -51,7 +68,15 @@ class Url2Html(object):
     def replace_img(self, html):
         """
         根据提供的html源码找出其中的图片链接，并对其进行替换
-        html: 文章源码
+        
+        Parameters
+        ----------
+        html: str
+            文章HTML源码
+
+        Returns
+        ----------
+        str: 替换html中在线图片链接为本地图片路径
         """
         data_croporisrc_lst = self.data_croporisrc_re.findall(html)
         data_src_lst = self.data_src_re.findall(html)
@@ -71,7 +96,15 @@ class Url2Html(object):
     def get_title(self, html):
         """
         根据提供的html源码提取文章中的标题
-        html: 文章源码
+
+        Parameters
+        ----------
+        html: str
+            文章HTML源码
+
+        Returns
+        ----------
+        str: 根据HTML获取文章标题
         """
         try:
             # title = html.split('activity-name">')[1].split('</h2')[0].strip()
@@ -85,7 +118,15 @@ class Url2Html(object):
     def article_info(self, html):
         """
         根据提供的html源码提取文章中的公众号和作者
-        html: 文章源码
+
+        Parameters
+        ----------
+        html: str
+            文章HTML源码
+
+        Returns
+        ----------
+        (str, str): 公众号名字和作者名字
         """
         account = (
             html.split('rich_media_meta rich_media_meta_text">')[1]
@@ -98,7 +139,15 @@ class Url2Html(object):
     def get_timestamp(self, html):
         """
         根据提供的html源码提取文章发表的时间戳
-        html: 文章源码
+
+        Parameters
+        ----------
+        html: str
+            文章HTML源码
+
+        Returns
+        ----------
+        int: 文章发表的时间戳
         """
         timestamp = int(html.split('ct = "')[1].split('";')[0].strip())
         return timestamp
@@ -106,7 +155,15 @@ class Url2Html(object):
     def timestamp2date(self, timestamp):
         """
         时间戳转日期
-        timestamp: 时间戳
+
+        Parameters
+        ----------
+        timestamp: int
+                时间戳
+
+        Returns
+        ----------
+        str: 文章发表的日期，yyyy-mm-dd
         """
         ymd = time.localtime(timestamp)
         date = "{}-{}-{}".format(ymd.tm_year, ymd.tm_mon, ymd.tm_mday)
@@ -170,9 +227,12 @@ class Url2Html(object):
 
     def run(self, url, mode, proxies={"http": None, "https": None}, **kwargs):
         """
-        启动函数
-        url: 微信文章链接
-        mode: 运行模式
+        Parameters
+        ----------
+        url: str
+             微信文章链接
+        mode: int
+            运行模式
             1: 返回html源码，不下载图片
             2: 返回html源码，下载图片但不替换图片路径
             3: 返回html源码，下载图片且替换图片路径
@@ -184,6 +244,10 @@ class Url2Html(object):
             date: 日期
             proxies: 代理
             img_path: 图片下载路径
+
+        Returns
+        ----------
+        str: HTML源码或消息
         """
         self.proxies = proxies
         if mode == 1:
@@ -252,7 +316,7 @@ class Url2Html(object):
                     return "{} success!".format(url)
         else:
             print("please input correct mode num")
-            return "faied!"
+            return "failed!"
 
 
 if __name__ == "__main__":

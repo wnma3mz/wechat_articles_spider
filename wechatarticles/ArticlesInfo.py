@@ -5,23 +5,18 @@ import requests
 
 
 class ArticlesInfo(object):
-    """
-    登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等
-    """
+    """登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等"""
 
     def __init__(self, appmsg_token, cookie, proxies={"http": None, "https": None}):
         """
         初始化参数
+
         Parameters
         ----------
         cookie: str
             点开微信公众号文章抓包工具获取的cookie
         appmsg_token: str
             点开微信公众号文章抓包工具获取的appmsg_token
-
-        Returns
-        -------
-        None
         """
         self.s = requests.session()
         self.s.trust_env = False
@@ -40,14 +35,11 @@ class ArticlesInfo(object):
     def __verify_url(self, article_url):
         """
         简单验证文章url是否符合要求
+
         Parameters
         ----------
         article_url: str
             文章链接
-
-        Returns
-        -------
-        None
         """
         verify_lst = ["mp.weixin.qq.com", "__biz", "mid", "sn", "idx"]
         for string in verify_lst:
@@ -57,6 +49,7 @@ class ArticlesInfo(object):
     def read_like_nums(self, article_url):
         """
         获取阅读数和点赞数
+
         Parameters
         ----------
         article_url: str
@@ -80,6 +73,7 @@ class ArticlesInfo(object):
     def comments(self, article_url):
         """
         获取文章评论
+
         Parameters
         ----------
         article_url: str
@@ -87,7 +81,8 @@ class ArticlesInfo(object):
 
         Returns
         -------
-        json:
+        json::
+
             {
                 "base_resp": {
                     "errmsg": "ok",
@@ -138,6 +133,7 @@ class ArticlesInfo(object):
     def __get_comment_id(self, article_url):
         """
         获取comment_id
+
         Parameters
         ----------
         article_url: str
@@ -156,6 +152,7 @@ class ArticlesInfo(object):
     def __get_params(self, article_url):
         """
         解析文章url, 获取必要的请求参数
+
         Parameters
         ----------
         article_url: str
@@ -180,6 +177,7 @@ class ArticlesInfo(object):
     def __get_appmsgext(self, article_url):
         """
         获取每篇文章具体信息
+
         Parameters
         ----------
         article_url: str
@@ -188,20 +186,21 @@ class ArticlesInfo(object):
         Returns
         -------
         json:
-            文章具体信息的json
-            {
-                'advertisement_info': [],
-                'advertisement_num': 0,
-                'appmsgstat': {'is_login': True,
-                'like_num': 12,
-                'liked': False,
-                'read_num': 288,
-                'real_read_num': 0,
-                'ret': 0,
-                'show': True},
-                'base_resp': {'wxtoken': 2045685972},
-                'reward_head_imgs': []
-            }
+            文章具体信息的json::
+
+                {
+                    'advertisement_info': [],
+                    'advertisement_num': 0,
+                    'appmsgstat': {'is_login': True,
+                    'like_num': 12,
+                    'liked': False,
+                    'read_num': 288,
+                    'real_read_num': 0,
+                    'ret': 0,
+                    'show': True},
+                    'base_resp': {'wxtoken': 2045685972},
+                    'reward_head_imgs': []
+                }
         """
         __biz, mid, idx, sn = self.__get_params(article_url)
 

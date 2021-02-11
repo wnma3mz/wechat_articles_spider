@@ -1,7 +1,8 @@
 # coding: utf-8
 import os
 from pprint import pprint
-from wechatarticles import ArticlesUrls, tools
+from wechatarticles import PublicAccountsWeb
+from wechatarticles.utils import save_json
 
 if __name__ == "__main__":
     # 模拟登录微信公众号平台，获取微信文章的url
@@ -10,16 +11,16 @@ if __name__ == "__main__":
     nickname = "nickname"
     query = "query"
 
-    test = ArticlesUrls(cookie=cookie, token=token)
-    # articles_sum = test.articles_nums(nickname)
-    artiacle_data = test.articles(nickname, begin="0", count="5")
-    # officical_info = test.official_info(nickname)
+    paw = PublicAccountsWeb(cookie=cookie, token=token)
+    # articles_sum = paw.articles_nums(nickname)
+    article_data = paw.articles(nickname, begin="0", count="5")
+    # official_info = paw.official_info(nickname)
 
     # print("articles_sum:", end=" ")
     # print(articles_sum)
     print("artcles_data:")
-    pprint(artiacle_data)
-    # print("officical_info:")
-    # pprint(officical_info)
+    pprint(article_data)
+    # print("official_info:")
+    # pprint(official_info)
 
-    tools.save_json("test.json", artiacle_data)
+    save_json("paw.json", article_data)

@@ -6,11 +6,18 @@ import time
 import requests
 from bs4 import BeautifulSoup as bs
 
-from .ArticlesUrls import ArticlesUrls
+from .ArticlesUrls import PublicAccountsWeb
 
 
-class nickname2biz(object):
-    """输入公众号名称转biz"""
+class AccountBiz(object):
+    """通过公众号名称获取biz
+
+    微信公众号网页版、清博、西瓜 ['xigu', 'qingbo', 'office']
+
+    实测西瓜一次性可获取较多（目前西瓜的已废弃）
+
+
+    """
 
     def __init__(
         self,
@@ -24,17 +31,16 @@ class nickname2biz(object):
         },
     ):
         """
-        cookie: 平台登录的cookie
-        token: 官方获取时需要token
-        method: 三种获取方式，三选一
-        官方、清博、西瓜
-        ['xigu', 'qingbo', 'office']
-        实测西瓜一次性可获取较多
-
-        t: 获取一次时间间隔
-        西瓜10s
-        清博10s
-        公众号120s
+        Parameters
+        ----------
+        t: int
+            获取一次时间间隔。西瓜10s, 清博10s, 公众号120s
+        cookie: str
+            平台登录的cookie
+        token: str
+            官方获取时需要token
+        method: str
+            三种获取方式，三选一
         """
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
@@ -61,11 +67,11 @@ class nickname2biz(object):
         self.res_lst = []
         for nickname in nickname_lst:
             try:
-                officical_infos = s.official_info(nickname)
-                if officical_infos:
-                    officical_info = officical_infos[0]
-                    biz = officical_info["fakeid"]
-                    tmp = self.biz_name.format(biz, officical_info["nickname"])
+                official_infos = s.official_info(nickname)
+                if official_infos:
+                    official_info = official_infos[0]
+                    biz = official_info["fakeid"]
+                    tmp = self.biz_name.format(biz, official_info["nickname"])
                     self.res_lst.append(tmp)
                 time.sleep(self.t)
             except Exception as e:
@@ -125,8 +131,8 @@ class nickname2biz(object):
 if __name__ == "__main__":
     nickname_lst = ["科技美学", "AppSo", "InfoQ"]
     cookie = ""
-    nb = nickname2biz(cookie, method="xigua", t=10)
-    res_lst = nb.run(nickname_lst)
+    ab = AccountBiz(cookie, method="xigua", t=10)
+    res_lst = ab.run(nickname_lst)
 
     fname = "1.txt"
     with open(fname, "w", encoding="utf-8") as f:

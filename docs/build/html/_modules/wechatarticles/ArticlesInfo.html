@@ -1,0 +1,325 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>wechatarticles.ArticlesInfo &#8212; wechatarticles  文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>wechatarticles.ArticlesInfo 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding:  utf-8</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+
+
+<div class="viewcode-block" id="ArticlesInfo"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesInfo.ArticlesInfo">[文档]</a><span class="k">class</span> <span class="nc">ArticlesInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;登录WeChat，获取更加详细的推文信息。如点赞数、阅读数、评论等&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appmsg_token</span><span class="p">,</span> <span class="n">cookie</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        初始化参数</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cookie: str</span>
+<span class="sd">            点开微信公众号文章抓包工具获取的cookie</span>
+<span class="sd">        appmsg_token: str</span>
+<span class="sd">            点开微信公众号文章抓包工具获取的appmsg_token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">trust_env</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">appmsg_token</span> <span class="o">=</span> <span class="n">appmsg_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Cookie&quot;</span><span class="p">:</span> <span class="n">cookie</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;is_only_read&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;is_temp_url&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;appmsg_type&quot;</span><span class="p">:</span> <span class="s2">&quot;9&quot;</span><span class="p">,</span>  <span class="c1"># 新参数，不加入无法获取like_num</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+
+    <span class="k">def</span> <span class="nf">__verify_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        简单验证文章url是否符合要求</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">verify_lst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;mp.weixin.qq.com&quot;</span><span class="p">,</span> <span class="s2">&quot;__biz&quot;</span><span class="p">,</span> <span class="s2">&quot;mid&quot;</span><span class="p">,</span> <span class="s2">&quot;sn&quot;</span><span class="p">,</span> <span class="s2">&quot;idx&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">verify_lst</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">string</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">article_url</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;params is error, please check your article_url&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ArticlesInfo.read_like_nums"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesInfo.ArticlesInfo.read_like_nums">[文档]</a>    <span class="k">def</span> <span class="nf">read_like_nums</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取阅读数和点赞数</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (int, int):</span>
+<span class="sd">            阅读数、点赞数</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">appmsgstat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_appmsgext</span><span class="p">(</span><span class="n">article_url</span><span class="p">)[</span><span class="s2">&quot;appmsgstat&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">appmsgstat</span><span class="p">[</span><span class="s2">&quot;read_num&quot;</span><span class="p">],</span>
+                <span class="n">appmsgstat</span><span class="p">[</span><span class="s2">&quot;like_num&quot;</span><span class="p">],</span>
+                <span class="n">appmsgstat</span><span class="p">[</span><span class="s2">&quot;old_like_num&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;params is error, please check your article_url&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ArticlesInfo.comments"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.ArticlesInfo.ArticlesInfo.comments">[文档]</a>    <span class="k">def</span> <span class="nf">comments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取文章评论</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json::</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;base_resp&quot;: {</span>
+<span class="sd">                    &quot;errmsg&quot;: &quot;ok&quot;,</span>
+<span class="sd">                    &quot;ret&quot;: 0</span>
+<span class="sd">                },</span>
+<span class="sd">                &quot;elected_comment&quot;: [</span>
+<span class="sd">                    {</span>
+<span class="sd">                        &quot;content&quot;: 用户评论文字,</span>
+<span class="sd">                        &quot;content_id&quot;: &quot;6846263421277569047&quot;,</span>
+<span class="sd">                        &quot;create_time&quot;: 1520098511,</span>
+<span class="sd">                        &quot;id&quot;: 3,</span>
+<span class="sd">                        &quot;is_from_friend&quot;: 0,</span>
+<span class="sd">                        &quot;is_from_me&quot;: 0,</span>
+<span class="sd">                        &quot;is_top&quot;: 0, 是否被置顶</span>
+<span class="sd">                        &quot;like_id&quot;: 10001,</span>
+<span class="sd">                        &quot;like_num&quot;: 3,</span>
+<span class="sd">                        &quot;like_status&quot;: 0,</span>
+<span class="sd">                        &quot;logo_url&quot;: &quot;http://wx.qlogo.cn/mmhead/OibRNdtlJdkFLMHYLMR92Lvq0PicDpJpbnaicP3Z6kVcCicLPVjCWbAA9w/132&quot;,</span>
+<span class="sd">                        &quot;my_id&quot;: 23,</span>
+<span class="sd">                        &quot;nick_name&quot;: 评论用户的名字,</span>
+<span class="sd">                        &quot;reply&quot;: {</span>
+<span class="sd">                            &quot;reply_list&quot;: [ ]</span>
+<span class="sd">                        }</span>
+<span class="sd">                    }</span>
+<span class="sd">                ],</span>
+<span class="sd">                &quot;elected_comment_total_cnt&quot;: 3, 评论总数</span>
+<span class="sd">                &quot;enabled&quot;: 1,</span>
+<span class="sd">                &quot;friend_comment&quot;: [ ],</span>
+<span class="sd">                &quot;is_fans&quot;: 1,</span>
+<span class="sd">                &quot;logo_url&quot;: &quot;http://wx.qlogo.cn/mmhead/Q3auHgzwzM6GAic0FAHOu9Gtv5lEu5kUqO6y6EjEFjAhuhUNIS7Y2AQ/132&quot;,</span>
+<span class="sd">                &quot;my_comment&quot;: [ ],</span>
+<span class="sd">                &quot;nick_name&quot;: 当前用户名,</span>
+<span class="sd">                &quot;only_fans_can_comment&quot;: false</span>
+<span class="sd">            }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">__biz</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_params</span><span class="p">(</span><span class="n">article_url</span><span class="p">)</span>
+        <span class="n">getcomment_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&amp;__biz=</span><span class="si">{}</span><span class="s2">&amp;idx=</span><span class="si">{}</span><span class="s2">&amp;comment_id=</span><span class="si">{}</span><span class="s2">&amp;limit=100&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">getcomment_url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__biz</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_comment_id</span><span class="p">(</span><span class="n">article_url</span><span class="p">))</span>
+            <span class="n">comment_json</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">comment_json</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="n">comment_json</span></div>
+
+    <span class="k">def</span> <span class="nf">__get_comment_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取comment_id</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str:</span>
+<span class="sd">            comment_id获取评论必要参数</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">article_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
+        <span class="c1"># 使用正则提取comment_id</span>
+        <span class="n">comment_id</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;comment_id = &quot;\d+&quot;&#39;</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">comment_id</span>
+
+    <span class="k">def</span> <span class="nf">__get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        解析文章url, 获取必要的请求参数</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        (str, str, str, str):</span>
+<span class="sd">            __biz, mid, idx, sn</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 简单验证文章的url是否正确</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__verify_url</span><span class="p">(</span><span class="n">article_url</span><span class="p">)</span>
+
+        <span class="c1"># 切分url, 提取相应的参数</span>
+        <span class="n">string_lst</span> <span class="o">=</span> <span class="n">article_url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">)</span>
+        <span class="n">dict_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">string</span><span class="p">[</span><span class="n">string</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">string_lst</span><span class="p">]</span>
+        <span class="n">__biz</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sn</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">dict_value</span>
+        <span class="n">sn</span> <span class="o">=</span> <span class="n">sn</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="n">sn</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;#&quot;</span> <span class="k">else</span> <span class="n">sn</span>
+
+        <span class="k">return</span> <span class="n">__biz</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sn</span>
+
+    <span class="k">def</span> <span class="nf">__get_appmsgext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">article_url</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        获取每篇文章具体信息</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        article_url: str</span>
+<span class="sd">            文章链接</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        json:</span>
+<span class="sd">            文章具体信息的json::</span>
+
+<span class="sd">                {</span>
+<span class="sd">                    &#39;advertisement_info&#39;: [],</span>
+<span class="sd">                    &#39;advertisement_num&#39;: 0,</span>
+<span class="sd">                    &#39;appmsgstat&#39;: {&#39;is_login&#39;: True,</span>
+<span class="sd">                    &#39;like_num&#39;: 12,</span>
+<span class="sd">                    &#39;liked&#39;: False,</span>
+<span class="sd">                    &#39;read_num&#39;: 288,</span>
+<span class="sd">                    &#39;real_read_num&#39;: 0,</span>
+<span class="sd">                    &#39;ret&#39;: 0,</span>
+<span class="sd">                    &#39;show&#39;: True},</span>
+<span class="sd">                    &#39;base_resp&#39;: {&#39;wxtoken&#39;: 2045685972},</span>
+<span class="sd">                    &#39;reward_head_imgs&#39;: []</span>
+<span class="sd">                }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">__biz</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_params</span><span class="p">(</span><span class="n">article_url</span><span class="p">)</span>
+
+        <span class="c1"># 将params参数换到data中请求。这一步貌似不换也行</span>
+        <span class="n">origin_url</span> <span class="o">=</span> <span class="s2">&quot;https://mp.weixin.qq.com/mp/getappmsgext?&quot;</span>
+        <span class="n">appmsgext_url</span> <span class="o">=</span> <span class="n">origin_url</span> <span class="o">+</span> <span class="s2">&quot;appmsg_token=</span><span class="si">{}</span><span class="s2">&amp;x5=0&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">appmsg_token</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;__biz&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__biz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;sn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+
+        <span class="c1"># appmsgext_url = origin_url + &quot;__biz={}&amp;mid={}&amp;sn={}&amp;idx={}&amp;appmsg_token={}&amp;x5=1&quot;.format(</span>
+        <span class="c1">#     __biz, mid, sn, idx, self.appmsg_token)</span>
+        <span class="n">appmsgext_json</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="n">appmsgext_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="s2">&quot;appmsgstat&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">appmsgext_json</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;get info error, please check your cookie and appmsg_token&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">appmsgext_json</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">wechatarticles</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, wnma3mz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

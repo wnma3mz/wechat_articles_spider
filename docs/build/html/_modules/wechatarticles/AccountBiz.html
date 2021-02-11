@@ -1,0 +1,241 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>wechatarticles.AccountBiz &#8212; wechatarticles  文档</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="搜索" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>wechatarticles.AccountBiz 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span> <span class="k">as</span> <span class="n">bs</span>
+
+<span class="kn">from</span> <span class="nn">.ArticlesUrls</span> <span class="kn">import</span> <span class="n">PublicAccountsWeb</span>
+
+
+<div class="viewcode-block" id="AccountBiz"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.AccountBiz.AccountBiz">[文档]</a><span class="k">class</span> <span class="nc">AccountBiz</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;通过公众号名称获取biz</span>
+
+<span class="sd">    微信公众号网页版、清博、西瓜 [&#39;xigu&#39;, &#39;qingbo&#39;, &#39;office&#39;]</span>
+
+<span class="sd">    实测西瓜一次性可获取较多（目前西瓜的已废弃）</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cookie</span><span class="p">,</span>
+        <span class="n">token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">t</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span>
+        <span class="n">proxies</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;http&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        t: int</span>
+<span class="sd">            获取一次时间间隔。西瓜10s, 清博10s, 公众号120s</span>
+<span class="sd">        cookie: str</span>
+<span class="sd">            平台登录的cookie</span>
+<span class="sd">        token: str</span>
+<span class="sd">            官方获取时需要token</span>
+<span class="sd">        method: str</span>
+<span class="sd">            三种获取方式，三选一</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Cookie&quot;</span><span class="p">:</span> <span class="n">cookie</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xigua&quot;</span><span class="p">,</span> <span class="s2">&quot;qingbo&quot;</span><span class="p">,</span> <span class="s2">&quot;office&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookie</span> <span class="o">=</span> <span class="n">cookie</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">biz_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proxies</span> <span class="o">=</span> <span class="n">proxies</span>
+
+<div class="viewcode-block" id="AccountBiz.run"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.AccountBiz.AccountBiz.run">[文档]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname_lst</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;xigua&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xigua</span><span class="p">(</span><span class="n">nickname_lst</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;qingbo&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">qingbo</span><span class="p">(</span><span class="n">nickname_lst</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">ArticlesUrls</span><span class="p">(</span><span class="n">cookie</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">office</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">nickname_lst</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AccountBiz.office"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.AccountBiz.AccountBiz.office">[文档]</a>    <span class="k">def</span> <span class="nf">office</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">nickname_lst</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nickname</span> <span class="ow">in</span> <span class="n">nickname_lst</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">official_infos</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">official_info</span><span class="p">(</span><span class="n">nickname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">official_infos</span><span class="p">:</span>
+                    <span class="n">official_info</span> <span class="o">=</span> <span class="n">official_infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">biz</span> <span class="o">=</span> <span class="n">official_info</span><span class="p">[</span><span class="s2">&quot;fakeid&quot;</span><span class="p">]</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">biz_name</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">biz</span><span class="p">,</span> <span class="n">official_info</span><span class="p">[</span><span class="s2">&quot;nickname&quot;</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span></div>
+
+<div class="viewcode-block" id="AccountBiz.xigua"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.AccountBiz.AccountBiz.xigua">[文档]</a>    <span class="k">def</span> <span class="nf">xigua</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname_lst</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://data.xiguaji.com/Search/SearchAct/?type=1&amp;key=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nickname</span> <span class="ow">in</span> <span class="n">nickname_lst</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nickname</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+                <span class="p">)</span>
+                <span class="n">soup</span> <span class="o">=</span> <span class="n">bs</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;lxml&quot;</span><span class="p">)</span>
+                <span class="n">infos</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="s2">&quot;number-details&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">infos</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="n">infos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">nickname</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">h3</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">biz</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="s2">&quot;src&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__biz=&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">biz_name</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">biz</span><span class="p">,</span> <span class="n">nickname</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span></div>
+
+<div class="viewcode-block" id="AccountBiz.qingbo"><a class="viewcode-back" href="../../wechatarticles.html#wechatarticles.AccountBiz.AccountBiz.qingbo">[文档]</a>    <span class="k">def</span> <span class="nf">qingbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nickname_lst</span><span class="p">):</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://www.gsdata.cn/query/wx?q=</span><span class="si">{}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">nickname</span> <span class="ow">in</span> <span class="n">nickname_lst</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nickname</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxies</span>
+                <span class="p">)</span>
+                <span class="n">biz_lst</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s1">&#39;&lt;input type=&quot;hidden&quot; class=&quot;biz&quot; value=&quot;(.+)&quot;&gt;?&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">text</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">biz_lst</span> <span class="o">!=</span> <span class="p">[]:</span>
+                    <span class="n">nicknames_lst</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                        <span class="sa">r</span><span class="s1">&#39;&lt;span class=&quot;color-pink&quot;&gt;(.+)&lt;/span&gt;&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">text</span>
+                    <span class="p">)</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">biz_name</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">biz_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nicknames_lst</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">res_lst</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">nickname_lst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;科技美学&quot;</span><span class="p">,</span> <span class="s2">&quot;AppSo&quot;</span><span class="p">,</span> <span class="s2">&quot;InfoQ&quot;</span><span class="p">]</span>
+    <span class="n">cookie</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">ab</span> <span class="o">=</span> <span class="n">AccountBiz</span><span class="p">(</span><span class="n">cookie</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;xigua&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">res_lst</span> <span class="o">=</span> <span class="n">ab</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">nickname_lst</span><span class="p">)</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;1.txt&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">res_lst</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">wechatarticles</a></h1>
+
+
+
+
+
+
+
+
+<h3>导航</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">模块代码</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="转向" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, wnma3mz.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
