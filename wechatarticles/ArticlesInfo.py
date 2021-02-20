@@ -32,6 +32,7 @@ class ArticlesInfo(object):
             "appmsg_type": "9",  # 新参数，不加入无法获取like_num
         }
         self.proxies = proxies
+        self.too_frequently_text = "你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面"
 
     def __verify_url(self, article_url):
         """
@@ -122,14 +123,14 @@ class ArticlesInfo(object):
         __biz, _, idx, _ = self.__get_params(article_url)
         getcomment_url = "https://mp.weixin.qq.com/mp/appmsg_comment?action=getcomment&__biz={}&idx={}&comment_id={}&limit=100"
         try:
-            url = getcomment_url.format(__biz, idx, self.__get_comment_id(article_url))
-            comment_json = self.s.get(
-                url, headers=self.headers, proxies=self.proxies
-            ).json()
+            comment_id = self.__get_comment_id(article_url)
+            if comment_id == "":
+                return {}
+            url = getcomment_url.format(__biz, idx, comment_id)
+            return self.s.get(url, headers=self.headers, proxies=self.proxies).json()
         except Exception as e:
             print(e)
-            comment_json = {}
-        return comment_json
+            return {}
 
     def __get_comment_id(self, article_url):
         """
@@ -147,8 +148,10 @@ class ArticlesInfo(object):
         """
         res = self.s.get(article_url, data=self.data, proxies=self.proxies)
         # 使用正则提取comment_id
-        comment_id = re.findall(r'comment_id = "\d+"', res.text)[0].split(" ")[-1][1:-1]
-        return comment_id
+        comment_id = re.findall(r'comment_id = "\d+"', res.text)
+        if len(comment_id) > 0:
+            return comment_id[0].split(" ")[-1][1:-1]
+        return ""
 
     def __get_params(self, article_url):
         """
@@ -166,7 +169,6 @@ class ArticlesInfo(object):
         """
         # 简单验证文章的url是否正确
         self.__verify_url(article_url)
-
         # 切分url, 提取相应的参数
         string_lst = article_url.split("?")[1].split("&")
         dict_value = [string[string.index("=") + 1 :] for string in string_lst]
@@ -223,14 +225,15 @@ class ArticlesInfo(object):
             raise Exception("get info error, please check your cookie and appmsg_token")
         return appmsgext_json
 
-    def content(self, url):
-        html_text = self.s.get(
-            url.strip(), headers=self.headers, proxies=self.proxies
-        ).text
+    def __get_content(self, url):
+        return self.s.get(url.strip(), headers=self.headers, proxies=self.proxies).text
+
+    def content(self, url, html_text=None):
+        if html_text == None:
+            html_text = self.__get_content(url)
 
         soup = bs(html_text, "lxml")
-        ctext = "你的访问过于频繁，需要从微信打开验证身份，是否需要继续访问当前页面"
-        if ctext in html_text:
+        if self.too_frequently_text in html_text:
             raise SystemError("访问频繁！")
         # js加载
         # html.text.split('var content = ')[1].split('var')[0].strip()
@@ -246,3 +249,113 @@ class ArticlesInfo(object):
                 return content_p, len(content_p), 0
         except:
             return "", 0, 0
+
+    def complete_content(self, url, html_text=None):
+        if html_text == None:
+            html_text = self.__get_content(url)
+
+        innerlink_flag = 0
+        video_flag = 0
+        imgs_flag = 0
+        account_key_string_lst = [
+            "此帐号已被屏蔽, 内容无法查看",
+            "该公众号已迁移",
+            "此帐号已自主注销，内容无法查看",
+            "此帐号处于帐号迁移流程中",
+            "此帐号被投诉且经审核涉嫌侵权。此帐号已注销，内容无法查看。",
+        ]
+        key_string_lst = [
+            "该内容已被发布者删除",
+            "此内容因违规无法查看",
+            "此内容被投诉且经审核涉嫌侵权，无法查看。",
+            "此内容被多人投诉，相关的内容无法进行查看。",
+        ]
+
+        if self.too_frequently_text in html_text:
+            raise SystemError("访问频繁！")
+
+        for key_string in key_string_lst:
+            if key_string in html_text:
+                title = key_string
+                return (
+                    "",
+                    title,
+                    "",
+                    "",
+                    imgs_flag,
+                    innerlink_flag,
+                    video_flag,
+                )
+        for key_string in account_key_string_lst:
+            if key_string in html_text:
+                title = key_string
+                return (
+                    "",
+                    title,
+                    "",
+                    "",
+                    imgs_flag,
+                    innerlink_flag,
+                    video_flag,
+                )
+
+        try:
+            title = html_text.split("<h2")[1].split("</h2")[0].split(">")[1].strip()
+        except Exception as e:
+            title = ""
+
+        if 'ct = "' in html_text:
+            timestamp = int(html_text.split('ct = "')[1].split('";')[0].strip())
+        else:
+            timestamp = (
+                html_text.split("ct = ")[1].split("|| '")[1].split("'")[0].strip()
+            )
+            timestamp = int(timestamp) if timestamp != "" else 0
+
+        if "copyright" in html_text:
+            if '_copyright_stat = "' in html_text:
+                copyright_stat = int(
+                    html_text.split('_copyright_stat = "')[1].split('";')[0].strip()
+                )
+            else:
+                copyright_stat = (
+                    html_text.split("copyright_stat =")[1]
+                    .split("|| '")[1]
+                    .split("'")[0]
+                    .strip()
+                )
+                copyright_stat = int(copyright_stat) if copyright_stat != "" else 0
+        else:
+            copyright_stat = 0
+
+        if "nick_name = " in html_text:
+            nickname = (
+                html_text.split("nick_name = ")[1]
+                .split("|| '")[1]
+                .split("'")[0]
+                .strip()
+            )
+        else:
+            nickname = html_text.split('nickname = "')[1].split('";')[0].strip()
+
+        soup = bs(html_text, "lxml")
+
+        body = soup.find(class_="rich_media_area_primary_inner")
+        imgs_flag = len(body.find_all("img"))
+        a_lst = body.find_all("a")
+        for a_item in a_lst:
+            if "tab" in a_item.attrs.keys() and a_item.attrs["tab"] == "innerlink":
+                innerlink_flag = 1
+                break
+        video_lst = body.find_all(class_="js_video_channel_container")
+        if len(video_lst) > 0:
+            video_flag = 1
+        return (
+            nickname,
+            title,
+            timestamp,
+            copyright_stat,
+            imgs_flag,
+            innerlink_flag,
+            video_flag,
+        )
