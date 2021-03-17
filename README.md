@@ -1,6 +1,7 @@
 # 微信公众号文章爬虫（微信文章阅读点赞的获取）
 
 ![](https://img.shields.io/pypi/v/wechatarticles)![](https://img.shields.io/pypi/l/wechatarticles)[![](https://img.shields.io/badge/docs-building-blue)](https://wnma3mz.github.io/wechat_articles_spider/build/html/index.html)
+
 安装
 
 `pip install wechatarticles`
@@ -19,9 +20,9 @@
 
 2. 不（能）做实时获取参数
 
-3. 参数过期需要手动更新
+3. 换一个公众号、参数过期，均需手动更新，如何获取参数均在文章中提及，请仔细查阅
 
-4. 换一个公众号需要手动更新
+4. 不能做关键词搜索（即微信搜一搜功能），比如搜索所有含“科技”两个字的文章。
 
 注：本项目仅供学习交流，严禁用于商业用途（该项目也没法直接使用），不能达到开箱即用的水平。使用本项目需要读文档+源码+动手实践，参考示例代码（`test`文件夹下）进行改写。
 

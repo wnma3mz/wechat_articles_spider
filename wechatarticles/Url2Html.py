@@ -4,6 +4,7 @@ import re
 import time
 
 import requests
+from bs4 import BeautifulSoup as bs
 
 
 class Url2Html(object):
@@ -68,7 +69,7 @@ class Url2Html(object):
     def replace_img(self, html):
         """
         根据提供的html源码找出其中的图片链接，并对其进行替换
-        
+
         Parameters
         ----------
         html: str
@@ -128,11 +129,12 @@ class Url2Html(object):
         ----------
         (str, str): 公众号名字和作者名字
         """
-        account = (
-            html.split('rich_media_meta rich_media_meta_text">')[1]
-            .split("</span")[0]
-            .strip()
-        )
+        # account = (
+        #     html.split('rich_media_meta rich_media_meta_text">')[1]
+        #     .split("</span")[0]
+        #     .strip()
+        # )
+        account = html.split('nickname = "')[1].split('"')[0]
         author = html.split('id="js_name">')[1].split("</a")[0].strip()
         return account, author
 
@@ -252,7 +254,7 @@ class Url2Html(object):
         self.proxies = proxies
         if mode == 1:
             return requests.get(url, proxies=proxies).text
-        elif mode in [2, 3, 4]:
+        elif mode in [2, 3, 4, 5]:
             if "img_path" in kwargs.keys():
                 self.img_path = kwargs["img_path"]
             else:
@@ -264,56 +266,35 @@ class Url2Html(object):
                 html_img, _ = self.replace_img(html)
                 return html_img
             else:
-                if "img_path" in kwargs.keys():
-                    self.img_path = kwargs["img_path"]
-                else:
-                    return "{} 请输入保存图片路径!".format(url)
-                if mode == 2:
-                    return requests.get(url, proxies=proxies).text
-                elif mode == 3:
+                account = kwargs["account"] if "account" in kwargs.keys() else None
+                self.account = account
+                title = kwargs["title"] if "title" in kwargs.keys() else None
+                date = kwargs["date"] if "date" in kwargs.keys() else None
+                proxies = kwargs["proxies"] if "proxies" in kwargs.keys() else None
+                if self.account and title and date:
+                    title = os.path.join(
+                        self.account,
+                        "[{}]-{}-{}".format(
+                            self.account, date, self.replace_name(title)
+                        ),
+                    )
+                    if os.path.isfile("{}.html".format(title)):
+                        return 0
                     html = requests.get(url, proxies=proxies).text
-                    html_img, _ = self.replace_img(html)
-                    return html_img
                 else:
-                    if "account" in kwargs.keys():
-                        self.account = kwargs["account"]
-                    else:
-                        self.account = None
-                    if "title" in kwargs.keys():
-                        title = kwargs["title"]
-                    else:
-                        title = None
-                    if "date" in kwargs.keys():
-                        date = kwargs["date"]
-                    else:
-                        date = None
-                    if "proxies" in kwargs.keys():
-                        proxies = kwargs["proxies"]
-                    else:
-                        proxies = None
-                    if self.account and title and date:
-                        title = os.path.join(
-                            self.account,
-                            "[{}]-{}-{}".format(
-                                self.account, date, self.replace_name(title)
-                            ),
-                        )
-                        if os.path.isfile("{}.html".format(title)):
-                            return 0
-                        html = requests.get(url, proxies=proxies).text
-                    else:
-                        html = requests.get(url, proxies=proxies).text
-                        title = self.rename_title(title, html)
+                    html = requests.get(url, proxies=proxies).text
+                    title = self.rename_title(title, html)
 
+                if mode == 5:
                     try:
-                        if mode == 5:
-                            self.download_media(html, title)
+                        self.download_media(html, title)
                     except Exception as e:
-                        print(fj, title)
-                    html_img, _ = self.replace_img(html)
-                    with open("{}.html".format(title), "w", encoding="utf-8") as f:
-                        f.write(html_img)
-                    return "{} success!".format(url)
+                        print(e)
+                        print(title)
+                html_img, _ = self.replace_img(html)
+                with open("{}.html".format(title), "w", encoding="utf-8") as f:
+                    f.write(html_img)
+                return "{} success!".format(url)
         else:
             print("please input correct mode num")
             return "failed!"
