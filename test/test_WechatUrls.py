@@ -9,7 +9,6 @@ if __name__ == "__main__":
     cookie = "cookie"
     token = "token"
     nickname = "nickname"
-    query = "query"
 
     paw = PublicAccountsWeb(cookie=cookie, token=token)
     # articles_sum = paw.articles_nums(nickname)
