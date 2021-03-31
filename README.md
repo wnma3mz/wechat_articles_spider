@@ -12,18 +12,6 @@
 
 技术交流可以直接联系，微信二维码见末尾（微信；wnma3mz)。烦请进行备注，如wechat_spider
 
-统一回复，项目可正常运行。若不能正常运行，该行会删除。
-
-联系前请注意：
-
-1. 不（能）做自动登录微信公众号、微信
-
-2. 不（能）做实时获取参数
-
-3. 换一个公众号、参数过期，均需手动更新，如何获取参数均在文章中提及，请仔细查阅
-
-4. 不能做关键词搜索（即微信搜一搜功能），比如搜索所有含“科技”两个字的文章。
-
 注：本项目仅供学习交流，严禁用于商业用途（该项目也没法直接使用），不能达到开箱即用的水平。使用本项目需要读文档+源码+动手实践，参考示例代码（`test`文件夹下）进行改写。
 
 提示：另外，已经有很多朋友（大佬）通过直接看源码，已经基于这套项目，或者重写，用于各自的需求。
@@ -53,7 +41,7 @@
 
 ## Notes
 
-项目始于2017年，当前更新于2021年2月
+项目始于2017年，当前更新于2021年3月
 
 项目代码进行调整，调用以前的接口请使用`pip install wechatarticles==0.5.8`。
 
@@ -117,11 +105,49 @@ wechat_cookie和appmsg_token手动获取的介绍，可以参考[这篇文档](h
 wechat_cookie和appmsg_token自动获取的介绍（需要安装`mitmproxy`，已放弃），仅供参考[这篇文档](https://github.com/wnma3mz/wechat_articles_spider/blob/master/docs/关于自动获取微信参数.md)。默认开放端口为8080。
 
 
-## 打赏部分
+联系注意事项：
+
+1. 不（能）做自动登录微信公众号、微信
+
+2. 不（能）做实时获取参数
+
+3. 换一个公众号、参数过期，均需手动更新，如何获取参数均在文章中提及，请仔细查阅
+
+4. 不能做关键词搜索（即微信搜一搜功能），比如搜索所有含“科技”两个字的文章。
+
+Q & A
+
+1. 项目能不能正常运行？
+
+  答：项目可正常运行。
+  
+2. xxx怎么运行/启动，需要获取哪些参数？
+
+  答：请看源码，并手动运行看看输出报错。
+
+3. xxx参数怎么获取？
+
+  答：文档和博客均描述的很清楚，请仔细阅读。
+
+4. 我要xxxx，需要怎么做？
+
+  答：看文档，看源码
+
+附录：
+
+问问题的正常方式：
+
+1. 描述清楚你运行的系统环境、Python环境...
+
+2. 运行了什么代码（改动了哪部分），报了什么错（请完整截图）？
+
+3. 自己根据报错做了哪些尝试？（文档中是否有描述？在网上搜索的解决方案有哪些）
+
+请按照以上流程进行提问，如果加完好友问题表述不清，一律无视。谢谢！
+
+若无动手能力，学习兴趣，本项目可能不适合你。请不要抱着“我就问这么一个问题，能占用多少时间的心态”，如果每个看到项目的人都占用1分钟，沟通成本巨大，请理解。谢谢！
 
 <figure class="third">
    微信二维码
 <img src="https://i.loli.net/2019/09/20/14QGTkfgstDxv9C.jpg"  width="50%" id="wechat_account" /><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/wechat.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay.jpg" width="260"><img src="https://raw.githubusercontent.com/wnma3mz/wechat_articles_spider/master/imgs/Alipay_redpaper.jpg" width="260">
 </figure>
-
-
