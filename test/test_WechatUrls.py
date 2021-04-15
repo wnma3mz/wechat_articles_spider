@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     paw = PublicAccountsWeb(cookie=cookie, token=token)
     # articles_sum = paw.articles_nums(nickname)
-    article_data = paw.articles(nickname, begin="0", count="5")
+    article_data = paw.get_urls(nickname, begin="0", count="5")
     # official_info = paw.official_info(nickname)
 
     # print("articles_sum:", end=" ")
