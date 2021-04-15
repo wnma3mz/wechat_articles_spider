@@ -22,7 +22,8 @@ class Url2Html(object):
         self.src_re = re.compile(r'src="(.*?)"')
         self.img_path = img_path
 
-    def replace_name(self, title):
+    @staticmethod
+    def replace_name(title):
         """
         对进行标题替换，确保标题符合windows的命名规则
 
@@ -94,7 +95,8 @@ class Url2Html(object):
                 html = html.replace(img_url, data_src).replace("data-src=", "src=")
         return html, img_lst
 
-    def get_title(self, html):
+    @staticmethod
+    def get_title(html):
         """
         根据提供的html源码提取文章中的标题
 
@@ -116,7 +118,8 @@ class Url2Html(object):
             print(html.split("<h2")[1].split("</h2")[0])
             return ""
 
-    def article_info(self, html):
+    @staticmethod
+    def article_info(html):
         """
         根据提供的html源码提取文章中的公众号和作者
 
@@ -138,7 +141,8 @@ class Url2Html(object):
         author = html.split('id="js_name">')[1].split("</a")[0].strip()
         return account, author
 
-    def get_timestamp(self, html):
+    @staticmethod
+    def get_timestamp(html):
         """
         根据提供的html源码提取文章发表的时间戳
 
@@ -154,7 +158,8 @@ class Url2Html(object):
         timestamp = int(html.split('ct = "')[1].split('";')[0].strip())
         return timestamp
 
-    def timestamp2date(self, timestamp):
+    @staticmethod
+    def timestamp2date(timestamp):
         """
         时间戳转日期
 
@@ -203,7 +208,8 @@ class Url2Html(object):
         )
         return title
 
-    def download_media(self, html, title):
+    @staticmethod
+    def download_media(html, title):
         soup = bs(html, "lxml")
         # mp3
         mpvoice_item_lst = soup.find_all("mpvoice")
@@ -227,6 +233,10 @@ class Url2Html(object):
                 with open("{}.mp4".format(title), "wb") as f:
                     f.write(doc.content)
 
+    @staticmethod
+    def test_replace_img(html):
+        return html.replace("data-src=", "src=").replace("wx_fmt=jpeg", "wx_fmt=web")
+
     def run(self, url, mode, proxies={"http": None, "https": None}, **kwargs):
         """
         Parameters
@@ -240,6 +250,7 @@ class Url2Html(object):
             3: 返回html源码，下载图片且替换图片路径
             4: 保存html源码，下载图片且替换图片路径
             5: 保存html源码，下载图片且替换图片路径，并下载视频与音频
+            6: 返回html源码，不下载图片，替换src和图片为web
         kwargs:
             account: 公众号名
             title: 文章名
@@ -254,6 +265,8 @@ class Url2Html(object):
         self.proxies = proxies
         if mode == 1:
             return requests.get(url, proxies=proxies).text
+        elif mode == 6:
+            return self.test_replace_img(requests.get(url, proxies=proxies).text)
         elif mode in [2, 3, 4, 5]:
             if "img_path" in kwargs.keys():
                 self.img_path = kwargs["img_path"]

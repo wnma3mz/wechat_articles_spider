@@ -123,6 +123,31 @@ def read_nickname(fname):
 def get_history_urls(
     biz, uin, key, lst=[], start_timestamp=0, count=10, endcount=99999
 ):
+    """
+    获取历史文章链接
+
+    Parameters
+    ----------
+    biz: str
+        公众号id
+    uin: str
+        个人微信号id
+    key: str
+        个人微信号key
+    lst: list
+        已有的数据列表
+    start_timestampe: int
+        截至时间戳
+    count: int
+        开始的条数
+    endcount: int
+        截至条数
+
+    Returns
+    -------
+    lst:
+        获取到的历史文章数据
+    """
     t = PC(biz=biz, uin=uin, cookie="")
     try:
         while True:
@@ -173,58 +198,6 @@ def timestamp2date(timestamp):
     time_array = time.localtime(int(timestamp))
     datetime = time.strftime("%Y-%m-%d %H:%M:%S", time_array)
     return datetime
-
-
-def save_mongo(
-    data, host=None, port=None, name=None, password="", dbname=None, collname=None
-):
-    """
-    存储数据到mongo
-
-    Parameters
-    ----------
-    data: list
-        需要插入的数据
-    host: str
-        主机名(默认为本机数据库)
-    port: int
-        mongo所在主机开放的端口，默认为27017
-    username: str
-        用户名
-    password: str
-        用户密码
-    dbname: str
-        远程连接的数据库名
-    collname: str
-        需要插入的集合名(collection)
-    Returns
-    -------
-    None
-    """
-    HOST = "localhost"
-    PORT = 27017
-
-    # 检查参数
-    host = HOST if host is None else host
-    port = PORT if port is None else port
-
-    assert isinstance(host, str)
-    assert isinstance(name, str)
-    assert isinstance(password, str)
-    assert isinstance(dbname, str)
-    assert isinstance(collname, str)
-
-    if not isinstance(port, int):
-        raise TypeError("port must be an instance of int")
-
-    from pymongo import MongoClient
-
-    # 连接数据库，一次性插入数据
-    client = MongoClient(host, port)
-    db_auth = client.admin
-    db_auth.authenticate(name, password)
-    coll = client[dbname][collname]
-    coll.insert_many(data)
 
 
 def save_json(fname, data):

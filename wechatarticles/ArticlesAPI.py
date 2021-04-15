@@ -124,7 +124,7 @@ class ArticlesAPI(object):
         如果list为空则说明没有相关文章
         """
         # 获取文章数据
-        article_data = self.official.articles(
+        article_data = self.official.get_urls(
             nickname, begin=str(begin), count=str(count)
         )
 
@@ -221,7 +221,7 @@ class ArticlesAPI(object):
             try:
                 # 获取文章数据
                 article_datas.append(
-                    self.official.articles(nickname, begin=str(begin), count=str(count))
+                    self.official.get_urls(nickname, begin=str(begin), count=str(count))
                 )
             except Exception as e:
                 print(e)
