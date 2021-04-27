@@ -81,14 +81,11 @@
 此处有次数限制，不可一次获取太多url。解决方案多个账号同时爬取
 [test_WechatUrls.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatUrls.py)
 
-#### 登录微信PC端获取文章信息
+#### 登录微信PC端获取文章信息（阅读点赞）
 [test_WechatInfo.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_WechatInfo.py)
 
 #### 快速获取大量文章urls（利用历史文章获取链接）
 [test_GetUrls.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_GetUrls.py)
-
-#### 利用公众号获取链接，并获取阅读点赞
-[test_ArticlesAPI.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_ArticlesAPI.py)
 
 #### 微信文章下载为离线HTML（含图片）
 [test_Url2Html.py](https://github.com/wnma3mz/wechat_articles_spider/blob/master/test/test_Url2Html.py)
@@ -119,27 +116,27 @@ Q & A
 
 1. 项目能不能正常运行？
 
-  答：项目可正常运行。
-  
+     答：项目可正常运行。
+
 2. xxx怎么运行/启动，需要获取哪些参数？
 
-  答：请看源码，并手动运行看看输出报错。
+     答：请看源码，并手动运行看看输出报错。
 
 3. xxx参数怎么获取？
 
-  答：文档和博客均描述的很清楚，请仔细阅读。
+     答：文档和博客均描述的很清楚，请仔细阅读。
 
 4. 我要xxxx，需要怎么做？
 
-  答：看文档，看源码
+     答：看文档，看源码
 
 5. 网页每日更新的方式怎么做的？
 
-  答：不是万能key。方案很简单，就是模拟点击+代理软件(Fiddler或Mitmproxy)拦截包，每日抓一次，如果你有更好的方案也欢迎告知。这部分未开源（如果有看到相关完整开源的可以提个issue学习一下），纯粹是因为配环境+定制化太麻烦，而且存在一定的问题。懂的看到这里能够实现的就能实现，如果问我我也不好回答你，太耗时耗力。
+     答：不是万能key。方案很简单，就是模拟点击+代理软件(Fiddler或Mitmproxy)拦截包，每日抓一次，如果你有更好的方案也欢迎告知。这部分未开源（如果有看到相关完整开源的可以提个issue学习一下），纯粹是因为配环境+定制化太麻烦，而且存在一定的问题。懂的看到这里能够实现的就能实现，如果问我我也不好回答你，太耗时耗力。
 
 6. PC端微信与抓包软件Fiddler是必装的吗？
 
-  答：不是。这个只是我了解(认为)到，这两个是相对最容易完成整个过程的。代替方案：可以抓手机端的微信（安卓和IOS均可，安卓的要root才能抓到阅读点赞）；抓包软件Fiddler这个可替代的很多，只要能进行HTTPS抓包查看数据就行。
+     答：不是。这个只是我了解(认为)到，这两个是相对最容易完成整个过程的。代替方案：可以抓手机端的微信（安卓和IOS均可，安卓的要root才能抓到阅读点赞）；抓包软件Fiddler这个可替代的很多，只要能进行HTTPS抓包查看数据就行。
 
 附录：
 
@@ -151,7 +148,7 @@ Q & A
 
 3. 自己根据报错做了哪些尝试？（文档中是否有描述？在网上搜索的解决方案有哪些）
 
-请按照以上流程进行提问，如果加完好友问题表述不清，一律无视。谢谢！
+请按照以上流程进行提问，如果加完好友问题表述不清，一律无视。请直接说问题or需求，不需要等我回复再说。谢谢！
 
 若无动手能力，学习兴趣，本项目可能不适合你。请不要抱着“我就问这么一个问题，能占用多少时间的心态”，如果每个看到项目的人都占用1分钟，沟通成本巨大，请理解。谢谢！
 

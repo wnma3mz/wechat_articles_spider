@@ -155,9 +155,9 @@ def get_history_urls(
             if res == []:
                 break
             count += 10
-            print(count)
             lst.append(res)
             dt = res[-1]["comm_msg_info"]["datetime"]
+            print(count, timestamp2date(dt))
             if dt <= start_timestamp or count >= endcount:
                 break
             time.sleep(5)
