@@ -60,7 +60,7 @@ class AccountBiz(object):
         elif self.method == "qingbo":
             return self.qingbo(nickname_lst)
         else:
-            s = ArticlesUrls(cookie=self.cookie, token=self.token, proxies=self.proxies)
+            s = PublicAccountsWeb(cookie=self.cookie, token=self.token, proxies=self.proxies)
             return self.office(s, nickname_lst)
 
     def office(self, s, nickname_lst):

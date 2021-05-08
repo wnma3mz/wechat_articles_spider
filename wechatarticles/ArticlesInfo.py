@@ -148,9 +148,12 @@ class ArticlesInfo(object):
         """
         res = self.s.get(article_url, data=self.data, proxies=self.proxies)
         # 使用正则提取comment_id
-        comment_id = re.findall(r'comment_id = "\d+"', res.text)
+        comment_id = re.findall(r'comment_id = "(\d+)"', res.text)
+        # 增加其他情况，感谢@[harry7756](https://github.com/harry7756)建议
+        if len(comment_id) == 0:
+            comment_id = re.findall(r"(?<=comment_id.DATA\'\)\s\:\s\')[0-9]+", res.text)
         if len(comment_id) > 0:
-            return comment_id[0].split(" ")[-1][1:-1]
+            return comment_id[0]
         return ""
 
     def __get_params(self, article_url):
