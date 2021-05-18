@@ -121,7 +121,14 @@ def read_nickname(fname):
 
 
 def get_history_urls(
-    biz, uin, key, lst=[], start_timestamp=0, count=10, endcount=99999
+    biz,
+    uin,
+    key,
+    lst=[],
+    start_timestamp=0,
+    start_count=10,
+    end_count=99999,
+    return_flag=False,
 ):
     """
     获取历史文章链接
@@ -138,10 +145,12 @@ def get_history_urls(
         已有的数据列表
     start_timestampe: int
         截至时间戳
-    count: int
+    start_count: int
         开始的条数
-    endcount: int
+    end_count: int
         截至条数
+    return_flag: bool
+        是否返回状态信息
 
     Returns
     -------
@@ -149,26 +158,29 @@ def get_history_urls(
         获取到的历史文章数据
     """
     t = PC(biz=biz, uin=uin, cookie="")
+    flag = True
     try:
         while True:
-            res = t.get_urls(key, offset=count)
+            res = t.get_urls(key, offset=start_count)
             if res == []:
                 break
-            count += 10
+            start_count += 10
             lst.append(res)
             dt = res[-1]["comm_msg_info"]["datetime"]
-            print(count, timestamp2date(dt))
-            if dt <= start_timestamp or count >= endcount:
+            print(start_count, timestamp2date(dt))
+            if dt <= start_timestamp or start_count >= end_count:
                 break
             time.sleep(5)
     except KeyboardInterrupt as e:
+        flag = False
         print("程序手动中断")
-        return lst
     except Exception as e:
         print(e)
+        flag = False
         print("获取文章链接失败。。。退出程序")
-        assert 1 == 2
     finally:
+        if return_flag:
+            return flag, lst
         return lst
 
 

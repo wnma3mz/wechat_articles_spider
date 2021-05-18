@@ -7,7 +7,7 @@ from pprint import pprint
 
 import pandas as pd
 from wechatarticles import ArticlesInfo
-from wechatarticles.utils import get_history_urls
+from wechatarticles.utils import get_history_urls, verify_url
 
 # 快速获取大量文章urls（利用历史文章获取链接）
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     key = ""
 
     lst = get_history_urls(
-        biz, uin, key, lst=[], start_timestamp=0, count=0, endcount=10
+        biz, uin, key, lst=[], start_timestamp=0, start_count=0, end_count=10
     )
     print("抓取到的文章链接")
     print(lst)
@@ -78,9 +78,9 @@ if __name__ == "__main__":
     # 个人微信号登陆后获取的cookie
     cookie = ""
     # 获取点赞数、阅读数、评论信息
-    ai = PublicAccountsWeb(appmsg_token, cookie)
+    ai = ArticlesInfo(appmsg_token, cookie)
 
-    # url：微信文章链接
+    # url：微信文章链接. lst[0]["app_msg_ext_info"]["content_url"]
     read_num, like_num, old_like_num = ai.read_like_nums(url)
     item = ai.comments(url)
     print("阅读：{}; 在看: {}; 点赞: {}".format(read_num, like_num, old_like_num))
