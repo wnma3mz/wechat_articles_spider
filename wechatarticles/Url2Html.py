@@ -64,7 +64,7 @@ class Url2Html(object):
         img = response.content
         with open(imgpath, "wb") as f:
             f.write(img)
-        return os.path.join(imgpath, name), img
+        return imgpath, img
 
     def replace_img(self, html):
         """
