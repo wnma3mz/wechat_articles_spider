@@ -13,10 +13,11 @@ import requests
 
 from .ArticlesUrls import PC
 
-base_columns = ["url", "title", "date", "headlines", "copyright"]
+base_columns = ["url", "title", "date", "headlines"]
+custom_columns = ["copyright_stat"]
 A_columns = ["read_num", "old_like_num", "like_num"]
 B_columns = ["comments_num", "comments_content", "comments_like_num"]
-C_columns = ["content", "content_num", "pic_num"]
+C_columns = ["text_content", "content_num", "pic_num"]
 mode_columns = {
     1: A_columns,
     2: B_columns,
