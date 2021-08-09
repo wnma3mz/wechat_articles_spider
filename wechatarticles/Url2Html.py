@@ -20,7 +20,6 @@ class Url2Html(object):
         self.data_src_re = re.compile(r'data-src="(.*?)"')
         self.data_croporisrc_re = re.compile(r'data-croporisrc="(.*?)"')
         self.src_re = re.compile(r'src="(.*?)"')
-        self.img_path = img_path
 
     @staticmethod
     def replace_name(title):
@@ -53,18 +52,18 @@ class Url2Html(object):
         """
         # 根据链接提取图片名
         name = "{}.{}".format(url.split("/")[-2], url.split("/")[3].split("_")[-1])
-        imgpath = os.path.join(self.img_path, name)
+        save_path = os.path.join(self.account, "imgs", name)
         # 如果该图片已被下载，可以无需再下载，直接返回路径即可
-        if os.path.isfile(imgpath):
-            with open(imgpath, "rb") as f:
+        if os.path.isfile(save_path):
+            with open(save_path, "rb") as f:
                 img = f.read()
-            return imgpath, img
+            return os.path.join("imgs", name), img
 
         response = requests.get(url, proxies=self.proxies)
         img = response.content
-        with open(imgpath, "wb") as f:
+        with open(save_path, "wb") as f:
             f.write(img)
-        return imgpath, img
+        return os.path.join("imgs", name), img
 
     def replace_img(self, html):
         """
@@ -87,7 +86,6 @@ class Url2Html(object):
         img_lst = []
         for img_url in img_url_lst:
             if "mmbiz.qpic.cn" in img_url:
-                # print(img_url)
                 data_src, img = self.download_img(img_url)
                 img_lst.append([data_src, img])
                 # 以绝对路径的方式替换图片
@@ -188,6 +186,7 @@ class Url2Html(object):
                 account_name = self.article_info(html)[0]
             except:
                 account_name = "未分类"
+            self.account = account_name
         else:
             account_name = self.account
         try:
@@ -255,7 +254,6 @@ class Url2Html(object):
             title: 文章名
             date: 日期
             proxies: 代理
-            img_path: 图片下载路径
 
         Returns
         ----------
@@ -267,10 +265,6 @@ class Url2Html(object):
         elif mode == 6:
             return self.test_replace_img(requests.get(url, proxies=proxies).text)
         elif mode in [2, 3, 4, 5]:
-            if "img_path" in kwargs.keys():
-                self.img_path = kwargs["img_path"]
-            else:
-                return "{} 请输入保存图片路径!".format(url)
             if mode == 2:
                 return requests.get(url, proxies=proxies).text
             elif mode == 3:
@@ -297,6 +291,8 @@ class Url2Html(object):
                     html = requests.get(url, proxies=proxies).text
                     title = self.rename_title(title, html)
 
+                if not os.path.isdir(os.path.join(self.account, "imgs")):
+                    os.makedirs(os.path.join(self.account, "imgs"))
                 if mode == 5:
                     try:
                         self.download_media(html, title)
@@ -319,5 +315,5 @@ if __name__ == "__main__":
     ]
     uh = Url2Html()
     for url in url_lst:
-        s = uh.run(url, mode=4, img_path="D:\\imgs")
+        s = uh.run(url, mode=4)
         print(s)
