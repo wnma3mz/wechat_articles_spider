@@ -111,9 +111,11 @@ class Url2Html(object):
             title = html.split("<h2")[1].split("</h2")[0].split(">")[1].strip()
             return title
         except Exception as e:
-            print(e)
-            print(html.split("<h2")[1].split("</h2")[0])
-            return ""
+            try:
+                title = html.split("<h1")[1].split("</h1")[0].split(">")[1].strip()
+                return title
+            except Exception as e:
+                return ""
 
     @staticmethod
     def article_info(html):
