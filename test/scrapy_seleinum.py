@@ -6,6 +6,8 @@ from functools import reduce
 from pprint import pprint
 import pickle
 
+#骨结核骨结核骨结核
+
 """
 note: 需要使用selenium，chrome版本需要与chromedriver版本对应。具体见https://chromedriver.storage.googleapis.com/
 该文件仅作测试用，可能失效
