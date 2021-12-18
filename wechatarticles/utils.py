@@ -7,6 +7,7 @@ import html
 import os
 import re
 import time
+import glob
 
 from .ArticlesUrls import PC
 
@@ -49,6 +50,23 @@ def remove_duplicate_json(fname):
 
     with open(fname, "w", encoding="utf-8") as f:
         f.writelines(sort_data)
+
+
+def merge_duplicate_json():
+    f_lst = glob.glob("*.json")
+    for fname in f_lst:
+        with open(fname, "r", encoding="utf-8") as f:
+            data = f.readlines()
+        print(fname)
+        flag = True
+        for i in range(len(data)):
+            for j in range(i + 1, len(data)):
+                if data[i] == data[j]:
+                    flag = False
+                    print(i)
+                    break
+            if flag == False:
+                break
 
 
 def end_func(timestamp, end_timestamp):

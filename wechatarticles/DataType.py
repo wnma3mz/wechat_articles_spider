@@ -101,5 +101,10 @@ class Sqlite3(DataType):
         print("[{}]表已存在{}条数据".format(table_name, len(data_lst)))
         return data_lst
 
+    def read_all(self, table_name):
+        table_res = self.conn.execute("SELECT * FROM '{}'".format(table_name))
+        data_lst = table_res.fetchall()
+        return data_lst
+
     def close(self):
         self.conn.close()
