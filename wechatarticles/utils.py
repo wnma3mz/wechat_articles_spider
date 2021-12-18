@@ -79,9 +79,12 @@ def save_f(fname):
 verify_lst = ["mp.weixin.qq.com", "__biz", "mid", "idx"]
 
 
-def verify_url(article_url):
+def verify_url(url):
+    # 过滤特殊链接
+    if "video?" in url or "show?" in url:
+        return False
     for string in verify_lst:
-        if string not in article_url:
+        if string not in url:
             return False
     return True
 
@@ -198,7 +201,7 @@ def timestamp2date(time_format_str, timestamp):
     Parameters
     ----------
     time_format_str: str
-        转换日期格式, "%Y-%m-%d %H:%M:%S"; "%Y-%m-%d
+        转换日期格式, "%Y-%m-%d %H:%M:%S"; "%Y-%m-%d; %Y年%m月%d日%H时%M分%S秒
 
     timestamp: int or str
         时间戳
