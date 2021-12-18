@@ -4,12 +4,9 @@
 """
 import base64
 import html
-import json
 import os
 import re
 import time
-
-import requests
 
 from .ArticlesUrls import PC
 
@@ -194,14 +191,17 @@ def swap_biz_id(biz=None, fakeid=None):
 
 
 # 一些tools，如时间戳转换
-def timestamp2date(timestamp):
+def timestamp2date(time_format_str, timestamp):
     """
     时间戳转换为日期
 
     Parameters
     ----------
+    time_format_str: str
+        转换日期格式, "%Y-%m-%d %H:%M:%S"; "%Y-%m-%d
+
     timestamp: int or str
-        用户账号
+        时间戳
 
     Returns
     -------
@@ -209,29 +209,5 @@ def timestamp2date(timestamp):
         转换好的日期：年-月-日 时:分:秒
     """
     time_array = time.localtime(int(timestamp))
-    datetime = time.strftime("%Y-%m-%d %H:%M:%S", time_array)
+    datetime = time.strftime(time_format_str, time_array)
     return datetime
-
-
-def save_json(fname, data):
-    """
-    保存数据为txt格式
-
-    Parameters
-    ----------
-    fname: str
-        保存为txt文件名
-    data: list
-        爬取到的数据
-    Returns
-    -------
-    None
-    """
-    assert isinstance(fname, str)
-
-    if ".json" not in fname:
-        raise IOError("fname must be json", fname)
-    with open(fname, "a+") as f:
-        for item in data:
-            f.write(json.dumps(item))
-            f.write("\n")
