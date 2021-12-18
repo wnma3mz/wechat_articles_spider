@@ -116,6 +116,15 @@ class Url2Html(object):
                 return title
             except Exception as e:
                 return ""
+        # if "var msg_title = " in s.text:
+        #     ct = s.text.split('var ct = "')[1].split('"')[0]
+        #     msg_title = s.text.split("var msg_title = '")[1].split("'")[0]
+        # elif "window.msg_title" in s.text:
+        #     ct = s.text.split("window.ct = '")[1].split("'")[0]
+        #     msg_title = s.text.split("window.msg_title = '")[1].split("'")[0]
+        # else:
+        #     print(url)
+
 
     @staticmethod
     def article_info(html):
