@@ -212,17 +212,17 @@ def swap_biz_id(biz=None, fakeid=None):
 
 
 # 一些tools，如时间戳转换
-def timestamp2date(time_format_str, timestamp):
+def timestamp2date(timestamp, time_format_str="%Y-%m-%d"):
     """
     时间戳转换为日期
 
     Parameters
     ----------
-    time_format_str: str
-        转换日期格式, "%Y-%m-%d %H:%M:%S"; "%Y-%m-%d; %Y年%m月%d日%H时%M分%S秒
-
     timestamp: int or str
         时间戳
+        
+    time_format_str: str
+        转换日期格式, "%Y-%m-%d %H:%M:%S"; "%Y-%m-%d; %Y年%m月%d日%H时%M分%S秒
 
     Returns
     -------
