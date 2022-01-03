@@ -2,7 +2,6 @@
 import os
 from pprint import pprint
 from wechatarticles import PublicAccountsWeb
-from wechatarticles.utils import save_json
 
 if __name__ == "__main__":
     # 模拟登录微信公众号平台，获取微信文章的url
@@ -21,5 +20,3 @@ if __name__ == "__main__":
     pprint(article_data)
     # print("official_info:")
     # pprint(official_info)
-
-    save_json("paw.json", article_data)

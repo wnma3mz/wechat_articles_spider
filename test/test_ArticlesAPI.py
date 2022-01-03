@@ -2,7 +2,6 @@
 import os
 from pprint import pprint
 from wechatarticles import ArticlesAPI
-from wechatarticles.utils import save_json
 
 if __name__ == "__main__":
     # 该API慎用，不再维护
@@ -31,4 +30,4 @@ if __name__ == "__main__":
     # 自定义从某部分开始爬取，持续爬取，直至爬取失败为止，一次性最多爬取40篇（功能未测试，欢迎尝试）
     datas = aa.continue_info(nickname=nickname, begin="0")
 
-    save_json("{}.json".format(nickname), data)
+    pprint(datas)
