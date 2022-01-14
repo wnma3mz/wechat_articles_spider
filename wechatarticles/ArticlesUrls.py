@@ -302,7 +302,7 @@ class PublicAccountsWeb(object):
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
-    def get_urls(self, nickname, begin=0, count=5):
+    def get_urls(self, nickname=None, biz=None, begin=0, count=5):
         """
         获取公众号的每页的文章信息
 
@@ -310,8 +310,13 @@ class PublicAccountsWeb(object):
         ----------
         nickname : str
             需要爬取公众号名称
+
+        biz : str
+            需要爬取公众号的biz, 优先
+
         begin: str or int
             起始爬取的页数
+
         count: str or int
             每次爬取的数量，1-5
 
@@ -333,10 +338,11 @@ class PublicAccountsWeb(object):
                 ]
             如果list为空则说明没有相关文章
         """
-        self.__verify_str(nickname, "nickname")
+        assert nickname != None and biz != None
+
         try:
             return self.__get_articles_data(
-                nickname, begin=str(begin), count=str(count)
+                nickname, biz, begin=str(begin), count=str(count)
             )["app_msg_list"]
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
@@ -376,8 +382,8 @@ class PublicAccountsWeb(object):
     def __get_articles_data(
         self,
         nickname,
+        biz,
         begin,
-        biz=None,
         count=5,
         type_="9",
         action="list_ex",
@@ -388,10 +394,10 @@ class PublicAccountsWeb(object):
         ----------
         nickname : str
             需要爬取公众号名称
-        begin: str or int
-            起始爬取的页数
         biz : str
             公众号的biz
+        begin: str or int
+            起始爬取的页数
         count: str or int
             每次爬取的数量，1-5
         type_: str or int
@@ -416,14 +422,12 @@ class PublicAccountsWeb(object):
         appmsg_url = "https://mp.weixin.qq.com/cgi-bin/appmsg"
 
         try:
-            if nickname != "":
+            if biz != None:
+                self.params["fakeid"] = biz
+            if nickname != None:
                 # 获取公众号的fakeid
                 official_info = self.official_info(nickname)
                 self.params["fakeid"] = official_info[0]["fakeid"]
-            elif biz != None:
-                self.params["fakeid"] = biz
-            else:
-                raise Exception(u"请输入biz或者nickname")
         except Exception:
             raise Exception(u"公众号名称错误或cookie、token错误，请重新输入")
 
@@ -541,9 +545,9 @@ class PC(object):
 
 
 class Mobile(object):
-    """通过移动端的wechat，获取需要爬取的微信公众号的推文链接"""
+    """已失效。通过移动端的wechat，获取需要爬取的微信公众号的推文链接"""
 
-    def __init__(self, biz, cookie):
+    def __init__(self, biz, cookie, proxies={"http": None, "https": None}):
         """
         Parameters
         ----------
@@ -558,6 +562,7 @@ class Mobile(object):
             "User-Agent": "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0Chrome/57.0.2987.132 MQQBrowser/6.2 Mobile",
             "Cookie": cookie,
         }
+        self.proxies = proxies
 
     def get_urls(self, appmsg_token, offset="0"):
         """
@@ -567,7 +572,7 @@ class Mobile(object):
             个人微信号登陆后获取的token
         offset: str or int
             获取起始的页数，从0开始，每次递增10（可以大于10，但是不好确认参数，所以递增10，之后再去重）
-        
+
         Returns
         ----------
         list:
@@ -669,3 +674,10 @@ class WeBook(object):
         else:
             print(res.json())
             return []
+
+
+if __name__ == "__main__":
+    biz = ""
+    cookie = ""
+    m = Mobile(biz, cookie)
+    m.get_urls()
