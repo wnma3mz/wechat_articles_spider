@@ -37,6 +37,7 @@ def demo(lst):
                 for info in infos["multi_app_msg_item_list"]
             ]
 
+        flag = 0
         for url, title in url_title_lst:
             try:
                 if not verify_url(url):
@@ -71,7 +72,10 @@ if __name__ == "__main__":
         biz, uin, key, lst=[], start_timestamp=0, start_count=0, end_count=10
     )
     print("抓取到的文章链接")
-    print(lst)
+#     print(lst)
+    res_lst = []
+    for item_lst in lst:
+        res_lst += item_lst
 
     # 个人微信号登陆后获取的token
     appmsg_token = ""
@@ -80,9 +84,14 @@ if __name__ == "__main__":
     # 获取点赞数、阅读数、评论信息
     ai = ArticlesInfo(appmsg_token, cookie)
 
-    # url：微信文章链接. lst[0]["app_msg_ext_info"]["content_url"]
+    # url：微信文章链接. 
+    url = res_lst[0]["app_msg_ext_info"]["content_url"]
     read_num, like_num, old_like_num = ai.read_like_nums(url)
     item = ai.comments(url)
     print("阅读：{}; 在看: {}; 点赞: {}".format(read_num, like_num, old_like_num))
     print("评论信息")
     pprint(item)
+    
+    # 所有url文件
+    demo(res_lst)
+
