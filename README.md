@@ -143,22 +143,6 @@ Q & A
 
 ### 广告位
 
-关于[Stormproxies](https://www.stormproxies.cn/?keyword=wnma3mz)：
-
-[StormProxies](https://www.stormproxies.cn/?keyword=wnma3mz)是全球大数据IP资源服务商，其住宅代理网络由真实的家庭住宅IP组成，可为企业或个人提供满足各种场景的代理产品。
-互联网时代，使用代理IP地址对于保护隐私和防止封号、养号等都非常重要，其中住宅IP可以让用户隐藏真实的IP地址，并使用不同的IP地址访问互联网。海外动态住宅代理IP是指经常更换的IP地址，具有不连号、散点分布的特点，适用于需要大量动态IP和时效短的业务，如网络爬虫、SEO网站优化等。
-市面上纯净的住宅IP不易得，因此价格都会略高，而StormProxies则是一款便宜好用的海外住宅IP代理。
-
-[StormProxies](https://www.stormproxies.cn/?keyword=wnma3mz)有哪些优势？
-1、IP+端口提取形式，IP纯净高匿；
-2、覆盖全球200+的国家与地区，超7000万+住宅IP。
-3、高可靠性，24小时稳定运行，平均99.99%的可用率；
-4、性价比更高，便宜好用，单个IP也能享受最优价格，没有额外费用；
-5、易于使用，支持HTTP/HTTPS/SOCKS5协议，提供多种API参数，网络集成更快捷；
-6、客服全天在线为您排忧解难，并可根据您的业务需求制定更合适的代理解决方案。
-
-[链接](https://www.stormproxies.cn/?keyword=wnma3mz)
-
 
 ### 附录
 
