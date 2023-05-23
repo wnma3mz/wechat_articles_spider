@@ -8,7 +8,7 @@
 
 展示地址：
 
-[日更，获取公众号的最新文章链接](https://data.wnma3mz.cn/demo.html)，支持日更阅读点赞评论正文
+~~[日更，获取公众号的最新文章链接](https://data.wnma3mz.cn/demo.html)，支持日更阅读点赞评论正文~~
 
 技术交流可以直接联系，微信二维码见末尾（微信；wnma3mz)。烦请进行备注，如wechat_spider
 
