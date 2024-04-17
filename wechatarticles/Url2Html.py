@@ -145,7 +145,7 @@ class Url2Html(object):
         #     .split("</span")[0]
         #     .strip()
         # )
-        account = html.split('nickname = "')[1].split('"')[0]
+        account = html.split('profile_nickname">')[1].split('</strong')[0]
         author = html.split('id="js_name">')[1].split("</a")[0].strip()
         return account, author
 
